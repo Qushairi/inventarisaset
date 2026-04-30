@@ -2,35 +2,55 @@
     $sidebarMenus = $sidebarMenus ?? [
         [
             'title' => true,
-            'name' => 'Menu Utama',
+            'name' => 'Menu Admin',
         ],
         [
             'name' => 'Dashboard',
             'icon' => 'grid-fill',
-            'route' => 'dashboard',
+            'route' => 'admin.dashboard',
+            'active_patterns' => ['admin.dashboard'],
         ],
         [
-            'name' => 'Data Master',
-            'icon' => 'archive-fill',
-            'children' => [
-                ['name' => 'Barang', 'url' => '#', 'active_patterns' => ['barang.*']],
-                ['name' => 'Kategori', 'url' => '#', 'active_patterns' => ['kategori.*']],
-                ['name' => 'Ruangan', 'url' => '#', 'active_patterns' => ['ruangan.*']],
-            ],
+            'name' => 'Kategori',
+            'icon' => 'list-ul',
+            'route' => 'admin.categories.index',
+            'active_patterns' => ['admin.categories.*'],
         ],
         [
-            'name' => 'Transaksi',
+            'name' => 'Data Lokasi',
+            'icon' => 'geo-alt-fill',
+            'route' => 'admin.locations.index',
+            'active_patterns' => ['admin.locations.*'],
+        ],
+        [
+            'name' => 'Data Aset',
+            'icon' => 'box-seam',
+            'route' => 'admin.assets.index',
+            'active_patterns' => ['admin.assets.*'],
+        ],
+        [
+            'name' => 'Data Pegawai',
+            'icon' => 'people-fill',
+            'route' => 'admin.employees.index',
+            'active_patterns' => ['admin.employees.*'],
+        ],
+        [
+            'name' => 'Peminjaman',
+            'icon' => 'journal-text',
+            'route' => 'admin.loans.index',
+            'active_patterns' => ['admin.loans.*'],
+        ],
+        [
+            'name' => 'Pengembalian',
             'icon' => 'clipboard-check-fill',
-            'children' => [
-                ['name' => 'Peminjaman', 'url' => '#', 'active_patterns' => ['peminjaman.*']],
-                ['name' => 'Pengembalian', 'url' => '#', 'active_patterns' => ['pengembalian.*']],
-            ],
+            'route' => 'admin.returns.index',
+            'active_patterns' => ['admin.returns.*'],
         ],
         [
             'name' => 'Laporan',
-            'icon' => 'bar-chart-fill',
-            'url' => '#',
-            'active_patterns' => ['laporan.*'],
+            'icon' => 'file-earmark-bar-graph-fill',
+            'route' => 'admin.reports.index',
+            'active_patterns' => ['admin.reports.*'],
         ],
     ];
 @endphp
@@ -38,22 +58,18 @@
 <div class="sidebar-wrapper active">
     <div class="sidebar-header">
         <div class="d-flex justify-content-between">
-            <div class="logo sidebar-brand-wrap">
-                <a href="{{ route('dashboard') }}" class="sidebar-brand">
-                    <span class="sidebar-brand-mark">
-                        <i class="bi bi-box-seam"></i>
-                    </span>
-                    <span class="sidebar-brand-copy">
-                        <strong>Inventaris</strong>
-                        <small>Aset Sekolah</small>
-                    </span>
-                </a>
+            <div class="logo">
+                <a href="{{ route('admin.dashboard') }}"><img src="{{ asset('assets/images/logo/logo.png') }}" alt="Logo"></a>
             </div>
             <div class="toggler">
                 <a href="#" class="sidebar-hide d-xl-none d-block">
                     <i class="bi bi-x bi-middle"></i>
                 </a>
             </div>
+        </div>
+        <div class="text-center mt-3">
+            <h6 class="mb-1">Inventaris Aset</h6>
+            <p class="mb-0 text-sm text-muted">Administrator Panel</p>
         </div>
     </div>
 
