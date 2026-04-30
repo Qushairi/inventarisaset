@@ -1,0 +1,154 @@
+body {
+    background: #f4f7fb;
+}
+
+#main #main-content {
+    padding-top: 1rem;
+}
+
+.topbar-shell {
+    background: #fff;
+    border-bottom: 1px solid #edf1f7;
+}
+
+.topbar-shell .navbar {
+    height: auto;
+    min-height: 90px;
+    padding: 1.25rem 2rem;
+}
+
+.topbar-heading h6 {
+    color: #25396f;
+    font-weight: 700;
+}
+
+.topbar-burger {
+    color: #435ebe;
+}
+
+.topbar-icon {
+    width: 2.8rem;
+    height: 2.8rem;
+    border-radius: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #f3f6fb;
+    color: #435ebe;
+    transition: 0.2s ease;
+}
+
+.topbar-icon:hover {
+    background: #e8eeff;
+    color: #435ebe;
+}
+
+.topbar-user {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.35rem 0.4rem 0.35rem 1rem;
+    border: 1px solid #edf1f7;
+    border-radius: 999px;
+    color: #25396f;
+    background: #fff;
+}
+
+.topbar-user:hover {
+    color: #25396f;
+    border-color: #dfe7f3;
+}
+
+.topbar-user .user-meta {
+    line-height: 1.15;
+}
+
+.topbar-user .user-meta strong {
+    display: block;
+    font-size: 0.95rem;
+}
+
+.topbar-user .user-meta small {
+    display: block;
+    font-size: 0.8rem;
+    color: #7c8db5;
+}
+
+.sidebar-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.85rem;
+    color: #25396f;
+}
+
+.sidebar-brand:hover {
+    color: #25396f;
+}
+
+.sidebar-brand-mark {
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #435ebe 0%, #6f86e8 100%);
+    color: #fff;
+    font-size: 1.25rem;
+    box-shadow: 0 10px 24px rgba(67, 94, 190, 0.2);
+}
+
+.sidebar-brand-copy {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.05;
+}
+
+.sidebar-brand-copy strong {
+    font-size: 1.15rem;
+    font-weight: 800;
+    letter-spacing: 0.01em;
+}
+
+.sidebar-brand-copy small {
+    font-size: 0.78rem;
+    color: #7c8db5;
+    font-weight: 700;
+}
+
+.card {
+    border-radius: 1.2rem;
+    box-shadow: 0 10px 30px rgba(31, 45, 61, 0.05);
+}
+
+.card .card-header {
+    padding: 1.5rem 1.5rem 0.5rem;
+}
+
+.footer p {
+    margin-bottom: 0;
+}
+
+@media screen and (max-width: 1199px) {
+    .topbar-shell .navbar {
+        padding: 1rem 1.5rem;
+    }
+}
+
+@media screen and (max-width: 767px) {
+    #main #main-content {
+        padding: 1rem;
+    }
+
+    .topbar-shell .navbar {
+        padding: 1rem;
+    }
+
+    .topbar-user {
+        padding-left: 0.75rem;
+    }
+
+    .topbar-user .user-meta {
+        display: none;
+    }
+}
