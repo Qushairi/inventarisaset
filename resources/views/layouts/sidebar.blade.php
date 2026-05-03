@@ -12,7 +12,7 @@
         ],
         [
             'name' => 'Kategori',
-            'icon' => 'list-ul',
+            'icon' => 'tags-fill',
             'route' => 'admin.categories.index',
             'active_patterns' => ['admin.categories.*'],
         ],
@@ -24,7 +24,7 @@
         ],
         [
             'name' => 'Data Aset',
-            'icon' => 'box-seam',
+            'icon' => 'box-seam-fill',
             'route' => 'admin.assets.index',
             'active_patterns' => ['admin.assets.*'],
         ],
@@ -36,19 +36,19 @@
         ],
         [
             'name' => 'Peminjaman',
-            'icon' => 'journal-text',
+            'icon' => 'journal-check',
             'route' => 'admin.loans.index',
             'active_patterns' => ['admin.loans.*'],
         ],
         [
             'name' => 'Pengembalian',
-            'icon' => 'clipboard-check-fill',
+            'icon' => 'arrow-counterclockwise',
             'route' => 'admin.returns.index',
             'active_patterns' => ['admin.returns.*'],
         ],
         [
             'name' => 'Laporan',
-            'icon' => 'file-earmark-bar-graph-fill',
+            'icon' => 'bar-chart-fill',
             'route' => 'admin.reports.index',
             'active_patterns' => ['admin.reports.*'],
         ],
@@ -57,19 +57,19 @@
 
 <div class="sidebar-wrapper active">
     <div class="sidebar-header">
-        <div class="d-flex justify-content-between">
-            <div class="logo">
-                <a href="{{ route('admin.dashboard') }}"><img src="{{ asset('assets/images/logo/logo.png') }}" alt="Logo"></a>
+        <div class="d-flex justify-content-between align-items-start">
+            <div class="w-100 text-center pe-4">
+                <a href="{{ route('admin.dashboard') }}" class="d-inline-block mb-3">
+                    <img src="{{ asset('assets/images/logo/logobengkalis.png') }}" alt="Logo Inventaris Aset" style="height: 72px; width: auto;">
+                </a>
+                <h6 class="mb-1">Inventaris Aset</h6>
+                <p class="mb-0 text-sm text-muted">Administrator Panel</p>
             </div>
             <div class="toggler">
                 <a href="#" class="sidebar-hide d-xl-none d-block">
                     <i class="bi bi-x bi-middle"></i>
                 </a>
             </div>
-        </div>
-        <div class="text-center mt-3">
-            <h6 class="mb-1">Inventaris Aset</h6>
-            <p class="mb-0 text-sm text-muted">Administrator Panel</p>
         </div>
     </div>
 
@@ -118,7 +118,9 @@
 
                 <li class="sidebar-item {{ $isActive ? 'active' : '' }} {{ $hasChildren ? 'has-sub' : '' }}">
                     <a href="{{ $hasChildren ? '#' : $menuLink }}" class="sidebar-link">
-                        <i class="bi bi-{{ $menu['icon'] }}"></i>
+                        <div class="d-inline-flex align-items-center justify-content-center flex-shrink-0" style="width: 1.25rem; height: 1.25rem;">
+                            <i class="bi bi-{{ $menu['icon'] }}"></i>
+                        </div>
                         <span>{{ $menu['name'] }}</span>
                     </a>
 

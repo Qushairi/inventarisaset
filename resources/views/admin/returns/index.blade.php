@@ -9,36 +9,35 @@
             'subtitle' => 'Kelola proses pengembalian dan verifikasi.',
             'breadcrumb' => 'Pengembalian',
         ])
+    </div>
 
+    <div class="page-content">
         <section class="section">
-            <div class="row">
-                <div class="col-12 col-md-4">
-                    <div class="card">
-                        <div class="card-body py-4-5">
-                            <div class="row">
-                                <div class="col-8 d-flex flex-column justify-content-center">
-                                    <h6 class="text-muted font-semibold">Total Pengembalian</h6>
-                                    <h3 class="font-extrabold mb-0">{{ $returnTotal }}</h3>
-                                </div>
-                                <div class="col-4">
-                                    <div class="stats-icon blue">
-                                        <i class="bi bi-clipboard-check-fill"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            @if (session('success'))
+                <div class="alert alert-light-success color-success">
+                    <i class="bi bi-check-circle me-1"></i>{{ session('success') }}
                 </div>
-            </div>
+            @endif
+
+            @if (session('error'))
+                <div class="alert alert-light-danger color-danger">
+                    <i class="bi bi-exclamation-circle me-1"></i>{{ session('error') }}
+                </div>
+            @endif
 
             <div class="card">
-                <div class="card-header">
-                    <h4 class="card-title mb-1">Daftar Pengembalian</h4>
-                    <p class="mb-0 text-muted">Pantau dan verifikasi proses pengembalian aset dari pegawai.</p>
+                <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+                    <div>
+                        <h4 class="card-title mb-1">Daftar Pengembalian</h4>
+                        <p class="mb-0 text-muted">Kelola data pengembalian dan verifikasi aset.</p>
+                    </div>
+                    <a href="{{ route('admin.returns.create') }}" class="btn btn-primary btn-sm icon icon-left">
+                        <i class="bi bi-plus-circle"></i><span>Tambah Pengembalian</span>
+                    </a>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-lg">
+                        <table class="table table-hover table-lg">
                             <thead>
                                 <tr>
                                     <th>Aset</th>
@@ -50,7 +49,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($returns as $return)
+                                @forelse ($returns as $return)
                                     @php
                                         $conditionBadge = match ($return['condition_variant']) {
                                             'warning' => 'bg-light-warning',
@@ -80,17 +79,31 @@
                                             <small class="text-muted">{{ $return['report_note'] }}</small>
                                         </td>
                                         <td class="text-end">
-                                            <a href="javascript:void(0)" class="btn btn-sm btn-outline-primary">
-                                                <i class="bi bi-download"></i> BA PDF
-                                            </a>
+                                            <div class="d-inline-flex flex-nowrap gap-2">
+                                                <a href="{{ route('admin.returns.edit', $return['id']) }}" class="btn btn-sm btn-light-primary icon icon-left">
+                                                    <i class="bi bi-pencil-square"></i><span>Edit</span>
+                                                </a>
+                                                <form action="{{ route('admin.returns.destroy', $return['id']) }}" method="POST" class="d-inline-block">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-sm btn-light-danger icon icon-left" onclick="return confirm('Hapus data pengembalian ini?')">
+                                                        <i class="bi bi-trash"></i><span>Hapus</span>
+                                                    </button>
+                                                </form>
+                                            </div>
                                         </td>
                                     </tr>
-                                @endforeach
+                                @empty
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted">Belum ada data pengembalian.</td>
+                                    </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
                     @include('admin.partials.table-footer', [
-                        'to' => count($returns),
+                        'from' => $returns->firstItem() ?? 0,
+                        'to' => $returns->lastItem() ?? 0,
                         'total' => $returnTotal,
                         'label' => 'pengembalian',
                     ])

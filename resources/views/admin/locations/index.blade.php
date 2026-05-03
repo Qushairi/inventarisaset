@@ -9,41 +9,35 @@
             'subtitle' => 'Kelola penempatan lokasi inventaris.',
             'breadcrumb' => 'Lokasi',
         ])
+    </div>
 
+    <div class="page-content">
         <section class="section">
-            <div class="row">
-                <div class="col-12 col-md-4">
-                    <div class="card">
-                        <div class="card-body py-4-5">
-                            <div class="row">
-                                <div class="col-8 d-flex flex-column justify-content-center">
-                                    <h6 class="text-muted font-semibold">Total Lokasi</h6>
-                                    <h3 class="font-extrabold mb-0">{{ count($locations) }}</h3>
-                                </div>
-                                <div class="col-4">
-                                    <div class="stats-icon blue">
-                                        <i class="bi bi-geo-alt-fill"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            @if (session('success'))
+                <div class="alert alert-light-success color-success">
+                    <i class="bi bi-check-circle me-1"></i>{{ session('success') }}
                 </div>
-            </div>
+            @endif
+
+            @if (session('error'))
+                <div class="alert alert-light-danger color-danger">
+                    <i class="bi bi-exclamation-circle me-1"></i>{{ session('error') }}
+                </div>
+            @endif
 
             <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-3">
                     <div>
                         <h4 class="card-title mb-1">Daftar Lokasi</h4>
                         <p class="mb-0 text-muted">Atur lokasi penempatan inventaris agar pelacakan aset lebih mudah dilakukan.</p>
                     </div>
-                    <a href="javascript:void(0)" class="btn btn-primary">
-                        <i class="bi bi-plus-circle"></i> Tambah Lokasi
+                    <a href="{{ route('admin.locations.create') }}" class="btn btn-primary btn-sm icon icon-left">
+                        <i class="bi bi-plus-circle"></i><span>Tambah Lokasi</span>
                     </a>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-lg">
+                        <table class="table table-hover table-lg">
                             <thead>
                                 <tr>
                                     <th>Lokasi</th>
@@ -53,7 +47,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($locations as $location)
+                                @forelse ($locations as $location)
                                     <tr>
                                         <td>
                                             <h6 class="mb-0">{{ $location['name'] }}</h6>
@@ -68,18 +62,32 @@
                                             <small class="text-muted">{{ $location['note'] }}</small>
                                         </td>
                                         <td class="text-end">
-                                            <a href="javascript:void(0)" class="btn btn-sm btn-outline-danger">
-                                                <i class="bi bi-trash"></i> Hapus
-                                            </a>
+                                            <div class="d-inline-flex flex-nowrap gap-2">
+                                                <a href="{{ route('admin.locations.edit', $location['code']) }}" class="btn btn-sm btn-light-primary icon icon-left">
+                                                    <i class="bi bi-pencil-square"></i><span>Edit</span>
+                                                </a>
+                                                <form action="{{ route('admin.locations.destroy', $location['code']) }}" method="POST" class="d-inline-block">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-sm btn-light-danger icon icon-left" onclick="return confirm('Hapus lokasi ini?')">
+                                                        <i class="bi bi-trash"></i><span>Hapus</span>
+                                                    </button>
+                                                </form>
+                                            </div>
                                         </td>
                                     </tr>
-                                @endforeach
+                                @empty
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted">Belum ada data lokasi.</td>
+                                    </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
                     @include('admin.partials.table-footer', [
-                        'to' => count($locations),
-                        'total' => count($locations),
+                        'from' => $locations->firstItem() ?? 0,
+                        'to' => $locations->lastItem() ?? 0,
+                        'total' => $locations->total(),
                         'label' => 'lokasi',
                     ])
                 </div>

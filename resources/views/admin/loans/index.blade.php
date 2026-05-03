@@ -9,36 +9,35 @@
             'subtitle' => 'Kelola pengajuan dan persetujuan peminjaman.',
             'breadcrumb' => 'Peminjaman',
         ])
+    </div>
 
+    <div class="page-content">
         <section class="section">
-            <div class="row">
-                <div class="col-12 col-md-4">
-                    <div class="card">
-                        <div class="card-body py-4-5">
-                            <div class="row">
-                                <div class="col-8 d-flex flex-column justify-content-center">
-                                    <h6 class="text-muted font-semibold">Total Peminjaman</h6>
-                                    <h3 class="font-extrabold mb-0">{{ $loanTotal }}</h3>
-                                </div>
-                                <div class="col-4">
-                                    <div class="stats-icon green">
-                                        <i class="bi bi-journal-text"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            @if (session('success'))
+                <div class="alert alert-light-success color-success">
+                    <i class="bi bi-check-circle me-1"></i>{{ session('success') }}
                 </div>
-            </div>
+            @endif
+
+            @if (session('error'))
+                <div class="alert alert-light-danger color-danger">
+                    <i class="bi bi-exclamation-circle me-1"></i>{{ session('error') }}
+                </div>
+            @endif
 
             <div class="card">
-                <div class="card-header">
-                    <h4 class="card-title mb-1">Daftar Peminjaman</h4>
-                    <p class="mb-0 text-muted">Pantau, setujui, atau tolak permintaan peminjaman aset dari pegawai.</p>
+                <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+                    <div>
+                        <h4 class="card-title mb-1">Daftar Peminjaman</h4>
+                        <p class="mb-0 text-muted">Kelola data peminjaman aset dari pegawai.</p>
+                    </div>
+                    <a href="{{ route('admin.loans.create') }}" class="btn btn-primary btn-sm icon icon-left">
+                        <i class="bi bi-plus-circle"></i><span>Tambah Peminjaman</span>
+                    </a>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-lg">
+                        <table class="table table-hover table-lg">
                             <thead>
                                 <tr>
                                     <th>Aset</th>
@@ -49,7 +48,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($loans as $loan)
+                                @forelse ($loans as $loan)
                                     @php
                                         $loanBadge = match ($loan['status_variant']) {
                                             'danger' => 'bg-light-danger',
@@ -75,18 +74,29 @@
                                             <div><small class="text-muted">{{ $loan['status_note'] }}</small></div>
                                         </td>
                                         <td class="text-end">
-                                            <div class="d-flex flex-wrap gap-2 justify-content-end">
-                                                <a href="javascript:void(0)" class="btn btn-sm btn-outline-success"><i class="bi bi-check-circle"></i> Approve</a>
-                                                <a href="javascript:void(0)" class="btn btn-sm btn-outline-danger"><i class="bi bi-x-circle"></i> Reject</a>
+                                            <div class="d-inline-flex flex-nowrap gap-2">
+                                                <a href="{{ route('admin.loans.edit', $loan['id']) }}" class="btn btn-sm btn-light-primary icon icon-left"><i class="bi bi-pencil-square"></i><span>Edit</span></a>
+                                                <form action="{{ route('admin.loans.destroy', $loan['id']) }}" method="POST" class="d-inline-block">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-sm btn-light-danger icon icon-left" onclick="return confirm('Hapus data peminjaman ini?')">
+                                                        <i class="bi bi-trash"></i><span>Hapus</span>
+                                                    </button>
+                                                </form>
                                             </div>
                                         </td>
                                     </tr>
-                                @endforeach
+                                @empty
+                                    <tr>
+                                        <td colspan="5" class="text-center text-muted">Belum ada data peminjaman.</td>
+                                    </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
                     @include('admin.partials.table-footer', [
-                        'to' => count($loans),
+                        'from' => $loans->firstItem() ?? 0,
+                        'to' => $loans->lastItem() ?? 0,
                         'total' => $loanTotal,
                         'label' => 'peminjaman',
                     ])

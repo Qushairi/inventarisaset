@@ -9,7 +9,9 @@
             'subtitle' => 'Ringkasan data dan unduh laporan PDF.',
             'breadcrumb' => 'Laporan',
         ])
+    </div>
 
+    <div class="page-content">
         <section class="section">
             <div class="card">
                 <div class="card-header">
@@ -18,22 +20,9 @@
                 </div>
                 <div class="card-body">
                     <div class="d-flex flex-wrap gap-2 mb-4">
-                        <a href="javascript:void(0)" class="btn btn-outline-primary">Download PDF Inventaris</a>
-                        <a href="javascript:void(0)" class="btn btn-outline-success">Download PDF Peminjaman</a>
-                        <a href="javascript:void(0)" class="btn btn-outline-warning">Download PDF Pengembalian</a>
-                    </div>
-
-                    <div class="row">
-                        @foreach ($summaryCards as $card)
-                            <div class="col-12 col-md-6 col-xl-3">
-                                <div class="card border">
-                                    <div class="card-body py-4">
-                                        <h6 class="text-muted font-semibold">{{ $card['label'] }}</h6>
-                                        <h3 class="font-extrabold mb-0">{{ $card['value'] }}</h3>
-                                    </div>
-                                </div>
-                            </div>
-                        @endforeach
+                        <a href="javascript:void(0)" class="btn btn-outline-primary btn-sm icon icon-left"><i class="bi bi-download"></i><span>Download PDF Inventaris</span></a>
+                        <a href="javascript:void(0)" class="btn btn-outline-success btn-sm icon icon-left"><i class="bi bi-download"></i><span>Download PDF Peminjaman</span></a>
+                        <a href="javascript:void(0)" class="btn btn-outline-warning btn-sm icon icon-left"><i class="bi bi-download"></i><span>Download PDF Pengembalian</span></a>
                     </div>
                 </div>
             </div>
@@ -41,7 +30,7 @@
             <div class="row">
                 <div class="col-12 col-xl-6">
                     <div class="card">
-                        <div class="card-header d-flex justify-content-between align-items-center">
+                        <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-3">
                             <div>
                                 <h4 class="card-title mb-1">Riwayat Peminjaman</h4>
                                 <p class="mb-0 text-muted">Preview data peminjaman terbaru.</p>
@@ -50,7 +39,7 @@
                         </div>
                         <div class="card-body p-0">
                             <div class="table-responsive">
-                                <table class="table table-lg mb-0">
+                                <table class="table table-hover table-lg mb-0">
                                     <thead>
                                         <tr>
                                             <th>Aset</th>
@@ -84,7 +73,7 @@
 
                 <div class="col-12 col-xl-6">
                     <div class="card">
-                        <div class="card-header d-flex justify-content-between align-items-center">
+                        <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-3">
                             <div>
                                 <h4 class="card-title mb-1">Riwayat Pengembalian</h4>
                                 <p class="mb-0 text-muted">Preview data pengembalian terbaru.</p>
@@ -93,7 +82,7 @@
                         </div>
                         <div class="card-body p-0">
                             <div class="table-responsive">
-                                <table class="table table-lg mb-0">
+                                <table class="table table-hover table-lg mb-0">
                                     <thead>
                                         <tr>
                                             <th>Aset</th>

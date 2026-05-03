@@ -9,41 +9,35 @@
             'subtitle' => 'Kelola data inventaris aset.',
             'breadcrumb' => 'Aset',
         ])
+    </div>
 
+    <div class="page-content">
         <section class="section">
-            <div class="row">
-                <div class="col-12 col-md-4">
-                    <div class="card">
-                        <div class="card-body py-4-5">
-                            <div class="row">
-                                <div class="col-8 d-flex flex-column justify-content-center">
-                                    <h6 class="text-muted font-semibold">Total Aset</h6>
-                                    <h3 class="font-extrabold mb-0">{{ count($assets) }}</h3>
-                                </div>
-                                <div class="col-4">
-                                    <div class="stats-icon green">
-                                        <i class="bi bi-box-seam"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            @if (session('success'))
+                <div class="alert alert-light-success color-success">
+                    <i class="bi bi-check-circle me-1"></i>{{ session('success') }}
                 </div>
-            </div>
+            @endif
+
+            @if (session('error'))
+                <div class="alert alert-light-danger color-danger">
+                    <i class="bi bi-exclamation-circle me-1"></i>{{ session('error') }}
+                </div>
+            @endif
 
             <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-3">
                     <div>
                         <h4 class="card-title mb-1">Daftar Aset</h4>
                         <p class="mb-0 text-muted">Kelola inventaris aset, status penggunaan, dan data penempatan barang.</p>
                     </div>
-                    <a href="javascript:void(0)" class="btn btn-primary">
-                        <i class="bi bi-plus-circle"></i> Tambah Aset
+                    <a href="{{ route('admin.assets.create') }}" class="btn btn-primary btn-sm icon icon-left">
+                        <i class="bi bi-plus-circle"></i><span>Tambah Aset</span>
                     </a>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-lg">
+                        <table class="table table-hover table-lg">
                             <thead>
                                 <tr>
                                     <th>Aset</th>
@@ -56,7 +50,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($assets as $asset)
+                                @forelse ($assets as $asset)
                                     @php
                                         $conditionBadge = match ($asset['condition_variant']) {
                                             'warning' => 'bg-light-warning',
@@ -102,20 +96,30 @@
                                             <small class="text-muted">Perolehan {{ $asset['acquired_at'] }}</small>
                                         </td>
                                         <td class="text-end">
-                                            <div class="d-flex flex-wrap gap-2 justify-content-end">
-                                                <a href="javascript:void(0)" class="btn btn-sm btn-outline-info"><i class="bi bi-eye"></i> Detail</a>
-                                                <a href="javascript:void(0)" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil-square"></i> Edit</a>
-                                                <a href="javascript:void(0)" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i> Hapus</a>
+                                            <div class="d-inline-flex flex-nowrap gap-2">
+                                                <a href="{{ route('admin.assets.edit', $asset['code']) }}" class="btn btn-sm btn-light-primary icon icon-left"><i class="bi bi-pencil-square"></i><span>Edit</span></a>
+                                                <form action="{{ route('admin.assets.destroy', $asset['code']) }}" method="POST" class="d-inline-block">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-sm btn-light-danger icon icon-left" onclick="return confirm('Hapus aset ini?')">
+                                                        <i class="bi bi-trash"></i><span>Hapus</span>
+                                                    </button>
+                                                </form>
                                             </div>
                                         </td>
                                     </tr>
-                                @endforeach
+                                @empty
+                                    <tr>
+                                        <td colspan="7" class="text-center text-muted">Belum ada data aset.</td>
+                                    </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
                     @include('admin.partials.table-footer', [
-                        'to' => count($assets),
-                        'total' => count($assets),
+                        'from' => $assets->firstItem() ?? 0,
+                        'to' => $assets->lastItem() ?? 0,
+                        'total' => $assets->total(),
                         'label' => 'aset',
                     ])
                 </div>
