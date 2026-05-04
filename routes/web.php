@@ -74,7 +74,9 @@ Route::middleware(['auth', 'role:pegawai'])->prefix('pegawai')->name('pegawai.')
     Route::get('/', [PegawaiDashboardController::class, 'index'])->name('dashboard');
     Route::get('/aset', [PegawaiAssetController::class, 'index'])->name('assets.index');
     Route::get('/peminjaman', [PegawaiLoanController::class, 'index'])->name('loans.index');
+    Route::post('/peminjaman', [PegawaiLoanController::class, 'store'])->name('loans.store');
     Route::get('/pengembalian', [PegawaiReturnController::class, 'index'])->name('returns.index');
+    Route::post('/pengembalian', [PegawaiReturnController::class, 'store'])->name('returns.store');
     Route::get('/profile', [PegawaiProfileController::class, 'index'])->name('profile.index');
     Route::patch('/profile', [PegawaiProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [PegawaiProfileController::class, 'updatePassword'])->name('profile.password.update');
