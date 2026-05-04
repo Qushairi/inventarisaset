@@ -95,7 +95,7 @@ class DashboardController extends Controller
                     'label' => 'Total Aset',
                     'value' => $assetTotal,
                     'helper' => 'Aset aktif yang tercatat saat ini.',
-                    'icon' => 'boxes',
+                    'icon' => 'box-seam',
                     'variant' => 'primary',
                 ],
                 [
@@ -140,44 +140,6 @@ class DashboardController extends Controller
                     'title' => 'Akun pegawai',
                     'value' => $employeeTotal,
                     'note' => 'Sudah dapat mengakses sistem.',
-                ],
-            ],
-            'quickLinks' => [
-                [
-                    'title' => 'Kelola Kategori',
-                    'description' => 'Atur kelompok aset agar data inventaris rapi.',
-                    'route' => 'admin.categories.index',
-                    'icon' => 'tags',
-                ],
-                [
-                    'title' => 'Kelola Lokasi',
-                    'description' => 'Tetapkan posisi dan ruangan penyimpanan aset.',
-                    'route' => 'admin.locations.index',
-                    'icon' => 'geo-alt',
-                ],
-                [
-                    'title' => 'Kelola Aset',
-                    'description' => 'Pantau kondisi, status, dan nilai perolehan barang.',
-                    'route' => 'admin.assets.index',
-                    'icon' => 'boxes',
-                ],
-                [
-                    'title' => 'Kelola Pegawai',
-                    'description' => 'Atur akun user pegawai yang memakai sistem.',
-                    'route' => 'admin.employees.index',
-                    'icon' => 'people',
-                ],
-                [
-                    'title' => 'Peminjaman',
-                    'description' => 'Setujui atau tolak pengajuan peminjaman aset.',
-                    'route' => 'admin.loans.index',
-                    'icon' => 'journal-check',
-                ],
-                [
-                    'title' => 'Laporan',
-                    'description' => 'Unduh rekap inventaris, peminjaman, dan pengembalian.',
-                    'route' => 'admin.reports.index',
-                    'icon' => 'bar-chart',
                 ],
             ],
             'activityChart' => [

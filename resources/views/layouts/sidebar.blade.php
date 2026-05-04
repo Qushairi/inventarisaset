@@ -24,7 +24,7 @@
         ],
         [
             'name' => 'Data Aset',
-            'icon' => 'box-seam-fill',
+            'icon' => 'box-seam',
             'route' => 'admin.assets.index',
             'active_patterns' => ['admin.assets.*'],
         ],

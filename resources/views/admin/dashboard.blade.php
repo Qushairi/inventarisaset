@@ -4,6 +4,194 @@
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('assets/vendors/apexcharts/apexcharts.css') }}">
+    <style>
+        .dashboard-grid {
+            --bs-gutter-x: 1.5rem;
+            --bs-gutter-y: 1.5rem;
+        }
+
+        .dashboard-panel {
+            height: 100%;
+            border-radius: 1rem;
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
+        }
+
+        .dashboard-panel .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 1.4rem 1.5rem 0.9rem;
+        }
+
+        .dashboard-panel .card-header h4 {
+            margin-bottom: 0;
+        }
+
+        .dashboard-panel .card-header + .card-body {
+            padding: 0 1.5rem 1.5rem;
+        }
+
+        .dashboard-stat-card .card-body {
+            display: flex;
+            align-items: center;
+            padding: 1.15rem 1.2rem;
+        }
+
+        .dashboard-stat-layout {
+            display: grid;
+            grid-template-columns: 3.25rem minmax(0, 1fr);
+            align-items: start;
+            gap: 0.9rem;
+            width: 100%;
+        }
+
+        .dashboard-stat-card .stats-icon {
+            float: none;
+            width: 3.25rem;
+            height: 3.25rem;
+            border-radius: 0.95rem;
+            flex-shrink: 0;
+        }
+
+        .dashboard-stat-card .stats-icon i {
+            font-size: 1.3rem;
+        }
+
+        .dashboard-stat-copy {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-width: 0;
+        }
+
+        .dashboard-stat-copy .dashboard-stat-label {
+            margin-bottom: 0.25rem;
+            color: #6c7aa5;
+            font-size: 0.95rem;
+            font-weight: 600;
+            line-height: 1.35;
+        }
+
+        .dashboard-stat-copy .dashboard-stat-value {
+            margin-bottom: 0.35rem;
+            color: #25396f;
+            font-size: 1.7rem;
+            line-height: 1;
+        }
+
+        .dashboard-stat-copy .dashboard-stat-helper {
+            display: block;
+            color: #7c8db5;
+            font-size: 0.88rem;
+            line-height: 1.45;
+            max-width: none;
+        }
+
+        .dashboard-chart-card .card-body {
+            padding-bottom: 1.1rem;
+        }
+
+        .dashboard-chart-card #chart-activity-overview,
+        .dashboard-chart-card #chart-asset-condition {
+            min-height: 320px;
+        }
+
+        .dashboard-side-stack {
+            height: 100%;
+        }
+
+        .dashboard-trend-item + .dashboard-trend-item {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #eef2ff;
+        }
+
+        .dashboard-trend-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 0.35rem;
+        }
+
+        .dashboard-trend-dot {
+            width: 0.75rem;
+            height: 0.75rem;
+            border-radius: 999px;
+            display: inline-flex;
+            flex-shrink: 0;
+            margin-right: 0.75rem;
+        }
+
+        .dashboard-highlight-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.9rem;
+            padding: 0.95rem 1rem;
+            border-radius: 0.95rem;
+            background: #f8faff;
+            border: 1px solid #edf2ff;
+        }
+
+        .dashboard-highlight-badge {
+            min-width: 2.2rem;
+            height: 2.2rem;
+            border-radius: 0.8rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #ebf3ff;
+            color: #435ebe;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .dashboard-table-card .card-header {
+            padding-bottom: 1rem;
+        }
+
+        .dashboard-table-card .card-body {
+            padding: 0;
+        }
+
+        @media (max-width: 575.98px) {
+            .dashboard-panel .card-header,
+            .dashboard-stat-card .card-body {
+                padding: 1rem;
+            }
+
+            .dashboard-panel .card-header + .card-body {
+                padding: 0 1.4rem 1.4rem;
+            }
+
+            .dashboard-stat-layout {
+                gap: 0.85rem;
+                grid-template-columns: 3rem minmax(0, 1fr);
+            }
+
+            .dashboard-stat-card .stats-icon {
+                width: 3rem;
+                height: 3rem;
+            }
+
+            .dashboard-stat-card .stats-icon i {
+                font-size: 1.2rem;
+            }
+
+            .dashboard-stat-copy .dashboard-stat-value {
+                font-size: 1.45rem;
+            }
+
+            .dashboard-stat-copy .dashboard-stat-helper {
+                max-width: none;
+            }
+
+            .dashboard-table-card .card-body {
+                padding: 0;
+            }
+        }
+    </style>
 @endpush
 
 @section('content')
@@ -16,7 +204,7 @@
     </div>
 
     <div class="page-content">
-        <section class="row">
+        <section class="row g-4 dashboard-grid">
             @foreach ($statCards as $card)
                 @php
                     $iconClass = match ($card['variant']) {
@@ -27,18 +215,16 @@
                     };
                 @endphp
                 <div class="col-12 col-md-6 col-xl-3">
-                    <div class="card">
-                        <div class="card-body px-3 py-4-5">
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <div class="stats-icon {{ $iconClass }}">
-                                        <i class="bi bi-{{ $card['icon'] }}"></i>
-                                    </div>
+                    <div class="card dashboard-panel dashboard-stat-card">
+                        <div class="card-body">
+                            <div class="dashboard-stat-layout">
+                                <div class="stats-icon {{ $iconClass }}">
+                                    <i class="bi bi-{{ $card['icon'] }}"></i>
                                 </div>
-                                <div class="col-md-8">
-                                    <h6 class="text-muted font-semibold">{{ $card['label'] }}</h6>
-                                    <h6 class="font-extrabold mb-0">{{ $card['value'] }}</h6>
-                                    <small class="text-muted">{{ $card['helper'] }}</small>
+                                <div class="dashboard-stat-copy">
+                                    <div class="dashboard-stat-label">{{ $card['label'] }}</div>
+                                    <h5 class="font-extrabold dashboard-stat-value">{{ $card['value'] }}</h5>
+                                    <small class="dashboard-stat-helper">{{ $card['helper'] }}</small>
                                 </div>
                             </div>
                         </div>
@@ -47,7 +233,7 @@
             @endforeach
 
             <div class="col-12 col-xl-8">
-                <div class="card">
+                <div class="card dashboard-panel dashboard-chart-card">
                     <div class="card-header">
                         <h4>Aktivitas Bulanan</h4>
                     </div>
@@ -58,7 +244,7 @@
             </div>
 
             <div class="col-12 col-xl-4">
-                <div class="card">
+                <div class="card dashboard-panel dashboard-chart-card">
                     <div class="card-header">
                         <h4>Komposisi Kondisi Aset</h4>
                     </div>
@@ -68,78 +254,57 @@
                 </div>
             </div>
 
-            <div class="col-12 col-xl-4">
-                <div class="card">
-                    <div class="card-header">
-                        <h4>Tren Cepat</h4>
-                    </div>
-                    <div class="card-body">
-                        @foreach ($trendCards as $trendCard)
-                            <div class="row {{ $loop->last ? '' : 'mb-3' }}">
-                                <div class="col-6">
-                                    <div class="d-flex align-items-center">
-                                        <svg class="bi" width="32" height="32" style="width: 10px; color: {{ $trendCard['color'] }}">
-                                            <use xlink:href="{{ asset('assets/vendors/bootstrap-icons/bootstrap-icons.svg#circle-fill') }}" />
-                                        </svg>
-                                        <h6 class="mb-0 ms-3">{{ $trendCard['title'] }}</h6>
+            <div class="col-12">
+                <div class="row g-4 dashboard-side-stack">
+                    <div class="col-12 col-xl-6">
+                        <div class="card dashboard-panel">
+                            <div class="card-header">
+                                <h4>Tren Cepat</h4>
+                            </div>
+                            <div class="card-body">
+                                @foreach ($trendCards as $trendCard)
+                                    <div class="dashboard-trend-item">
+                                        <div class="dashboard-trend-head">
+                                            <div class="d-flex align-items-center">
+                                                <span class="dashboard-trend-dot" style="background-color: {{ $trendCard['color'] }}"></span>
+                                                <h6 class="mb-0">{{ $trendCard['title'] }}</h6>
+                                            </div>
+                                            <h6 class="mb-0">{{ $trendCard['value'] }}</h6>
+                                        </div>
+                                        <div id="{{ $trendCard['chart_id'] }}"></div>
                                     </div>
-                                </div>
-                                <div class="col-6 text-end">
-                                    <h6 class="mb-0">{{ $trendCard['value'] }}</h6>
-                                </div>
-                                <div class="col-12">
-                                    <div id="{{ $trendCard['chart_id'] }}"></div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-xl-6">
+                        <div class="card dashboard-panel">
+                            <div class="card-header">
+                                <h4>Highlight Sistem</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    @foreach ($highlights as $highlight)
+                                        <div class="col-12">
+                                            <div class="dashboard-highlight-item">
+                                                <div class="dashboard-highlight-badge">{{ $highlight['value'] }}</div>
+                                                <div>
+                                                    <h6 class="mb-1">{{ $highlight['title'] }}</h6>
+                                                    <p class="mb-0 text-sm text-muted">{{ $highlight['note'] }}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
                                 </div>
                             </div>
-                        @endforeach
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-12 col-xl-8">
-                <div class="card">
-                    <div class="card-header">
-                        <h4>Fitur Admin</h4>
-                    </div>
-                    <div class="card-body">
-                        <div class="list-group">
-                            @foreach ($quickLinks as $link)
-                                <a href="{{ route($link['route']) }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-start">
-                                    <div class="me-3">
-                                        <div class="fw-bold">
-                                            <i class="bi bi-{{ $link['icon'] }} me-2 text-primary"></i>{{ $link['title'] }}
-                                        </div>
-                                        <small class="text-muted">{{ $link['description'] }}</small>
-                                    </div>
-                                    <i class="bi bi-arrow-right text-muted"></i>
-                                </a>
-                            @endforeach
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="col-12 col-xl-4">
-                <div class="card">
-                    <div class="card-header">
-                        <h4>Highlight Sistem</h4>
-                    </div>
-                    <div class="card-body">
-                        @foreach ($highlights as $highlight)
-                            <div class="d-flex align-items-start {{ $loop->last ? '' : 'mb-3' }}">
-                                <div class="badge bg-light-primary me-3">{{ $highlight['value'] }}</div>
-                                <div>
-                                    <h6 class="mb-1">{{ $highlight['title'] }}</h6>
-                                    <p class="mb-0 text-sm text-muted">{{ $highlight['note'] }}</p>
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-            </div>
-
             <div class="col-12 col-xl-6">
-                <div class="card">
+                <div class="card dashboard-panel dashboard-table-card">
                     <div class="card-header">
                         <h4>Aset Terbaru</h4>
                     </div>
@@ -197,7 +362,7 @@
             </div>
 
             <div class="col-12 col-xl-6">
-                <div class="card">
+                <div class="card dashboard-panel dashboard-table-card">
                     <div class="card-header">
                         <h4>Peminjaman Terbaru</h4>
                     </div>
