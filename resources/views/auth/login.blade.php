@@ -1,8 +1,4 @@
-@extends('layouts.guest')
-
-@section('title', 'Login')
-
-@section('content')
+<x-guest-layout title="Login">
     <div class="auth-logo">
         <a href="{{ route('login') }}">
             <img src="{{ asset('assets/images/logo/logobengkalis.png') }}" alt="Logo Inventaris Aset" style="height: 5rem; width: auto;">
@@ -91,4 +87,4 @@
             </div>
         </div>
     </div>
-@endsection
+</x-guest-layout>
