@@ -79,6 +79,27 @@ class LoanController extends Controller
             ->with('success', 'Data peminjaman berhasil diperbarui.');
     }
 
+    public function updateStatus(Request $request, Loan $loan)
+    {
+        $validated = $request->validate([
+            'status' => ['required', Rule::in(['Disetujui', 'Ditolak'])],
+        ]);
+
+        if ($loan->status !== 'Menunggu') {
+            return redirect()
+                ->route('admin.loans.index')
+                ->with('error', 'Pengajuan peminjaman ini sudah diproses sebelumnya.');
+        }
+
+        $loan->update([
+            'status' => $validated['status'],
+        ]);
+
+        return redirect()
+            ->route('admin.loans.index')
+            ->with('success', 'Pengajuan peminjaman berhasil '.($validated['status'] === 'Disetujui' ? 'diterima.' : 'ditolak.'));
+    }
+
     public function destroy(Loan $loan)
     {
         if ($loan->returnRecord()->exists()) {

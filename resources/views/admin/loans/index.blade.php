@@ -74,16 +74,28 @@
                                             <div><small class="text-muted">{{ $loan['status_note'] }}</small></div>
                                         </td>
                                         <td class="text-end">
-                                            <div class="d-inline-flex flex-nowrap gap-2">
-                                                <a href="{{ route('admin.loans.edit', $loan['id']) }}" class="btn btn-sm btn-light-primary icon icon-left"><i class="bi bi-pencil-square"></i><span>Edit</span></a>
-                                                <form action="{{ route('admin.loans.destroy', $loan['id']) }}" method="POST" class="d-inline-block">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-light-danger icon icon-left" onclick="return confirm('Hapus data peminjaman ini?')">
-                                                        <i class="bi bi-trash"></i><span>Hapus</span>
-                                                    </button>
-                                                </form>
-                                            </div>
+                                            @if ($loan['status'] === 'Menunggu')
+                                                <div class="d-inline-flex flex-nowrap gap-2">
+                                                    <form action="{{ route('admin.loans.status', $loan['id']) }}" method="POST" class="d-inline-block">
+                                                        @csrf
+                                                        @method('PUT')
+                                                        <input type="hidden" name="status" value="Disetujui">
+                                                        <button type="submit" class="btn btn-sm btn-light-success icon icon-left" onclick="return confirm('Terima pengajuan peminjaman ini?')">
+                                                            <i class="bi bi-check-circle"></i><span>Terima</span>
+                                                        </button>
+                                                    </form>
+                                                    <form action="{{ route('admin.loans.status', $loan['id']) }}" method="POST" class="d-inline-block">
+                                                        @csrf
+                                                        @method('PUT')
+                                                        <input type="hidden" name="status" value="Ditolak">
+                                                        <button type="submit" class="btn btn-sm btn-light-danger icon icon-left" onclick="return confirm('Tolak pengajuan peminjaman ini?')">
+                                                            <i class="bi bi-x-circle"></i><span>Tolak</span>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            @else
+                                                <span class="text-muted small">Sudah diproses</span>
+                                            @endif
                                         </td>
                                     </tr>
                                 @empty

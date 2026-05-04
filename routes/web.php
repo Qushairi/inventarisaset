@@ -57,6 +57,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/peminjaman/create', [LoanController::class, 'create'])->name('loans.create');
     Route::post('/peminjaman', [LoanController::class, 'store'])->name('loans.store');
     Route::get('/peminjaman/{loan}/edit', [LoanController::class, 'edit'])->name('loans.edit');
+    Route::put('/peminjaman/{loan}/status', [LoanController::class, 'updateStatus'])->name('loans.status');
     Route::put('/peminjaman/{loan}', [LoanController::class, 'update'])->name('loans.update');
     Route::delete('/peminjaman/{loan}', [LoanController::class, 'destroy'])->name('loans.destroy');
 
