@@ -4,7 +4,7 @@
             <p class="mb-0">{{ now()->year }} &copy; {{ config('app.name', 'Inventaris Aset') }}</p>
         </div>
         <div class="float-end">
-            <p class="mb-0">Panel admin inventaris aset.</p>
+            <p class="mb-0">{{ $footerLabel ?? 'Panel admin inventaris aset.' }}</p>
         </div>
     </div>
 </footer>

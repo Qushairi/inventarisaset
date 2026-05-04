@@ -8,11 +8,21 @@ use App\Http\Controllers\Admin\LoanController;
 use App\Http\Controllers\Admin\LocationController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\ReturnController;
+use App\Http\Controllers\Pegawai\AssetController as PegawaiAssetController;
+use App\Http\Controllers\Pegawai\DashboardController as PegawaiDashboardController;
+use App\Http\Controllers\Pegawai\LoanController as PegawaiLoanController;
+use App\Http\Controllers\Pegawai\ProfileController as PegawaiProfileController;
+use App\Http\Controllers\Pegawai\ReturnController as PegawaiReturnController;
+use App\Support\DashboardRedirector;
 use Illuminate\Support\Facades\Route;
 
-Route::redirect('/', '/admin')->name('dashboard');
+Route::get('/', function () {
+    return auth()->check()
+        ? redirect()->route(DashboardRedirector::routeNameFor(auth()->user()))
+        : redirect()->route('login');
+})->name('dashboard');
 
-Route::prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/kategori', [CategoryController::class, 'index'])->name('categories.index');
@@ -59,3 +69,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::get('/laporan', [ReportController::class, 'index'])->name('reports.index');
 });
+
+Route::middleware(['auth', 'role:pegawai'])->prefix('pegawai')->name('pegawai.')->group(function () {
+    Route::get('/', [PegawaiDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/aset', [PegawaiAssetController::class, 'index'])->name('assets.index');
+    Route::get('/peminjaman', [PegawaiLoanController::class, 'index'])->name('loans.index');
+    Route::get('/pengembalian', [PegawaiReturnController::class, 'index'])->name('returns.index');
+    Route::get('/profile', [PegawaiProfileController::class, 'index'])->name('profile.index');
+    Route::patch('/profile', [PegawaiProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/password', [PegawaiProfileController::class, 'updatePassword'])->name('profile.password.update');
+});
+
+require __DIR__.'/auth.php';

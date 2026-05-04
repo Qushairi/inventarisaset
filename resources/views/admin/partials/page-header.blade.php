@@ -9,7 +9,7 @@
         <div class="col-12 col-md-6 order-md-2 order-first">
             <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end mt-2 mt-md-0">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route($homeRoute ?? 'admin.dashboard') }}">Dashboard</a></li>
                     <li class="breadcrumb-item active" aria-current="page">{{ $breadcrumb ?? $title }}</li>
                 </ol>
             </nav>

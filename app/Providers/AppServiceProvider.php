@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Support\DashboardRedirector;
+use Illuminate\Auth\Middleware\RedirectIfAuthenticated;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -19,6 +21,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        RedirectIfAuthenticated::redirectUsing(
+            fn () => DashboardRedirector::pathFor(auth()->user()),
+        );
     }
 }

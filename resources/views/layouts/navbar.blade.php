@@ -1,6 +1,11 @@
 @php
-    $user = auth()->user();
+    $user = $pageUser ?? auth()->user();
     $roleLabel = $user?->role ? ucfirst($user->role) : 'Administrator';
+    $profileUrl = !empty($profileRoute) && Route::has($profileRoute)
+        ? route($profileRoute)
+        : '#';
+    $profilePhotoUrl = $user?->profilePhotoUrl();
+    $avatarInitials = $user?->name ? $user->initials() : 'AD';
 @endphp
 
 <header class="mb-3">
@@ -47,8 +52,12 @@
                                 <p class="mb-0 text-sm text-gray-600">{{ $roleLabel }}</p>
                             </div>
                             <div class="user-img d-flex align-items-center">
-                                <div class="avatar avatar-md">
-                                    <img src="{{ asset('assets/images/faces/1.jpg') }}" alt="User Avatar">
+                                <div class="avatar avatar-md bg-light-primary">
+                                    @if ($profilePhotoUrl)
+                                        <img src="{{ $profilePhotoUrl }}" alt="Foto profil {{ $user?->name }}">
+                                    @else
+                                        <span class="avatar-content">{{ $avatarInitials }}</span>
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -57,12 +66,19 @@
                         <li>
                             <h6 class="dropdown-header">Halo, {{ $user?->name ?? 'Admin' }}!</h6>
                         </li>
-                        <li><a class="dropdown-item" href="#"><i class="icon-mid bi bi-person me-2"></i> Profil</a></li>
+                        <li><a class="dropdown-item" href="{{ $profileUrl }}"><i class="icon-mid bi bi-person me-2"></i> Profil</a></li>
                         <li><a class="dropdown-item" href="#"><i class="icon-mid bi bi-gear me-2"></i> Pengaturan</a></li>
                         <li>
                             <hr class="dropdown-divider">
                         </li>
-                        <li><a class="dropdown-item" href="#"><i class="icon-mid bi bi-box-arrow-right me-2"></i> Keluar</a></li>
+                        <li>
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="dropdown-item">
+                                    <i class="icon-mid bi bi-box-arrow-right me-2"></i> Keluar
+                                </button>
+                            </form>
+                        </li>
                     </ul>
                 </div>
             </div>
