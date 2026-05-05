@@ -28,12 +28,6 @@
             'route' => 'pegawai.returns.index',
             'active_patterns' => ['pegawai.returns.*'],
         ],
-        [
-            'name' => 'Profile',
-            'icon' => 'person-circle',
-            'route' => 'pegawai.profile.index',
-            'active_patterns' => ['pegawai.profile.*'],
-        ],
     ];
 @endphp
 

@@ -166,6 +166,12 @@ class DashboardController extends BasePegawaiController
                     'icon' => 'arrow-counterclockwise',
                 ],
                 [
+                    'title' => 'Notifikasi',
+                    'description' => 'Lihat persetujuan, verifikasi, dan pengingat aktivitas Anda.',
+                    'route' => 'pegawai.notifications.index',
+                    'icon' => 'bell',
+                ],
+                [
                     'title' => 'Profile',
                     'description' => 'Lihat informasi akun pegawai dan aktivitas terbaru.',
                     'route' => 'pegawai.profile.index',

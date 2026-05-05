@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\ReturnController;
 use App\Http\Controllers\Pegawai\AssetController as PegawaiAssetController;
 use App\Http\Controllers\Pegawai\DashboardController as PegawaiDashboardController;
 use App\Http\Controllers\Pegawai\LoanController as PegawaiLoanController;
+use App\Http\Controllers\Pegawai\NotificationController as PegawaiNotificationController;
 use App\Http\Controllers\Pegawai\ProfileController as PegawaiProfileController;
 use App\Http\Controllers\Pegawai\ReturnController as PegawaiReturnController;
 use App\Support\DashboardRedirector;
@@ -78,6 +79,9 @@ Route::middleware(['auth', 'role:pegawai'])->prefix('pegawai')->name('pegawai.')
     Route::post('/peminjaman', [PegawaiLoanController::class, 'store'])->name('loans.store');
     Route::get('/pengembalian', [PegawaiReturnController::class, 'index'])->name('returns.index');
     Route::post('/pengembalian', [PegawaiReturnController::class, 'store'])->name('returns.store');
+    Route::get('/notifikasi', [PegawaiNotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/notifikasi/{notification}', [PegawaiNotificationController::class, 'show'])->name('notifications.show');
+    Route::patch('/notifikasi', [PegawaiNotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
     Route::get('/profile', [PegawaiProfileController::class, 'index'])->name('profile.index');
     Route::patch('/profile', [PegawaiProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [PegawaiProfileController::class, 'updatePassword'])->name('profile.password.update');

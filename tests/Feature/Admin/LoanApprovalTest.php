@@ -47,6 +47,16 @@ class LoanApprovalTest extends TestCase
             'status' => 'Disetujui',
             'status_note' => 'Butuh laptop untuk presentasi.',
         ]);
+
+        $this->assertDatabaseHas('notifications', [
+            'notifiable_id' => $pegawai->id,
+            'notifiable_type' => User::class,
+        ]);
+
+        $notification = $pegawai->fresh()->notifications()->latest()->first();
+
+        $this->assertNotNull($notification);
+        $this->assertSame('loan_approved', $notification->data['type_key']);
     }
 
     public function test_admin_can_reject_pending_loan_request(): void
@@ -84,6 +94,16 @@ class LoanApprovalTest extends TestCase
             'status' => 'Ditolak',
             'status_note' => 'Butuh proyektor untuk rapat.',
         ]);
+
+        $this->assertDatabaseHas('notifications', [
+            'notifiable_id' => $pegawai->id,
+            'notifiable_type' => User::class,
+        ]);
+
+        $notification = $pegawai->fresh()->notifications()->latest()->first();
+
+        $this->assertNotNull($notification);
+        $this->assertSame('loan_rejected', $notification->data['type_key']);
     }
 
     public function test_admin_cannot_reprocess_non_pending_loan_request(): void

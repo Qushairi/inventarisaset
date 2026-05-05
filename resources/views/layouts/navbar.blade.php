@@ -1,9 +1,12 @@
 @php
     $user = $pageUser ?? auth()->user();
     $roleLabel = $user?->role ? ucfirst($user->role) : 'Administrator';
-    $profileUrl = !empty($profileRoute) && Route::has($profileRoute)
-        ? route($profileRoute)
-        : '#';
+    $profileRouteName = $profileRoute ?? match ($user?->role) {
+        'pegawai' => 'pegawai.profile.index',
+        default => null,
+    };
+    $hasProfileRoute = !empty($profileRouteName) && Route::has($profileRouteName);
+    $profileUrl = $hasProfileRoute ? route($profileRouteName) : null;
     $profilePhotoUrl = $user?->profilePhotoUrl();
     $avatarInitials = $user?->name ? $user->initials() : 'AD';
 @endphp
@@ -33,14 +36,80 @@
                         </ul>
                     </li>
                     <li class="nav-item dropdown nav-icon me-3">
-                        <a class="nav-link" href="#" data-bs-toggle="dropdown" aria-expanded="false">
+                        <a class="nav-link position-relative" href="#" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-bell fs-5 text-gray-600"></i>
+                            @if (($navbarUnreadNotificationCount ?? 0) > 0)
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                    {{ $navbarUnreadNotificationCount > 9 ? '9+' : $navbarUnreadNotificationCount }}
+                                </span>
+                            @endif
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li>
-                                <h6 class="dropdown-header">Notifikasi</h6>
+                        <ul class="dropdown-menu dropdown-menu-end notification-dropdown-menu">
+                            <li class="px-3 pt-2 pb-1 d-flex justify-content-between align-items-center gap-3">
+                                <div>
+                                    <h6 class="dropdown-header px-0 mb-0">Notifikasi</h6>
+                                    <small class="text-muted">{{ $navbarUnreadNotificationCount ?? 0 }} belum dibaca</small>
+                                </div>
+                                @if (!empty($notificationMarkAllUrl) && ($navbarUnreadNotificationCount ?? 0) > 0)
+                                    <form method="POST" action="{{ $notificationMarkAllUrl }}">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit" class="btn btn-sm btn-light-primary">Tandai dibaca</button>
+                                    </form>
+                                @endif
                             </li>
-                            <li><a class="dropdown-item" href="#">Belum ada notifikasi</a></li>
+
+                            @forelse (($navbarNotifications ?? collect()) as $notification)
+                                @php
+                                    $variant = $notification->data['variant'] ?? 'primary';
+                                    $icon = $notification->data['icon'] ?? 'bell';
+                                    $isUnread = is_null($notification->read_at);
+                                @endphp
+                                <li>
+                                    @if (!empty($notificationShowRouteName))
+                                        <a class="dropdown-item notification-dropdown-item {{ $isUnread ? 'notification-unread' : '' }}" href="{{ route($notificationShowRouteName, $notification) }}">
+                                            <div class="d-flex align-items-start gap-3">
+                                                <div class="avatar avatar-md notification-icon bg-light-{{ $variant }}">
+                                                    <span class="avatar-content">
+                                                        <i class="bi bi-{{ $icon }}"></i>
+                                                    </span>
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <div class="d-flex justify-content-between align-items-start gap-2">
+                                                        <strong class="d-block">{{ $notification->data['title'] ?? 'Notifikasi baru' }}</strong>
+                                                        @if ($isUnread)
+                                                            <span class="badge bg-primary">Baru</span>
+                                                        @endif
+                                                    </div>
+                                                    <small class="d-block text-muted">{{ $notification->data['message'] ?? '-' }}</small>
+                                                    <small class="d-block text-muted mt-1">{{ $notification->created_at->diffForHumans() }}</small>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    @else
+                                        <div class="dropdown-item">
+                                            <div class="d-flex align-items-start gap-3">
+                                                <div class="avatar avatar-md notification-icon bg-light-{{ $variant }}">
+                                                    <span class="avatar-content">
+                                                        <i class="bi bi-{{ $icon }}"></i>
+                                                    </span>
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <strong class="d-block">{{ $notification->data['title'] ?? 'Notifikasi baru' }}</strong>
+                                                    <small class="d-block text-muted">{{ $notification->data['message'] ?? '-' }}</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
+                                </li>
+                            @empty
+                                <li><span class="dropdown-item text-muted">Belum ada notifikasi</span></li>
+                            @endforelse
+
+                            @if (!empty($notificationIndexUrl))
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-center text-primary fw-semibold" href="{{ $notificationIndexUrl }}">Lihat semua notifikasi</a></li>
+                            @endif
                         </ul>
                     </li>
                 </ul>
@@ -66,8 +135,9 @@
                         <li>
                             <h6 class="dropdown-header">Halo, {{ $user?->name ?? 'Admin' }}!</h6>
                         </li>
-                        <li><a class="dropdown-item" href="{{ $profileUrl }}"><i class="icon-mid bi bi-person me-2"></i> Profil</a></li>
-                        <li><a class="dropdown-item" href="#"><i class="icon-mid bi bi-gear me-2"></i> Pengaturan</a></li>
+                        @if ($hasProfileRoute)
+                            <li><a class="dropdown-item" href="{{ $profileUrl }}"><i class="icon-mid bi bi-person me-2"></i> Profil</a></li>
+                        @endif
                         <li>
                             <hr class="dropdown-divider">
                         </li>

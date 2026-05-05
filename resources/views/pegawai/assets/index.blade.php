@@ -14,14 +14,17 @@
 
     <div class="page-content">
         <section class="section">
-            <div class="card">
-                <div class="card-header">
-                    <h4 class="card-title mb-1">Daftar Aset</h4>
-                    <p class="mb-0 text-muted">Informasi aset, lokasi, kondisi, dan status ketersediaan.</p>
+            <div class="card pegawai-panel pegawai-table-card">
+                <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+                    <div>
+                        <h4 class="card-title mb-1">Daftar Aset</h4>
+                        <p class="mb-0 text-muted">Informasi aset, lokasi, kondisi, dan status ketersediaan.</p>
+                    </div>
+                    <span class="badge bg-light-primary">{{ $assets->total() }} aset</span>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-hover table-lg">
+                        <table class="table table-hover table-lg mb-0">
                             <thead>
                                 <tr>
                                     <th>Aset</th>

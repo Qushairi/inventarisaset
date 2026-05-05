@@ -7,11 +7,17 @@ use App\Models\Asset;
 use App\Models\AssetReturn;
 use App\Models\Loan;
 use App\Models\User;
+use App\Support\PegawaiNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 class ReturnController extends Controller
 {
+    public function __construct(
+        private readonly PegawaiNotificationService $pegawaiNotificationService,
+    ) {
+    }
+
     public function index()
     {
         $returns = AssetReturn::query()
@@ -56,7 +62,9 @@ class ReturnController extends Controller
     {
         $validated = $this->validateReturn($request);
 
-        AssetReturn::query()->create($validated);
+        $returnRecord = AssetReturn::query()->create($validated);
+
+        $this->pegawaiNotificationService->sendReturnVerifiedNotification($returnRecord);
 
         return redirect()
             ->route('admin.returns.index')
@@ -78,8 +86,13 @@ class ReturnController extends Controller
     public function update(Request $request, AssetReturn $return)
     {
         $validated = $this->validateReturn($request, $return);
+        $previousStatus = $return->status;
 
         $return->update($validated);
+
+        if ($previousStatus !== $return->status || $return->status === 'Terverifikasi') {
+            $this->pegawaiNotificationService->sendReturnVerifiedNotification($return);
+        }
 
         return redirect()
             ->route('admin.returns.index')

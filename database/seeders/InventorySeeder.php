@@ -15,54 +15,35 @@ class InventorySeeder extends Seeder
 {
     public function run(): void
     {
+        User::query()
+            ->whereIn('email', [
+                'jidan@gmail.com',
+                'pegawai1@bengkalis.go.id',
+                'pegawai@bengkalis.go.id',
+            ])
+            ->whereDoesntHave('loans')
+            ->whereDoesntHave('returns')
+            ->delete();
+
         User::query()->updateOrCreate(
             ['email' => 'admin@inventarisaset.test'],
             [
                 'name' => 'Admin Inventaris',
-                'password' => Hash::make('password'),
+                'password' => Hash::make('Admin123!'),
                 'role' => 'admin',
                 'email_verified_at' => now(),
             ],
         );
 
-        $employeePayloads = [
-            [
-                'name' => 'Jidan',
-                'email' => 'jidan@gmail.com',
-                'password' => Hash::make('password'),
-                'role' => 'pegawai',
-                'email_verified_at' => now(),
-                'created_at' => now()->setDate(2026, 4, 15)->setTime(17, 46),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'Muhammad Amien',
-                'email' => 'amien@bengkalis.go.id',
-                'password' => Hash::make('password'),
-                'role' => 'pegawai',
-                'email_verified_at' => now(),
-                'created_at' => now()->setDate(2026, 3, 9)->setTime(14, 21),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'Pegawai1',
-                'email' => 'pegawai1@bengkalis.go.id',
-                'password' => Hash::make('password'),
-                'role' => 'pegawai',
-                'email_verified_at' => now(),
-                'created_at' => now()->setDate(2026, 3, 7)->setTime(20, 0),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'Pegawai Dinas',
-                'email' => 'pegawai@bengkalis.go.id',
-                'password' => Hash::make('password'),
-                'role' => 'pegawai',
-                'email_verified_at' => now(),
-                'created_at' => now()->setDate(2026, 3, 6)->setTime(19, 49),
-                'updated_at' => now(),
-            ],
-        ];
+        $employeePayloads = [[
+            'name' => 'Muhammad Amien',
+            'email' => 'amien@bengkalis.go.id',
+            'password' => Hash::make('Pegawai123!'),
+            'role' => 'pegawai',
+            'email_verified_at' => now(),
+            'created_at' => now()->setDate(2026, 3, 9)->setTime(14, 21),
+            'updated_at' => now(),
+        ]];
 
         User::query()->upsert(
             $employeePayloads,

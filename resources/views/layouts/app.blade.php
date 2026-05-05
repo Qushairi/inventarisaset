@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
+    @php
+        $isPegawaiPage = request()->routeIs('pegawai.*');
+    @endphp
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Dashboard') - {{ config('app.name', 'Inventaris Aset') }}</title>
@@ -11,10 +14,13 @@
     <link rel="stylesheet" href="{{ asset('assets/vendors/perfect-scrollbar/perfect-scrollbar.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/vendors/bootstrap-icons/bootstrap-icons.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/app.css') }}">
+    @if ($isPegawaiPage)
+        <link rel="stylesheet" href="{{ asset('assets/css/pegawai.css') }}">
+    @endif
     <link rel="shortcut icon" href="{{ asset('assets/images/favicon.svg') }}" type="image/x-icon">
     @stack('styles')
 </head>
-<body>
+<body class="{{ $isPegawaiPage ? 'pegawai-layout' : '' }}">
     <div id="app">
         <div id="sidebar" class="active">
             @include($sidebarPartial ?? 'layouts.sidebar')

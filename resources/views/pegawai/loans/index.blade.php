@@ -26,21 +26,24 @@
                 </div>
             @endif
 
-            <div class="card">
+            <div class="card pegawai-panel pegawai-table-card">
                 <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-3">
                     <div>
                         <h4 class="card-title mb-1">Riwayat Peminjaman</h4>
                         <p class="mb-0 text-muted">Daftar pengajuan peminjaman aset yang terkait dengan akun pegawai.</p>
                     </div>
-                    <button
-                        type="button"
-                        class="btn btn-primary btn-sm icon icon-left"
-                        data-bs-toggle="modal"
-                        data-bs-target="#loanRequestModal"
-                        @disabled($availableAssets->isEmpty())
-                    >
-                        <i class="bi bi-plus-circle"></i><span>Ajukan Peminjaman</span>
-                    </button>
+                    <div class="d-flex align-items-center flex-wrap gap-2">
+                        <span class="badge bg-light-primary">{{ $loanTotal }} pengajuan</span>
+                        <button
+                            type="button"
+                            class="btn btn-primary btn-sm icon icon-left"
+                            data-bs-toggle="modal"
+                            data-bs-target="#loanRequestModal"
+                            @disabled($availableAssets->isEmpty())
+                        >
+                            <i class="bi bi-plus-circle"></i><span>Ajukan Peminjaman</span>
+                        </button>
+                    </div>
                 </div>
                 <div class="card-body">
                     @if ($availableAssets->isEmpty())
@@ -50,7 +53,7 @@
                     @endif
 
                     <div class="table-responsive">
-                        <table class="table table-hover table-lg">
+                        <table class="table table-hover table-lg mb-0">
                             <thead>
                                 <tr>
                                     <th>Aset</th>

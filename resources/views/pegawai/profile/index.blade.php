@@ -27,39 +27,41 @@
             </div>
 
             <div class="col-12 col-xl-4">
-                <div class="card">
+                <div class="card pegawai-panel pegawai-profile-card">
                     <div class="card-body text-center py-4">
-                        <div class="avatar avatar-xl {{ $profilePhotoUrl ? '' : 'bg-light-primary' }} mx-auto mb-3">
-                            @if ($profilePhotoUrl)
-                                <img src="{{ $profilePhotoUrl }}" alt="Foto profil {{ $pegawaiUser->name }}">
-                            @else
-                                <span class="avatar-content">{{ $pegawaiInitials }}</span>
-                            @endif
-                        </div>
-                        <h4 class="mb-1">{{ $pegawaiUser->name }}</h4>
-                        <p class="text-muted mb-2">{{ $pegawaiUser->email }}</p>
-                        <span class="badge bg-light-secondary">{{ ucfirst($pegawaiUser->role) }}</span>
-                        <hr>
-                        <div class="row text-start">
-                            <div class="col-12 mb-3">
-                                <small class="text-muted d-block">ID Akun</small>
-                                <strong>#{{ $pegawaiUser->id }}</strong>
+                        <div class="pegawai-profile-summary">
+                            <div class="avatar avatar-xl {{ $profilePhotoUrl ? '' : 'bg-light-primary' }} mx-auto mb-3">
+                                @if ($profilePhotoUrl)
+                                    <img src="{{ $profilePhotoUrl }}" alt="Foto profil {{ $pegawaiUser->name }}">
+                                @else
+                                    <span class="avatar-content">{{ $pegawaiInitials }}</span>
+                                @endif
                             </div>
-                            <div class="col-12 mb-3">
-                                <small class="text-muted d-block">Terdaftar</small>
-                                <strong>{{ optional($pegawaiUser->created_at)->format('d/m/Y H:i') }} WIB</strong>
-                            </div>
-                            <div class="col-12">
-                                <small class="text-muted d-block">Email Terverifikasi</small>
-                                <strong>{{ $pegawaiUser->email_verified_at ? 'Sudah' : 'Belum' }}</strong>
+                            <h4 class="mb-1">{{ $pegawaiUser->name }}</h4>
+                            <p class="text-muted mb-2">{{ $pegawaiUser->email }}</p>
+                            <span class="badge bg-light-secondary">{{ ucfirst($pegawaiUser->role) }}</span>
+
+                            <div class="pegawai-profile-meta row text-start">
+                                <div class="col-12 mb-3">
+                                    <small class="text-muted d-block">ID Akun</small>
+                                    <strong>#{{ $pegawaiUser->id }}</strong>
+                                </div>
+                                <div class="col-12 mb-3">
+                                    <small class="text-muted d-block">Terdaftar</small>
+                                    <strong>{{ optional($pegawaiUser->created_at)->format('d/m/Y H:i') }} WIB</strong>
+                                </div>
+                                <div class="col-12">
+                                    <small class="text-muted d-block">Email Terverifikasi</small>
+                                    <strong>{{ $pegawaiUser->email_verified_at ? 'Sudah' : 'Belum' }}</strong>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="card">
+                <div class="card pegawai-panel">
                     <div class="card-header">
-                        <h4>Foto Profil</h4>
+                        <h4 class="card-title mb-1">Foto Profil</h4>
                         <p class="mb-0 text-muted">Unggah foto profil baru agar akun lebih mudah dikenali.</p>
                     </div>
                     <div class="card-body">
@@ -102,9 +104,9 @@
             <div class="col-12 col-xl-8">
                 <div class="row">
                     <div class="col-12">
-                        <div class="card">
+                        <div class="card pegawai-panel">
                             <div class="card-header">
-                                <h4>Ubah Password</h4>
+                                <h4 class="card-title mb-1">Ubah Password</h4>
                                 <p class="mb-0 text-muted">Gunakan password yang kuat agar akun tetap aman.</p>
                             </div>
                             <div class="card-body">
@@ -166,8 +168,8 @@
                             };
                         @endphp
                         <div class="col-12 col-md-6">
-                            <div class="card">
-                                <div class="card-body px-3 py-4-4">
+                            <div class="card pegawai-panel pegawai-stat-card h-100">
+                                <div class="card-body px-3 py-4-5">
                                     <div class="row">
                                         <div class="col-3">
                                             <div class="stats-icon {{ $iconClass }}">
@@ -185,11 +187,17 @@
                     @endforeach
 
                     <div class="col-12">
-                        <div class="card">
-                            <div class="card-header">
-                                <h4>Peminjaman Terakhir</h4>
+                        <div class="card pegawai-panel pegawai-table-card">
+                            <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+                                <div>
+                                    <h4 class="card-title mb-1">Peminjaman Terakhir</h4>
+                                    <p class="mb-0 text-muted">Ringkasan peminjaman terbaru yang dilakukan dari akun ini.</p>
+                                </div>
+                                <a href="{{ route('pegawai.loans.index') }}" class="btn btn-light-primary btn-sm icon icon-left">
+                                    <i class="bi bi-box-arrow-up-right"></i><span>Lihat Riwayat</span>
+                                </a>
                             </div>
-                            <div class="card-body p-0">
+                            <div class="card-body">
                                 <div class="table-responsive">
                                     <table class="table table-hover table-lg mb-0">
                                         <thead>
@@ -228,11 +236,17 @@
                     </div>
 
                     <div class="col-12">
-                        <div class="card">
-                            <div class="card-header">
-                                <h4>Pengembalian Terakhir</h4>
+                        <div class="card pegawai-panel pegawai-table-card">
+                            <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+                                <div>
+                                    <h4 class="card-title mb-1">Pengembalian Terakhir</h4>
+                                    <p class="mb-0 text-muted">Status pengembalian aset terbaru yang sudah Anda ajukan.</p>
+                                </div>
+                                <a href="{{ route('pegawai.returns.index') }}" class="btn btn-light-primary btn-sm icon icon-left">
+                                    <i class="bi bi-box-arrow-up-right"></i><span>Lihat Riwayat</span>
+                                </a>
                             </div>
-                            <div class="card-body p-0">
+                            <div class="card-body">
                                 <div class="table-responsive">
                                     <table class="table table-hover table-lg mb-0">
                                         <thead>

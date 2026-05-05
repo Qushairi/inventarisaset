@@ -6,11 +6,17 @@ use App\Http\Controllers\Controller;
 use App\Models\Asset;
 use App\Models\Loan;
 use App\Models\User;
+use App\Support\PegawaiNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 class LoanController extends Controller
 {
+    public function __construct(
+        private readonly PegawaiNotificationService $pegawaiNotificationService,
+    ) {
+    }
+
     public function index()
     {
         $loans = Loan::query()
@@ -51,7 +57,9 @@ class LoanController extends Controller
     {
         $validated = $this->validateLoan($request);
 
-        Loan::query()->create($validated);
+        $loan = Loan::query()->create($validated);
+
+        $this->pegawaiNotificationService->sendLoanStatusNotification($loan);
 
         return redirect()
             ->route('admin.loans.index')
@@ -71,8 +79,13 @@ class LoanController extends Controller
     public function update(Request $request, Loan $loan)
     {
         $validated = $this->validateLoan($request, $loan);
+        $previousStatus = $loan->status;
 
         $loan->update($validated);
+
+        if ($previousStatus !== $loan->status) {
+            $this->pegawaiNotificationService->sendLoanStatusNotification($loan);
+        }
 
         return redirect()
             ->route('admin.loans.index')
@@ -94,6 +107,8 @@ class LoanController extends Controller
         $loan->update([
             'status' => $validated['status'],
         ]);
+
+        $this->pegawaiNotificationService->sendLoanStatusNotification($loan);
 
         return redirect()
             ->route('admin.loans.index')

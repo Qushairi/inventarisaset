@@ -1,0 +1,190 @@
+body.pegawai-layout {
+    background-color: #f4f7fb;
+}
+
+.pegawai-layout #main #main-content {
+    min-height: 100vh;
+    background: linear-gradient(180deg, #f4f7fb 0, #f9fbff 260px, #f4f7fb 100%);
+}
+
+.pegawai-layout .page-title {
+    background-color: #fff;
+    border-radius: 1rem;
+    padding: 1.5rem 1.75rem;
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
+}
+
+.pegawai-layout .page-title .breadcrumb {
+    margin-bottom: 0;
+}
+
+.pegawai-layout .pegawai-panel {
+    border-radius: 1rem;
+    box-shadow: 0 14px 36px rgba(15, 23, 42, 0.06);
+    overflow: hidden;
+}
+
+.pegawai-layout .pegawai-panel .card-header {
+    padding: 1.5rem 1.5rem 1rem;
+    background-color: #fff;
+}
+
+.pegawai-layout .pegawai-panel .card-header h4,
+.pegawai-layout .pegawai-panel .card-header .card-title {
+    margin-bottom: 0.35rem;
+}
+
+.pegawai-layout .pegawai-panel .card-body {
+    padding: 1.5rem;
+}
+
+.pegawai-layout .pegawai-panel .card-header + .card-body {
+    padding-top: 0;
+}
+
+.pegawai-layout .pegawai-table-card .table-responsive {
+    border: 1px solid #edf2f7;
+    border-radius: 0.95rem;
+    background-color: #fff;
+}
+
+.pegawai-layout .pegawai-table-card .table {
+    margin-bottom: 0;
+}
+
+.pegawai-layout .pegawai-table-card .table thead th {
+    background-color: #f8fafc;
+    color: #7b8899;
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.pegawai-layout .pegawai-table-card .table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.pegawai-layout .pegawai-table-card .table tbody tr:hover {
+    background-color: #f7f9ff;
+}
+
+.pegawai-layout .pegawai-table-card .table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.pegawai-layout .pegawai-table-card .table small {
+    line-height: 1.5;
+}
+
+.pegawai-layout .pegawai-table-card .badge,
+.pegawai-layout .pegawai-profile-card .badge {
+    font-weight: 600;
+    padding: 0.45rem 0.8rem;
+}
+
+.pegawai-layout .pegawai-table-card .table-footer-meta {
+    border-top-color: #edf2f7 !important;
+    margin-top: 1rem;
+    padding-top: 1rem !important;
+}
+
+.pegawai-layout .pegawai-stat-card .card-body {
+    padding: 1.6rem 1.35rem;
+}
+
+.pegawai-layout .pegawai-stat-card .stats-icon {
+    box-shadow: 0 14px 24px rgba(67, 94, 190, 0.16);
+}
+
+.pegawai-layout .pegawai-highlight-item {
+    border: 1px solid #edf2f7;
+    border-radius: 0.95rem;
+    padding: 1rem;
+    background-color: #fbfdff;
+}
+
+.pegawai-layout .pegawai-highlight-item .badge {
+    min-width: 2.75rem;
+}
+
+.pegawai-layout .pegawai-list-group .list-group-item {
+    border: 1px solid #edf2f7;
+    border-radius: 0.95rem;
+    margin-bottom: 0.85rem;
+    padding: 1rem 1rem 0.95rem;
+    transition: all 0.2s ease;
+}
+
+.pegawai-layout .pegawai-list-group .list-group-item:last-child {
+    margin-bottom: 0;
+}
+
+.pegawai-layout .pegawai-list-group .list-group-item:hover {
+    background-color: #f8faff;
+    border-color: #dbe5f1;
+}
+
+.pegawai-layout .pegawai-profile-card .pegawai-profile-summary {
+    border: 1px solid #edf2f7;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, rgba(67, 94, 190, 0.08), rgba(87, 202, 235, 0.12));
+}
+
+.pegawai-layout .pegawai-profile-card .pegawai-profile-meta {
+    margin-top: 1.25rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid rgba(67, 94, 190, 0.12);
+}
+
+.pegawai-layout .pegawai-panel .btn.btn-light-secondary,
+.pegawai-layout .pegawai-panel .btn.btn-light-primary,
+.pegawai-layout .pegawai-panel .btn.btn-light-danger {
+    box-shadow: none;
+}
+
+.pegawai-layout .notification-dropdown-menu {
+    width: 24rem;
+    max-width: calc(100vw - 2rem);
+}
+
+.pegawai-layout .notification-dropdown-item {
+    white-space: normal;
+    padding-top: 0.85rem;
+    padding-bottom: 0.85rem;
+}
+
+.pegawai-layout .notification-dropdown-item.notification-unread {
+    background-color: #f8faff;
+}
+
+.pegawai-layout .notification-icon[class*="bg-light-"] .avatar-content,
+.pegawai-layout .notification-icon[class*="bg-light-"] .avatar-content i {
+    color: inherit;
+}
+
+.pegawai-layout .notification-list-item {
+    border-color: #edf2f7 !important;
+}
+
+@media (max-width: 767.98px) {
+    .pegawai-layout .page-title {
+        padding: 1.25rem;
+    }
+
+    .pegawai-layout .pegawai-panel .card-header,
+    .pegawai-layout .pegawai-panel .card-body {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    .pegawai-layout .pegawai-table-card .table thead th {
+        font-size: 0.72rem;
+    }
+
+    .pegawai-layout .notification-dropdown-menu {
+        width: min(24rem, calc(100vw - 1.25rem));
+    }
+}
