@@ -169,6 +169,40 @@ body.pegawai-layout {
     border-color: #edf2f7 !important;
 }
 
+.pegawai-layout .loan-letter-preview {
+    min-height: 72vh;
+    padding: 1.1rem;
+    border-radius: 1rem;
+    border: 1px solid #edf2f7;
+    background: linear-gradient(180deg, #eef3fb 0%, #f8fbff 100%);
+    overflow: auto;
+}
+
+.pegawai-layout .loan-letter-image {
+    width: 100%;
+    display: block;
+    border-radius: 1rem;
+    box-shadow: 0 18px 36px rgba(15, 23, 42, 0.08);
+    background-color: #fff;
+}
+
+.pegawai-layout .berita-acara-preview-shell {
+    padding: 1.25rem;
+    border-radius: 1rem;
+    border: 1px solid #edf2f7;
+    background: linear-gradient(180deg, #eef3fb 0%, #f8fbff 100%);
+    overflow-x: auto;
+}
+
+.pegawai-layout .berita-acara-preview-sheet {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 2.25rem;
+    border-radius: 1rem;
+    background-color: #fff;
+    box-shadow: 0 18px 36px rgba(15, 23, 42, 0.08);
+}
+
 @media (max-width: 767.98px) {
     .pegawai-layout .page-title {
         padding: 1.25rem;
@@ -186,5 +220,17 @@ body.pegawai-layout {
 
     .pegawai-layout .notification-dropdown-menu {
         width: min(24rem, calc(100vw - 1.25rem));
+    }
+
+    .pegawai-layout .loan-letter-preview {
+        padding: 0.85rem;
+    }
+
+    .pegawai-layout .berita-acara-preview-shell {
+        padding: 0.85rem;
+    }
+
+    .pegawai-layout .berita-acara-preview-sheet {
+        padding: 1rem;
     }
 }

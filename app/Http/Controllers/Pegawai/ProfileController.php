@@ -67,7 +67,7 @@ class ProfileController extends BasePegawaiController
         $pegawai = $this->currentPegawai();
 
         if ($request->boolean('remove_profile_photo')) {
-            $this->deleteProfilePhoto($pegawai->profile_photo_path);
+            $this->deleteStoredFile($pegawai->profile_photo_path);
 
             $pegawai->update([
                 'profile_photo_path' => null,
@@ -78,11 +78,43 @@ class ProfileController extends BasePegawaiController
                 ->with('success', 'Foto profil berhasil dihapus.');
         }
 
+        if ($request->boolean('remove_signature')) {
+            $this->deleteStoredFile($pegawai->signature_path);
+
+            $pegawai->update([
+                'signature_path' => null,
+                'signature_updated_at' => now(),
+            ]);
+
+            return redirect()
+                ->route('pegawai.profile.index')
+                ->with('success', 'Tanda tangan berhasil dihapus.');
+        }
+
+        if ($request->hasFile('signature_file')) {
+            $validated = $request->validateWithBag('updateSignature', [
+                'signature_file' => ['required', 'image', 'mimes:png', 'max:2048'],
+            ]);
+
+            $this->deleteStoredFile($pegawai->signature_path);
+
+            $path = $validated['signature_file']->store('signatures', 'public');
+
+            $pegawai->update([
+                'signature_path' => $path,
+                'signature_updated_at' => now(),
+            ]);
+
+            return redirect()
+                ->route('pegawai.profile.index')
+                ->with('success', 'Tanda tangan berhasil diperbarui.');
+        }
+
         $validated = $request->validateWithBag('updatePhoto', [
             'profile_photo' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ]);
 
-        $this->deleteProfilePhoto($pegawai->profile_photo_path);
+        $this->deleteStoredFile($pegawai->profile_photo_path);
 
         $path = $validated['profile_photo']->store('profile-photos', 'public');
 
@@ -113,7 +145,7 @@ class ProfileController extends BasePegawaiController
             ->with('success', 'Password berhasil diperbarui.');
     }
 
-    private function deleteProfilePhoto(?string $path): void
+    private function deleteStoredFile(?string $path): void
     {
         if (filled($path)) {
             Storage::disk('public')->delete($path);

@@ -52,6 +52,11 @@ class Asset extends Model
         return $this->hasMany(AssetReturn::class);
     }
 
+    public function beritaAcaras(): HasMany
+    {
+        return $this->hasMany(BeritaAcara::class);
+    }
+
     public function getRouteKeyName(): string
     {
         return 'code';

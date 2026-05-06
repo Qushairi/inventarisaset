@@ -6,9 +6,11 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EmployeeController;
 use App\Http\Controllers\Admin\LoanController;
 use App\Http\Controllers\Admin\LocationController;
+use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\ReturnController;
 use App\Http\Controllers\Pegawai\AssetController as PegawaiAssetController;
+use App\Http\Controllers\Pegawai\BeritaAcaraController as PegawaiBeritaAcaraController;
 use App\Http\Controllers\Pegawai\DashboardController as PegawaiDashboardController;
 use App\Http\Controllers\Pegawai\LoanController as PegawaiLoanController;
 use App\Http\Controllers\Pegawai\NotificationController as PegawaiNotificationController;
@@ -70,12 +72,17 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::delete('/pengembalian/{return}', [ReturnController::class, 'destroy'])->name('returns.destroy');
 
     Route::get('/laporan', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/profile', [AdminProfileController::class, 'index'])->name('profile.index');
+    Route::patch('/profile', [AdminProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/password', [AdminProfileController::class, 'updatePassword'])->name('profile.password.update');
 });
 
 Route::middleware(['auth', 'role:pegawai'])->prefix('pegawai')->name('pegawai.')->group(function () {
     Route::get('/', [PegawaiDashboardController::class, 'index'])->name('dashboard');
     Route::get('/aset', [PegawaiAssetController::class, 'index'])->name('assets.index');
     Route::get('/peminjaman', [PegawaiLoanController::class, 'index'])->name('loans.index');
+    Route::get('/peminjaman/{loan}/surat', [PegawaiBeritaAcaraController::class, 'show'])->name('loans.letter.show');
+    Route::get('/peminjaman/{loan}/surat/download', [PegawaiBeritaAcaraController::class, 'download'])->name('loans.letter.download');
     Route::post('/peminjaman', [PegawaiLoanController::class, 'store'])->name('loans.store');
     Route::get('/pengembalian', [PegawaiReturnController::class, 'index'])->name('returns.index');
     Route::post('/pengembalian', [PegawaiReturnController::class, 'store'])->name('returns.store');

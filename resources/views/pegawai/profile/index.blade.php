@@ -5,6 +5,7 @@
 @section('content')
     @php
         $profilePhotoUrl = $pegawaiUser->profilePhotoUrl();
+        $signatureUrl = $pegawaiUser->signatureUrl();
     @endphp
 
     <div class="page-heading">
@@ -54,6 +55,10 @@
                                     <small class="text-muted d-block">Email Terverifikasi</small>
                                     <strong>{{ $pegawaiUser->email_verified_at ? 'Sudah' : 'Belum' }}</strong>
                                 </div>
+                                <div class="col-12 mt-3">
+                                    <small class="text-muted d-block">Tanda Tangan Digital</small>
+                                    <strong>{{ $pegawaiUser->hasSignature() ? 'Sudah diunggah' : 'Belum diunggah' }}</strong>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -94,6 +99,54 @@
                                 <input type="hidden" name="remove_profile_photo" value="1">
                                 <button type="submit" class="btn btn-light-danger icon icon-left" onclick="return confirm('Hapus foto profil saat ini?')">
                                     <i class="bi bi-trash"></i><span>Hapus Foto</span>
+                                </button>
+                            </form>
+                        @endif
+                    </div>
+                </div>
+
+                <div class="card pegawai-panel">
+                    <div class="card-header">
+                        <h4 class="card-title mb-1">Tanda Tangan Digital</h4>
+                        <p class="mb-0 text-muted">Tanda tangan ini akan dipakai otomatis pada surat peminjaman aset.</p>
+                    </div>
+                    <div class="card-body">
+                        @if ($errors->updateSignature->any())
+                            <div class="alert alert-light-danger color-danger">
+                                <i class="bi bi-exclamation-circle me-1"></i>{{ $errors->updateSignature->first() }}
+                            </div>
+                        @endif
+
+                        @if ($signatureUrl)
+                            <div class="border rounded-3 p-3 mb-3 bg-light">
+                                <small class="text-muted d-block mb-2">Preview tanda tangan</small>
+                                <img src="{{ $signatureUrl }}" alt="Tanda tangan {{ $pegawaiUser->name }}" style="max-width: 280px; max-height: 120px; width: auto; height: auto;">
+                            </div>
+                        @endif
+
+                        <form action="{{ route('pegawai.profile.update') }}" method="POST" enctype="multipart/form-data">
+                            @csrf
+                            @method('PATCH')
+                            <div class="form-group">
+                                <label for="signature_file">Upload Tanda Tangan</label>
+                                <input type="file" id="signature_file" name="signature_file" class="form-control @error('signature_file', 'updateSignature') is-invalid @enderror" accept=".png">
+                                <small class="text-muted d-block mt-2">Gunakan file PNG transparan dengan ukuran maksimal 2 MB agar tampil rapi pada surat peminjaman.</small>
+                                @error('signature_file', 'updateSignature')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <button type="submit" class="btn btn-primary icon icon-left">
+                                <i class="bi bi-pen"></i><span>Simpan Tanda Tangan</span>
+                            </button>
+                        </form>
+
+                        @if ($pegawaiUser->hasSignature())
+                            <form action="{{ route('pegawai.profile.update') }}" method="POST" class="mt-3">
+                                @csrf
+                                @method('PATCH')
+                                <input type="hidden" name="remove_signature" value="1">
+                                <button type="submit" class="btn btn-light-danger icon icon-left" onclick="return confirm('Hapus tanda tangan saat ini?')">
+                                    <i class="bi bi-trash"></i><span>Hapus Tanda Tangan</span>
                                 </button>
                             </form>
                         @endif

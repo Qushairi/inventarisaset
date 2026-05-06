@@ -3,11 +3,13 @@
 namespace Tests\Feature\Admin;
 
 use App\Models\Asset;
+use App\Models\BeritaAcara;
 use App\Models\Category;
 use App\Models\Loan;
 use App\Models\Location;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class LoanApprovalTest extends TestCase
@@ -16,6 +18,8 @@ class LoanApprovalTest extends TestCase
 
     public function test_admin_can_accept_pending_loan_request(): void
     {
+        Storage::fake('public');
+
         $admin = User::factory()->create([
             'role' => 'admin',
         ]);
@@ -48,6 +52,21 @@ class LoanApprovalTest extends TestCase
             'status_note' => 'Butuh laptop untuk presentasi.',
         ]);
 
+        $loan->refresh();
+        $beritaAcara = $loan->beritaAcara()->first();
+
+        $this->assertNotNull($loan->loan_letter_number);
+        $this->assertNotNull($loan->loan_letter_generated_at);
+        $this->assertSame($admin->id, $loan->approved_by_user_id);
+        $this->assertInstanceOf(BeritaAcara::class, $beritaAcara);
+        $this->assertSame($loan->id, $beritaAcara->loan_id);
+        $this->assertSame($asset->id, $beritaAcara->asset_id);
+        $this->assertSame($admin->id, $beritaAcara->first_party_user_id);
+        $this->assertSame($pegawai->id, $beritaAcara->second_party_user_id);
+        $this->assertNotNull($beritaAcara->pdf_path);
+        $this->assertStringStartsWith('SPA-', $beritaAcara->number);
+        Storage::disk('public')->assertExists($beritaAcara->pdf_path);
+
         $this->assertDatabaseHas('notifications', [
             'notifiable_id' => $pegawai->id,
             'notifiable_type' => User::class,
@@ -57,6 +76,7 @@ class LoanApprovalTest extends TestCase
 
         $this->assertNotNull($notification);
         $this->assertSame('loan_approved', $notification->data['type_key']);
+        $this->assertSame($beritaAcara->number, $notification->data['meta']['loan_letter_number']);
     }
 
     public function test_admin_can_reject_pending_loan_request(): void

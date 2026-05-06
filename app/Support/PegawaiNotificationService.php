@@ -13,7 +13,7 @@ class PegawaiNotificationService
 {
     public function sendLoanStatusNotification(Loan $loan): bool
     {
-        $loan->loadMissing(['asset', 'user']);
+        $loan->loadMissing(['asset', 'user', 'beritaAcara']);
 
         if (! $loan->user instanceof User || $loan->user->role !== 'pegawai') {
             return false;
@@ -31,7 +31,7 @@ class PegawaiNotificationService
             'type_key' => $isApproved ? 'loan_approved' : 'loan_rejected',
             'title' => $isApproved ? 'Peminjaman disetujui' : 'Peminjaman ditolak',
             'message' => $isApproved
-                ? 'Pengajuan peminjaman untuk aset '.$assetLabel.' telah disetujui admin.'
+                ? 'Pengajuan peminjaman untuk aset '.$assetLabel.' telah disetujui admin dan surat peminjaman sudah tersedia.'
                 : 'Pengajuan peminjaman untuk aset '.$assetLabel.' ditolak admin.',
             'action_label' => 'Lihat peminjaman',
             'action_url' => route('pegawai.loans.index', absolute: false),
@@ -48,6 +48,7 @@ class PegawaiNotificationService
                 'planned_return_date' => optional($loan->planned_return_date)->format('d/m/Y'),
                 'status' => $loan->status,
                 'status_note' => $loan->status_note,
+                'loan_letter_number' => $loan->beritaAcara?->number ?? $loan->loan_letter_number,
             ],
         ]);
     }

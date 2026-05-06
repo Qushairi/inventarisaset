@@ -2,6 +2,7 @@
     $user = $pageUser ?? auth()->user();
     $roleLabel = $user?->role ? ucfirst($user->role) : 'Administrator';
     $profileRouteName = $profileRoute ?? match ($user?->role) {
+        'admin' => 'admin.profile.index',
         'pegawai' => 'pegawai.profile.index',
         default => null,
     };

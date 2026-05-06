@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Asset;
 use App\Models\Loan;
 use App\Models\User;
+use App\Support\BeritaAcaraService;
 use App\Support\PegawaiNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -14,6 +15,7 @@ class LoanController extends Controller
 {
     public function __construct(
         private readonly PegawaiNotificationService $pegawaiNotificationService,
+        private readonly BeritaAcaraService $beritaAcaraService,
     ) {
     }
 
@@ -58,7 +60,9 @@ class LoanController extends Controller
         $validated = $this->validateLoan($request);
 
         $loan = Loan::query()->create($validated);
+        $this->syncApprover($loan, $request->user());
 
+        $this->refreshLoanLetterIfEligible($loan, $request->user());
         $this->pegawaiNotificationService->sendLoanStatusNotification($loan);
 
         return redirect()
@@ -82,6 +86,8 @@ class LoanController extends Controller
         $previousStatus = $loan->status;
 
         $loan->update($validated);
+        $this->syncApprover($loan, $request->user());
+        $this->refreshLoanLetterIfEligible($loan, $request->user());
 
         if ($previousStatus !== $loan->status) {
             $this->pegawaiNotificationService->sendLoanStatusNotification($loan);
@@ -106,8 +112,10 @@ class LoanController extends Controller
 
         $loan->update([
             'status' => $validated['status'],
+            'approved_by_user_id' => $validated['status'] === 'Disetujui' ? $request->user()?->id : null,
         ]);
 
+        $this->refreshLoanLetterIfEligible($loan, $request->user());
         $this->pegawaiNotificationService->sendLoanStatusNotification($loan);
 
         return redirect()
@@ -142,6 +150,26 @@ class LoanController extends Controller
     private function statusOptions(): array
     {
         return ['Menunggu', 'Disetujui', 'Selesai', 'Ditolak'];
+    }
+
+    private function refreshLoanLetterIfEligible(Loan $loan, ?User $approver = null): void
+    {
+        if (in_array($loan->status, ['Disetujui', 'Selesai'], true)) {
+            $this->beritaAcaraService->ensureForLoan($loan, $approver, force: true);
+        }
+    }
+
+    private function syncApprover(Loan $loan, ?User $approver = null): void
+    {
+        $approvedByUserId = in_array($loan->status, ['Disetujui', 'Selesai'], true)
+            ? $approver?->id
+            : null;
+
+        if ($loan->approved_by_user_id !== $approvedByUserId) {
+            $loan->forceFill([
+                'approved_by_user_id' => $approvedByUserId,
+            ])->saveQuietly();
+        }
     }
 
     private function validateLoan(Request $request, ?Loan $loan = null): array

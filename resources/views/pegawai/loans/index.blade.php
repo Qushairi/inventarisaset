@@ -60,6 +60,7 @@
                                     <th>Periode</th>
                                     <th>Status</th>
                                     <th>Catatan</th>
+                                    <th>Surat</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -84,10 +85,25 @@
                                             <span class="badge {{ $loanBadge }}">{{ $loan['status'] }}</span>
                                         </td>
                                         <td><small class="text-muted">{{ $loan['status_note'] }}</small></td>
+                                        <td>
+                                            @if ($loan['letter_url'])
+                                                <div class="fw-semibold">{{ $loan['letter_number'] }}</div>
+                                                <div class="d-flex flex-wrap gap-2 mt-2">
+                                                    <a href="{{ $loan['letter_url'] }}" class="btn btn-sm btn-light-primary">
+                                                        Lihat Surat
+                                                    </a>
+                                                    <a href="{{ $loan['letter_download_url'] }}" class="btn btn-sm btn-light-secondary">
+                                                        Download PDF
+                                                    </a>
+                                                </div>
+                                            @else
+                                                <small class="text-muted">Belum tersedia</small>
+                                            @endif
+                                        </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="4" class="text-center text-muted">Belum ada data peminjaman.</td>
+                                        <td colspan="5" class="text-center text-muted">Belum ada data peminjaman.</td>
                                     </tr>
                                 @endforelse
                             </tbody>

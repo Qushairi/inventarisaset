@@ -15,7 +15,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
-#[Fillable(['name', 'email', 'password', 'role', 'profile_photo_path'])]
+#[Fillable(['name', 'email', 'password', 'role', 'profile_photo_path', 'signature_path', 'signature_updated_at'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -32,6 +32,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'signature_updated_at' => 'datetime',
         ];
     }
 
@@ -45,6 +46,16 @@ class User extends Authenticatable
         return $this->hasMany(AssetReturn::class);
     }
 
+    public function approvedBeritaAcaras(): HasMany
+    {
+        return $this->hasMany(BeritaAcara::class, 'first_party_user_id');
+    }
+
+    public function receivedBeritaAcaras(): HasMany
+    {
+        return $this->hasMany(BeritaAcara::class, 'second_party_user_id');
+    }
+
     public function hasProfilePhoto(): bool
     {
         return filled($this->profile_photo_path);
@@ -54,6 +65,18 @@ class User extends Authenticatable
     {
         return $this->hasProfilePhoto()
             ? Storage::disk('public')->url($this->profile_photo_path)
+            : null;
+    }
+
+    public function hasSignature(): bool
+    {
+        return filled($this->signature_path);
+    }
+
+    public function signatureUrl(): ?string
+    {
+        return $this->hasSignature()
+            ? Storage::disk('public')->url($this->signature_path)
             : null;
     }
 

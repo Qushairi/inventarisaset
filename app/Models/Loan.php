@@ -14,10 +14,14 @@ class Loan extends Model
     protected $fillable = [
         'asset_id',
         'user_id',
+        'approved_by_user_id',
         'loan_date',
         'planned_return_date',
         'status',
         'status_note',
+        'loan_letter_number',
+        'loan_letter_svg',
+        'loan_letter_generated_at',
     ];
 
     protected function casts(): array
@@ -25,6 +29,7 @@ class Loan extends Model
         return [
             'loan_date' => 'date',
             'planned_return_date' => 'date',
+            'loan_letter_generated_at' => 'datetime',
         ];
     }
 
@@ -38,8 +43,28 @@ class Loan extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function approvedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approved_by_user_id');
+    }
+
     public function returnRecord(): HasOne
     {
         return $this->hasOne(AssetReturn::class);
+    }
+
+    public function beritaAcara(): HasOne
+    {
+        return $this->hasOne(BeritaAcara::class);
+    }
+
+    public function hasLoanLetter(): bool
+    {
+        if ($this->relationLoaded('beritaAcara') && $this->beritaAcara) {
+            return true;
+        }
+
+        return $this->beritaAcara()->exists()
+            || (filled($this->loan_letter_number) && (filled($this->loan_letter_svg) || filled($this->loan_letter_generated_at)));
     }
 }

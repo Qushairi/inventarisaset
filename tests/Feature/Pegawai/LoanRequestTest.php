@@ -3,10 +3,13 @@
 namespace Tests\Feature\Pegawai;
 
 use App\Models\Asset;
+use App\Models\BeritaAcara;
 use App\Models\Category;
+use App\Models\Loan;
 use App\Models\Location;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class LoanRequestTest extends TestCase
@@ -68,6 +71,102 @@ class LoanRequestTest extends TestCase
             'asset_id' => $asset->id,
             'user_id' => $pegawai->id,
         ]);
+    }
+
+    public function test_pegawai_can_view_approved_loan_letter_from_loan_history(): void
+    {
+        Storage::fake('public');
+
+        $pegawai = User::factory()->create([
+            'role' => 'pegawai',
+        ]);
+
+        $asset = $this->createAsset([
+            'status' => 'Tersedia',
+        ]);
+
+        $loan = Loan::query()->create([
+            'asset_id' => $asset->id,
+            'user_id' => $pegawai->id,
+            'loan_date' => '2026-05-04',
+            'planned_return_date' => '2026-05-06',
+            'status' => 'Disetujui',
+            'status_note' => 'Dipakai untuk kegiatan lapangan.',
+        ]);
+
+        $response = $this->actingAs($pegawai)->get(route('pegawai.loans.letter.show', $loan));
+
+        $response->assertOk();
+        $response->assertSee('SURAT PEMINJAMAN ASET');
+        $response->assertSee('Download PDF');
+
+        $loan->refresh();
+        $beritaAcara = $loan->beritaAcara()->first();
+
+        $this->assertNotNull($loan->loan_letter_number);
+        $this->assertInstanceOf(BeritaAcara::class, $beritaAcara);
+        $this->assertNotNull($beritaAcara->pdf_path);
+        Storage::disk('public')->assertExists($beritaAcara->pdf_path);
+    }
+
+    public function test_pegawai_can_download_approved_loan_letter(): void
+    {
+        Storage::fake('public');
+
+        $pegawai = User::factory()->create([
+            'role' => 'pegawai',
+        ]);
+
+        $asset = $this->createAsset([
+            'status' => 'Tersedia',
+            'code' => 'AST-LTP-003',
+        ]);
+
+        $loan = Loan::query()->create([
+            'asset_id' => $asset->id,
+            'user_id' => $pegawai->id,
+            'loan_date' => '2026-05-11',
+            'planned_return_date' => '2026-05-13',
+            'status' => 'Disetujui',
+            'status_note' => 'Dipakai untuk rapat koordinasi.',
+        ]);
+
+        $response = $this->actingAs($pegawai)->get(route('pegawai.loans.letter.download', $loan));
+
+        $response->assertOk();
+        $response->assertHeader('content-type', 'application/pdf');
+        $this->assertStringContainsString('attachment;', (string) $response->headers->get('content-disposition'));
+        $this->assertStringContainsString('surat-peminjaman-aset', (string) $response->headers->get('content-disposition'));
+        $this->assertStringStartsWith('%PDF', $response->getContent());
+    }
+
+    public function test_pegawai_cannot_view_other_users_loan_letter(): void
+    {
+        $pegawai = User::factory()->create([
+            'role' => 'pegawai',
+        ]);
+
+        $otherPegawai = User::factory()->create([
+            'role' => 'pegawai',
+        ]);
+
+        $asset = $this->createAsset([
+            'status' => 'Tersedia',
+            'code' => 'AST-LTP-002',
+        ]);
+
+        $loan = Loan::query()->create([
+            'asset_id' => $asset->id,
+            'user_id' => $otherPegawai->id,
+            'loan_date' => '2026-05-08',
+            'planned_return_date' => '2026-05-09',
+            'status' => 'Disetujui',
+            'status_note' => 'Peminjaman pegawai lain.',
+        ]);
+
+        $this->actingAs($pegawai)
+            ->get(route('pegawai.loans.letter.show', $loan))
+            ->assertNotFound();
     }
 
     private function createAsset(array $overrides = []): Asset

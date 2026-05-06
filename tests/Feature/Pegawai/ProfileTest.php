@@ -102,4 +102,41 @@ class ProfileTest extends TestCase
 
         $this->assertTrue(Hash::check('PasswordBaru123!', $user->password));
     }
+
+    public function test_pegawai_can_upload_signature_png(): void
+    {
+        Storage::fake('public');
+
+        $user = User::factory()->create([
+            'role' => 'pegawai',
+        ]);
+
+        $response = $this->actingAs($user)->patch(route('pegawai.profile.update'), [
+            'signature_file' => UploadedFile::fake()->image('signature.png'),
+        ]);
+
+        $response->assertRedirect(route('pegawai.profile.index'));
+        $response->assertSessionHas('success', 'Tanda tangan berhasil diperbarui.');
+
+        $user->refresh();
+
+        $this->assertNotNull($user->signature_path);
+        Storage::disk('public')->assertExists($user->signature_path);
+    }
+
+    public function test_pegawai_cannot_upload_non_png_signature(): void
+    {
+        Storage::fake('public');
+
+        $user = User::factory()->create([
+            'role' => 'pegawai',
+        ]);
+
+        $response = $this->actingAs($user)->from(route('pegawai.profile.index'))->patch(route('pegawai.profile.update'), [
+            'signature_file' => UploadedFile::fake()->image('signature.jpg'),
+        ]);
+
+        $response->assertRedirect(route('pegawai.profile.index'));
+        $response->assertSessionHasErrors(['signature_file'], null, 'updateSignature');
+    }
 }
