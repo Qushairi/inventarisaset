@@ -179,7 +179,7 @@
                                         <tr>
                                             <td>
                                                 <div class="d-flex align-items-center">
-                                                    <div class="avatar avatar-lg me-3">
+                                                    <div class="avatar avatar-lg me-3 {{ $asset['avatar_type'] === 'image' ? '' : 'bg-light-primary' }}">
                                                         @if ($asset['avatar_type'] === 'image')
                                                             <img src="{{ asset($asset['avatar_value']) }}" alt="{{ $asset['name'] }}">
                                                         @else

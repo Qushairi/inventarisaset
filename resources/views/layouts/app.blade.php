@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="{{ asset('assets/vendors/perfect-scrollbar/perfect-scrollbar.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/vendors/bootstrap-icons/bootstrap-icons.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/app.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/inventarisaset.css') }}">
     @if ($isPegawaiPage)
         <link rel="stylesheet" href="{{ asset('assets/css/pegawai.css') }}">
     @endif

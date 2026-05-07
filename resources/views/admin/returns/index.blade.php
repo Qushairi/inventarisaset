@@ -79,18 +79,9 @@
                                             <small class="text-muted">{{ $return['report_note'] }}</small>
                                         </td>
                                         <td class="text-end">
-                                            <div class="d-inline-flex flex-nowrap gap-2">
-                                                <a href="{{ route('admin.returns.edit', $return['id']) }}" class="btn btn-sm btn-light-primary icon icon-left">
-                                                    <i class="bi bi-pencil-square"></i><span>Edit</span>
-                                                </a>
-                                                <form action="{{ route('admin.returns.destroy', $return['id']) }}" method="POST" class="d-inline-block">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-light-danger icon icon-left" onclick="return confirm('Hapus data pengembalian ini?')">
-                                                        <i class="bi bi-trash"></i><span>Hapus</span>
-                                                    </button>
-                                                </form>
-                                            </div>
+                                            <a href="{{ route('admin.returns.letter.show', $return['id']) }}" class="btn btn-sm btn-light-primary icon icon-left">
+                                                <i class="bi bi-file-earmark-pdf"></i><span>Lihat Surat</span>
+                                            </a>
                                         </td>
                                     </tr>
                                 @empty

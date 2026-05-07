@@ -1,0 +1,9 @@
+.avatar[class*="bg-light-"] .avatar-content,
+.avatar[class*="bg-light-"] .avatar-content i,
+.avatar[class*="bg-light-"] .avatar-content svg {
+    color: inherit;
+}
+
+.avatar img {
+    object-fit: cover;
+}

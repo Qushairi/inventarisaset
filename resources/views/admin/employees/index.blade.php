@@ -51,7 +51,7 @@
                                     <tr>
                                         <td>
                                             <div class="d-flex align-items-center">
-                                                <div class="avatar avatar-lg me-3">
+                                                <div class="avatar avatar-lg me-3 bg-light-primary">
                                                     <span class="avatar-content">{{ $employee['initials'] }}</span>
                                                 </div>
                                                 <div>

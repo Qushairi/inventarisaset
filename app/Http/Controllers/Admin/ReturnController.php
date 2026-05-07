@@ -7,6 +7,7 @@ use App\Models\Asset;
 use App\Models\AssetReturn;
 use App\Models\Loan;
 use App\Models\User;
+use App\Support\AssetReturnLetterService;
 use App\Support\PegawaiNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -14,6 +15,7 @@ use Illuminate\Validation\Rule;
 class ReturnController extends Controller
 {
     public function __construct(
+        private readonly AssetReturnLetterService $assetReturnLetterService,
         private readonly PegawaiNotificationService $pegawaiNotificationService,
     ) {
     }
@@ -108,6 +110,29 @@ class ReturnController extends Controller
             ->with('success', 'Data pengembalian berhasil dihapus.');
     }
 
+    public function showLetter(AssetReturn $return)
+    {
+        $return->loadMissing(['asset.category', 'user', 'loan.asset.category', 'loan.user', 'loan.approvedBy']);
+
+        return view('admin.returns.letter', array_merge(
+            $this->assetReturnLetterService->previewData($return, $this->currentAdmin()),
+            [
+                'backUrl' => route('admin.returns.index'),
+                'downloadUrl' => route('admin.returns.letter.download', $return),
+                'editUrl' => route('admin.returns.edit', $return),
+            ],
+        ));
+    }
+
+    public function downloadLetter(AssetReturn $return)
+    {
+        $return->loadMissing(['asset.category', 'user', 'loan.asset.category', 'loan.user', 'loan.approvedBy']);
+
+        return response($this->assetReturnLetterService->pdfBinary($return, $this->currentAdmin()))
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'attachment; filename="'.$this->assetReturnLetterService->pdfFilename($return).'"');
+    }
+
     private function conditionVariant(string $condition): string
     {
         return match ($condition) {
@@ -141,5 +166,14 @@ class ReturnController extends Controller
             'report_number' => ['required', 'string', 'max:100', Rule::unique('asset_returns', 'report_number')->ignore($return?->id)],
             'report_note' => ['nullable', 'string', 'max:255'],
         ]);
+    }
+
+    private function currentAdmin(): ?User
+    {
+        $user = auth()->user();
+
+        return $user instanceof User && $user->role === 'admin'
+            ? $user
+            : null;
     }
 }

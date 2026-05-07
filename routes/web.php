@@ -70,6 +70,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/pengembalian/{return}/edit', [ReturnController::class, 'edit'])->name('returns.edit');
     Route::put('/pengembalian/{return}', [ReturnController::class, 'update'])->name('returns.update');
     Route::delete('/pengembalian/{return}', [ReturnController::class, 'destroy'])->name('returns.destroy');
+    Route::get('/pengembalian/{return}/surat', [ReturnController::class, 'showLetter'])->name('returns.letter.show');
+    Route::get('/pengembalian/{return}/surat/download', [ReturnController::class, 'downloadLetter'])->name('returns.letter.download');
 
     Route::get('/laporan', [ReportController::class, 'index'])->name('reports.index');
     Route::get('/profile', [AdminProfileController::class, 'index'])->name('profile.index');
