@@ -3,7 +3,7 @@
 @section('title', 'Surat Peminjaman Aset')
 
 @push('styles')
-    @include('berita-acaras.partials.styles')
+    @include('surat-peminjaman.partials.styles')
 @endpush
 
 @section('content')
@@ -27,7 +27,7 @@
             <div class="card pegawai-panel">
                 <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                     <div>
-                        <h4 class="card-title mb-1">{{ $beritaAcara->number }}</h4>
+                        <h4 class="card-title mb-1">{{ $suratPeminjaman->number }}</h4>
                         <p class="mb-0 text-muted">Dokumen ini tersimpan pada riwayat peminjaman aset Anda.</p>
                     </div>
                     <div class="d-flex flex-wrap gap-2">
@@ -40,9 +40,9 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="berita-acara-preview-shell">
-                        <div class="berita-acara-preview-sheet">
-                            @include('berita-acaras.partials.body', $documentData)
+                    <div class="surat-peminjaman-preview-shell">
+                        <div class="surat-peminjaman-preview-sheet">
+                            @include('surat-peminjaman.partials.body', $documentData)
                         </div>
                     </div>
                 </div>

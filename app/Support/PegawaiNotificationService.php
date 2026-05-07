@@ -13,7 +13,7 @@ class PegawaiNotificationService
 {
     public function sendLoanStatusNotification(Loan $loan): bool
     {
-        $loan->loadMissing(['asset', 'user', 'beritaAcara']);
+        $loan->loadMissing(['asset', 'user', 'suratPeminjaman']);
 
         if (! $loan->user instanceof User || $loan->user->role !== 'pegawai') {
             return false;
@@ -48,7 +48,7 @@ class PegawaiNotificationService
                 'planned_return_date' => optional($loan->planned_return_date)->format('d/m/Y'),
                 'status' => $loan->status,
                 'status_note' => $loan->status_note,
-                'loan_letter_number' => $loan->beritaAcara?->number ?? $loan->loan_letter_number,
+                'loan_letter_number' => $loan->suratPeminjaman?->number ?? $loan->loan_letter_number,
             ],
         ]);
     }

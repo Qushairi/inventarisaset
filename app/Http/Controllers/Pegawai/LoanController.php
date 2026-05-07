@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Pegawai;
 
 use App\Models\Asset;
 use App\Models\Loan;
-use App\Support\BeritaAcaraService;
+use App\Support\SuratPeminjamanService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -13,7 +13,7 @@ use Illuminate\Validation\ValidationException;
 class LoanController extends BasePegawaiController
 {
     public function __construct(
-        private readonly BeritaAcaraService $beritaAcaraService,
+        private readonly SuratPeminjamanService $suratPeminjamanService,
     ) {
     }
 
@@ -27,7 +27,7 @@ class LoanController extends BasePegawaiController
             ->latest('loan_date')
             ->paginate(10)
             ->through(function (Loan $loan) {
-                $beritaAcara = $this->beritaAcaraService->ensureForLoan($loan);
+                $suratPeminjaman = $this->suratPeminjamanService->ensureForLoan($loan);
 
                 return [
                     'id' => $loan->id,
@@ -42,11 +42,11 @@ class LoanController extends BasePegawaiController
                         default => 'success',
                     },
                     'status_note' => $loan->status_note,
-                    'letter_number' => $beritaAcara?->number,
-                    'letter_url' => $beritaAcara
+                    'letter_number' => $suratPeminjaman?->number,
+                    'letter_url' => $suratPeminjaman
                         ? route('pegawai.loans.letter.show', $loan)
                         : null,
-                    'letter_download_url' => $beritaAcara
+                    'letter_download_url' => $suratPeminjaman
                         ? route('pegawai.loans.letter.download', $loan)
                         : null,
                 ];

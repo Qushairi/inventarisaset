@@ -10,7 +10,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
-class BeritaAcaraService
+class SuratPeminjamanService
 {
     public function ensureForLoan(Loan $loan, ?User $approver = null, bool $force = false): ?BeritaAcara
     {
@@ -18,8 +18,8 @@ class BeritaAcaraService
             'asset.category',
             'user',
             'approvedBy',
-            'beritaAcara.firstParty',
-            'beritaAcara.secondParty',
+            'suratPeminjaman.firstParty',
+            'suratPeminjaman.secondParty',
         ]);
 
         if (! in_array($loan->status, ['Disetujui', 'Selesai'], true)) {
@@ -35,27 +35,27 @@ class BeritaAcaraService
         }
 
         $issuedAt = now();
-        $beritaAcara = $loan->beritaAcara ?? new BeritaAcara();
-        $isNewRecord = ! $beritaAcara->exists;
+        $suratPeminjaman = $loan->suratPeminjaman ?? $loan->beritaAcara ?? new BeritaAcara();
+        $isNewRecord = ! $suratPeminjaman->exists;
 
-        $beritaAcara->fill([
+        $suratPeminjaman->fill([
             'asset_id' => $asset->id,
             'first_party_user_id' => $resolvedApprover?->id,
             'second_party_user_id' => $pegawai->id,
-            'location' => $beritaAcara->location ?: 'Bengkalis',
+            'location' => $suratPeminjaman->location ?: 'Bengkalis',
             'asset_condition' => $this->normalizeCondition($asset->condition),
             'handover_statement' => $this->handoverStatement(),
             'closing_statement' => $this->closingStatement(),
-            'issued_at' => $beritaAcara->issued_at ?? $issuedAt,
-            'number' => $this->resolveDocumentNumber($beritaAcara, $issuedAt),
-            'verification_token' => $beritaAcara->verification_token ?: $this->generateVerificationToken(),
+            'issued_at' => $suratPeminjaman->issued_at ?? $issuedAt,
+            'number' => $this->resolveDocumentNumber($suratPeminjaman, $issuedAt),
+            'verification_token' => $suratPeminjaman->verification_token ?: $this->generateVerificationToken(),
         ]);
 
-        $beritaAcara->loan()->associate($loan);
-        $beritaAcara->save();
+        $suratPeminjaman->loan()->associate($loan);
+        $suratPeminjaman->save();
 
-        if ($force || $isNewRecord || $this->needsPdfRegeneration($loan, $resolvedApprover, $beritaAcara)) {
-            $pdfBinary = $this->renderPdfBinary($beritaAcara->fresh([
+        if ($force || $isNewRecord || $this->needsPdfRegeneration($loan, $resolvedApprover, $suratPeminjaman)) {
+            $pdfBinary = $this->renderPdfBinary($suratPeminjaman->fresh([
                 'loan.asset.category',
                 'loan.user',
                 'firstParty',
@@ -63,22 +63,22 @@ class BeritaAcaraService
                 'asset.category',
             ]));
 
-            $pdfPath = $this->pdfStoragePath($beritaAcara->number);
+            $pdfPath = $this->pdfStoragePath($suratPeminjaman->number);
 
             Storage::disk('public')->put($pdfPath, $pdfBinary);
 
-            $beritaAcara->forceFill([
+            $suratPeminjaman->forceFill([
                 'pdf_path' => $pdfPath,
                 'pdf_generated_at' => $issuedAt,
             ])->saveQuietly();
         }
 
         $loan->forceFill([
-            'loan_letter_number' => $beritaAcara->number,
-            'loan_letter_generated_at' => $beritaAcara->pdf_generated_at ?? $issuedAt,
+            'loan_letter_number' => $suratPeminjaman->number,
+            'loan_letter_generated_at' => $suratPeminjaman->pdf_generated_at ?? $issuedAt,
         ])->saveQuietly();
 
-        return $beritaAcara->fresh([
+        return $suratPeminjaman->fresh([
             'loan.asset.category',
             'loan.user',
             'firstParty',
@@ -89,62 +89,63 @@ class BeritaAcaraService
 
     public function previewData(Loan|BeritaAcara $source): array
     {
-        $beritaAcara = $this->resolveBeritaAcara($source);
-        $payload = $this->viewPayload($beritaAcara);
+        $suratPeminjaman = $this->resolveDocumentRecord($source);
+        $payload = $this->viewPayload($suratPeminjaman);
 
         return [
-            'beritaAcara' => $beritaAcara,
-            'loan' => $beritaAcara->loan,
-            'asset' => $beritaAcara->asset,
-            'approver' => $beritaAcara->firstParty,
-            'pegawai' => $beritaAcara->secondParty,
+            'suratPeminjaman' => $suratPeminjaman,
+            'beritaAcara' => $suratPeminjaman,
+            'loan' => $suratPeminjaman->loan,
+            'asset' => $suratPeminjaman->asset,
+            'approver' => $suratPeminjaman->firstParty,
+            'pegawai' => $suratPeminjaman->secondParty,
             'documentData' => $payload,
-            'missingSignatures' => $this->missingSignatureLabels($beritaAcara),
+            'missingSignatures' => $this->missingSignatureLabels($suratPeminjaman),
         ];
     }
 
     public function pdfBinary(Loan|BeritaAcara $source): string
     {
-        $beritaAcara = $this->resolveBeritaAcara($source);
-        $pdfPath = $beritaAcara->pdf_path;
+        $suratPeminjaman = $this->resolveDocumentRecord($source);
+        $pdfPath = $suratPeminjaman->pdf_path;
 
-        if ($pdfPath && Storage::disk('public')->exists($pdfPath) && ! $this->needsPdfRegeneration($beritaAcara->loan, $beritaAcara->firstParty, $beritaAcara)) {
+        if ($pdfPath && Storage::disk('public')->exists($pdfPath) && ! $this->needsPdfRegeneration($suratPeminjaman->loan, $suratPeminjaman->firstParty, $suratPeminjaman)) {
             return Storage::disk('public')->get($pdfPath);
         }
 
-        $beritaAcara = $this->ensureForLoan($beritaAcara->loan, $beritaAcara->firstParty, force: true) ?? $beritaAcara;
+        $suratPeminjaman = $this->ensureForLoan($suratPeminjaman->loan, $suratPeminjaman->firstParty, force: true) ?? $suratPeminjaman;
 
-        return $beritaAcara->pdf_path && Storage::disk('public')->exists($beritaAcara->pdf_path)
-            ? Storage::disk('public')->get($beritaAcara->pdf_path)
-            : $this->renderPdfBinary($beritaAcara);
+        return $suratPeminjaman->pdf_path && Storage::disk('public')->exists($suratPeminjaman->pdf_path)
+            ? Storage::disk('public')->get($suratPeminjaman->pdf_path)
+            : $this->renderPdfBinary($suratPeminjaman);
     }
 
     public function pdfFilename(Loan|BeritaAcara $source): string
     {
-        $beritaAcara = $this->resolveBeritaAcara($source);
-        $baseName = Str::slug('surat-peminjaman-aset-'.$beritaAcara->loan_id);
+        $suratPeminjaman = $this->resolveDocumentRecord($source);
+        $baseName = Str::slug('surat-peminjaman-aset-'.$suratPeminjaman->loan_id);
 
         return ($baseName !== '' ? $baseName : 'surat-peminjaman-aset').'.pdf';
     }
 
     public function missingSignatureLabels(Loan|BeritaAcara $source): array
     {
-        $beritaAcara = $this->resolveBeritaAcara($source);
+        $suratPeminjaman = $this->resolveDocumentRecord($source);
 
         $missing = [];
 
-        if (! $beritaAcara->secondParty?->hasSignature()) {
+        if (! $suratPeminjaman->secondParty?->hasSignature()) {
             $missing[] = 'TTD pegawai belum tersedia';
         }
 
-        if (! $beritaAcara->firstParty?->hasSignature()) {
+        if (! $suratPeminjaman->firstParty?->hasSignature()) {
             $missing[] = 'TTD admin belum tersedia';
         }
 
         return $missing;
     }
 
-    private function resolveBeritaAcara(Loan|BeritaAcara $source): BeritaAcara
+    private function resolveDocumentRecord(Loan|BeritaAcara $source): BeritaAcara
     {
         if ($source instanceof BeritaAcara) {
             return $source->loadMissing([
@@ -156,25 +157,25 @@ class BeritaAcaraService
             ]);
         }
 
-        $beritaAcara = $this->ensureForLoan($source);
+        $suratPeminjaman = $this->ensureForLoan($source);
 
-        if (! $beritaAcara) {
+        if (! $suratPeminjaman) {
             abort(404);
         }
 
-        return $beritaAcara;
+        return $suratPeminjaman;
     }
 
-    private function renderPdfBinary(BeritaAcara $beritaAcara): string
+    private function renderPdfBinary(BeritaAcara $suratPeminjaman): string
     {
-        return Pdf::loadView('berita-acaras.document', $this->viewPayload($beritaAcara))
+        return Pdf::loadView('surat-peminjaman.document', $this->viewPayload($suratPeminjaman))
             ->setPaper('a4')
             ->output();
     }
 
-    private function viewPayload(BeritaAcara $beritaAcara): array
+    private function viewPayload(BeritaAcara $suratPeminjaman): array
     {
-        $beritaAcara->loadMissing([
+        $suratPeminjaman->loadMissing([
             'loan.asset.category',
             'loan.user',
             'firstParty',
@@ -182,13 +183,14 @@ class BeritaAcaraService
             'asset.category',
         ]);
 
-        $asset = $beritaAcara->asset ?? $beritaAcara->loan?->asset;
-        $loan = $beritaAcara->loan;
-        $approver = $beritaAcara->firstParty;
-        $pegawai = $beritaAcara->secondParty;
+        $asset = $suratPeminjaman->asset ?? $suratPeminjaman->loan?->asset;
+        $loan = $suratPeminjaman->loan;
+        $approver = $suratPeminjaman->firstParty;
+        $pegawai = $suratPeminjaman->secondParty;
 
         return [
-            'beritaAcara' => $beritaAcara,
+            'suratPeminjaman' => $suratPeminjaman,
+            'beritaAcara' => $suratPeminjaman,
             'asset' => $asset,
             'loan' => $loan,
             'approver' => $approver,
@@ -198,21 +200,21 @@ class BeritaAcaraService
             'approverSignatureDataUri' => $this->dataUriFromStoragePath($approver?->signature_path),
             'pegawaiSignatureDataUri' => $this->dataUriFromStoragePath($pegawai?->signature_path),
             'asalPengadaan' => $this->originLabel($asset?->acquired_at),
-            'printedAt' => $beritaAcara->issued_at ?? now(),
+            'printedAt' => $suratPeminjaman->issued_at ?? now(),
         ];
     }
 
-    private function needsPdfRegeneration(Loan $loan, ?User $approver, BeritaAcara $beritaAcara): bool
+    private function needsPdfRegeneration(Loan $loan, ?User $approver, BeritaAcara $suratPeminjaman): bool
     {
-        if (! $beritaAcara->pdf_generated_at || blank($beritaAcara->pdf_path)) {
+        if (! $suratPeminjaman->pdf_generated_at || blank($suratPeminjaman->pdf_path)) {
             return true;
         }
 
-        if (! Storage::disk('public')->exists($beritaAcara->pdf_path)) {
+        if (! Storage::disk('public')->exists($suratPeminjaman->pdf_path)) {
             return true;
         }
 
-        $generatedAt = $beritaAcara->pdf_generated_at;
+        $generatedAt = $suratPeminjaman->pdf_generated_at;
         $pegawaiSignatureUpdatedAt = $loan->user?->signature_updated_at;
         $approverSignatureUpdatedAt = $approver?->signature_updated_at;
 
@@ -221,14 +223,14 @@ class BeritaAcaraService
             return true;
         }
 
-        if ($this->usesLegacyBaPrefix($beritaAcara) || $this->usesLegacyStoragePath($beritaAcara)) {
+        if ($this->usesLegacyNumberPrefix($suratPeminjaman) || $this->usesLegacyStoragePath($suratPeminjaman)) {
             return true;
         }
 
-        return (int) $beritaAcara->asset_id !== (int) $loan->asset_id
-            || (int) $beritaAcara->second_party_user_id !== (int) $loan->user_id
-            || (int) $beritaAcara->first_party_user_id !== (int) ($approver?->id ?? 0)
-            || $beritaAcara->asset_condition !== $this->normalizeCondition($loan->asset?->condition);
+        return (int) $suratPeminjaman->asset_id !== (int) $loan->asset_id
+            || (int) $suratPeminjaman->second_party_user_id !== (int) $loan->user_id
+            || (int) $suratPeminjaman->first_party_user_id !== (int) ($approver?->id ?? 0)
+            || $suratPeminjaman->asset_condition !== $this->normalizeCondition($loan->asset?->condition);
     }
 
     private function resolveApprover(Loan $loan, ?User $approver = null): ?User
@@ -294,23 +296,23 @@ class BeritaAcaraService
         return 'surat-peminjaman/'.Str::slug($number).'.pdf';
     }
 
-    private function resolveDocumentNumber(BeritaAcara $beritaAcara, Carbon $issuedAt): string
+    private function resolveDocumentNumber(BeritaAcara $suratPeminjaman, Carbon $issuedAt): string
     {
-        if (filled($beritaAcara->number) && ! $this->usesLegacyBaPrefix($beritaAcara)) {
-            return (string) $beritaAcara->number;
+        if (filled($suratPeminjaman->number) && ! $this->usesLegacyNumberPrefix($suratPeminjaman)) {
+            return (string) $suratPeminjaman->number;
         }
 
         return $this->generateNumber($issuedAt);
     }
 
-    private function usesLegacyBaPrefix(BeritaAcara $beritaAcara): bool
+    private function usesLegacyNumberPrefix(BeritaAcara $suratPeminjaman): bool
     {
-        return filled($beritaAcara->number) && Str::startsWith((string) $beritaAcara->number, 'BA-');
+        return filled($suratPeminjaman->number) && Str::startsWith((string) $suratPeminjaman->number, 'BA-');
     }
 
-    private function usesLegacyStoragePath(BeritaAcara $beritaAcara): bool
+    private function usesLegacyStoragePath(BeritaAcara $suratPeminjaman): bool
     {
-        return filled($beritaAcara->pdf_path) && Str::startsWith((string) $beritaAcara->pdf_path, 'berita-acara/');
+        return filled($suratPeminjaman->pdf_path) && Str::startsWith((string) $suratPeminjaman->pdf_path, 'berita-acara/');
     }
 
     private function dataUriFromPublicPath(string $absolutePath): ?string

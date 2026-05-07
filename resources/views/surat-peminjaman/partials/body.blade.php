@@ -59,7 +59,7 @@
     $printedDate = $printedAt ?? now();
 @endphp
 
-<div class="berita-acara-document">
+<div class="surat-peminjaman-document">
     <table class="header-table header">
         <tr>
             <td style="width: 95px;">
@@ -81,7 +81,7 @@
     </table>
 
     <div class="doc-title">SURAT PEMINJAMAN ASET</div>
-    <div class="doc-no">Nomor : {{ $beritaAcara->number }}</div>
+    <div class="doc-no">Nomor : {{ $suratPeminjaman->number }}</div>
 
     <div class="paragraph">
         Pada hari ini {{ strtolower($formatTanggal($printedDate)) }}, yang bertandatangan di bawah ini menyatakan bahwa peminjaman aset inventaris telah disetujui untuk dipergunakan sesuai kebutuhan kedinasan dengan rincian sebagai berikut:
@@ -127,15 +127,15 @@
     </table>
 
     <div class="paragraph">
-        {{ $beritaAcara->handover_statement }}
+        {{ $suratPeminjaman->handover_statement }}
     </div>
 
     <div class="paragraph">
-        {{ $beritaAcara->closing_statement }}
+        {{ $suratPeminjaman->closing_statement }}
     </div>
 
     <div class="paragraph">
-        {{ $beritaAcara->location }}, {{ $formatTanggalSingkat($printedDate) }}
+        {{ $suratPeminjaman->location }}, {{ $formatTanggalSingkat($printedDate) }}
     </div>
 
     <table class="sign">

@@ -186,7 +186,7 @@ body.pegawai-layout {
     background-color: #fff;
 }
 
-.pegawai-layout .berita-acara-preview-shell {
+.pegawai-layout .surat-peminjaman-preview-shell {
     padding: 1.25rem;
     border-radius: 1rem;
     border: 1px solid #edf2f7;
@@ -194,7 +194,7 @@ body.pegawai-layout {
     overflow-x: auto;
 }
 
-.pegawai-layout .berita-acara-preview-sheet {
+.pegawai-layout .surat-peminjaman-preview-sheet {
     max-width: 900px;
     margin: 0 auto;
     padding: 2rem 2.25rem;
@@ -226,11 +226,11 @@ body.pegawai-layout {
         padding: 0.85rem;
     }
 
-    .pegawai-layout .berita-acara-preview-shell {
+    .pegawai-layout .surat-peminjaman-preview-shell {
         padding: 0.85rem;
     }
 
-    .pegawai-layout .berita-acara-preview-sheet {
+    .pegawai-layout .surat-peminjaman-preview-sheet {
         padding: 1rem;
     }
 }

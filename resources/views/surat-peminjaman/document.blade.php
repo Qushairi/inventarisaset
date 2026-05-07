@@ -2,9 +2,9 @@
 <html lang="id">
 <head>
     <meta charset="utf-8">
-    @include('berita-acaras.partials.styles')
+    @include('surat-peminjaman.partials.styles')
 </head>
 <body>
-    @include('berita-acaras.partials.body')
+    @include('surat-peminjaman.partials.body')
 </body>
 </html>

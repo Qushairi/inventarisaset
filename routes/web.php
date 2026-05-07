@@ -10,12 +10,12 @@ use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\ReturnController;
 use App\Http\Controllers\Pegawai\AssetController as PegawaiAssetController;
-use App\Http\Controllers\Pegawai\BeritaAcaraController as PegawaiBeritaAcaraController;
 use App\Http\Controllers\Pegawai\DashboardController as PegawaiDashboardController;
 use App\Http\Controllers\Pegawai\LoanController as PegawaiLoanController;
 use App\Http\Controllers\Pegawai\NotificationController as PegawaiNotificationController;
 use App\Http\Controllers\Pegawai\ProfileController as PegawaiProfileController;
 use App\Http\Controllers\Pegawai\ReturnController as PegawaiReturnController;
+use App\Http\Controllers\Pegawai\SuratPeminjamanController as PegawaiSuratPeminjamanController;
 use App\Support\DashboardRedirector;
 use Illuminate\Support\Facades\Route;
 
@@ -81,8 +81,8 @@ Route::middleware(['auth', 'role:pegawai'])->prefix('pegawai')->name('pegawai.')
     Route::get('/', [PegawaiDashboardController::class, 'index'])->name('dashboard');
     Route::get('/aset', [PegawaiAssetController::class, 'index'])->name('assets.index');
     Route::get('/peminjaman', [PegawaiLoanController::class, 'index'])->name('loans.index');
-    Route::get('/peminjaman/{loan}/surat', [PegawaiBeritaAcaraController::class, 'show'])->name('loans.letter.show');
-    Route::get('/peminjaman/{loan}/surat/download', [PegawaiBeritaAcaraController::class, 'download'])->name('loans.letter.download');
+    Route::get('/peminjaman/{loan}/surat', [PegawaiSuratPeminjamanController::class, 'show'])->name('loans.letter.show');
+    Route::get('/peminjaman/{loan}/surat/download', [PegawaiSuratPeminjamanController::class, 'download'])->name('loans.letter.download');
     Route::post('/peminjaman', [PegawaiLoanController::class, 'store'])->name('loans.store');
     Route::get('/pengembalian', [PegawaiReturnController::class, 'index'])->name('returns.index');
     Route::post('/pengembalian', [PegawaiReturnController::class, 'store'])->name('returns.store');

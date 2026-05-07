@@ -58,13 +58,19 @@ class Loan extends Model
         return $this->hasOne(BeritaAcara::class);
     }
 
+    public function suratPeminjaman(): HasOne
+    {
+        return $this->hasOne(BeritaAcara::class);
+    }
+
     public function hasLoanLetter(): bool
     {
-        if ($this->relationLoaded('beritaAcara') && $this->beritaAcara) {
+        if (($this->relationLoaded('suratPeminjaman') && $this->suratPeminjaman)
+            || ($this->relationLoaded('beritaAcara') && $this->beritaAcara)) {
             return true;
         }
 
-        return $this->beritaAcara()->exists()
+        return $this->suratPeminjaman()->exists()
             || (filled($this->loan_letter_number) && (filled($this->loan_letter_svg) || filled($this->loan_letter_generated_at)));
     }
 }
