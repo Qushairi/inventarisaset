@@ -8,12 +8,25 @@ use App\Models\Category;
 use App\Models\Loan;
 use App\Models\Location;
 use App\Models\User;
+use DateTimeInterface;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Collection;
 
 class InventorySeeder extends Seeder
 {
     public function run(): void
+    {
+        $this->seedUsers();
+        $categories = $this->seedCategories();
+        $locations = $this->seedLocations();
+        $employees = $this->employeesByEmail();
+        $assets = $this->seedAssets($categories, $locations);
+        $loans = $this->seedLoans($assets, $employees);
+        $this->seedReturns($assets, $employees, $loans);
+    }
+
+    private function seedUsers(): void
     {
         User::query()
             ->whereIn('email', [
@@ -50,7 +63,13 @@ class InventorySeeder extends Seeder
             ['email'],
             ['name', 'password', 'role', 'email_verified_at', 'created_at', 'updated_at'],
         );
+    }
 
+    /**
+     * @return Collection<string, Category>
+     */
+    private function seedCategories(): Collection
+    {
         Category::query()->upsert([
             [
                 'name' => 'Transportasi',
@@ -72,6 +91,14 @@ class InventorySeeder extends Seeder
             ],
         ], ['code'], ['name', 'description', 'note']);
 
+        return Category::query()->get()->keyBy('code');
+    }
+
+    /**
+     * @return Collection<string, Location>
+     */
+    private function seedLocations(): Collection
+    {
         Location::query()->upsert([
             [
                 'name' => 'Ruang Bidang SMP',
@@ -91,10 +118,24 @@ class InventorySeeder extends Seeder
             ],
         ], ['code'], ['name', 'address', 'address_note', 'description', 'note']);
 
-        $categories = Category::query()->get()->keyBy('code');
-        $locations = Location::query()->get()->keyBy('code');
-        $employees = User::query()->where('role', 'pegawai')->get()->keyBy('email');
+        return Location::query()->get()->keyBy('code');
+    }
 
+    /**
+     * @return Collection<string, User>
+     */
+    private function employeesByEmail(): Collection
+    {
+        return User::query()->where('role', 'pegawai')->get()->keyBy('email');
+    }
+
+    /**
+     * @param  Collection<string, Category>  $categories
+     * @param  Collection<string, Location>  $locations
+     * @return Collection<string, Asset>
+     */
+    private function seedAssets(Collection $categories, Collection $locations): Collection
+    {
         Asset::query()->upsert([
             [
                 'name' => 'Mobil',
@@ -146,8 +187,16 @@ class InventorySeeder extends Seeder
             ],
         ], ['code'], ['name', 'note', 'image_path', 'category_id', 'location_id', 'condition', 'status', 'acquisition_price', 'acquired_at']);
 
-        $assets = Asset::query()->get()->keyBy('code');
+        return Asset::query()->get()->keyBy('code');
+    }
 
+    /**
+     * @param  Collection<string, Asset>  $assets
+     * @param  Collection<string, User>  $employees
+     * @return Collection<string, Loan>
+     */
+    private function seedLoans(Collection $assets, Collection $employees): Collection
+    {
         Loan::query()->upsert([
             [
                 'asset_id' => $assets['1234']->id,
@@ -191,8 +240,19 @@ class InventorySeeder extends Seeder
             ],
         ], ['asset_id', 'user_id', 'loan_date'], ['planned_return_date', 'status', 'status_note']);
 
-        $loans = Loan::query()->with(['asset', 'user'])->get()->keyBy(fn (Loan $loan) => $loan->asset->code . '|' . $loan->user->email . '|' . $loan->loan_date->format('Y-m-d'));
+        return Loan::query()
+            ->with(['asset', 'user'])
+            ->get()
+            ->keyBy(fn (Loan $loan) => $this->loanLookupKey($loan));
+    }
 
+    /**
+     * @param  Collection<string, Asset>  $assets
+     * @param  Collection<string, User>  $employees
+     * @param  Collection<string, Loan>  $loans
+     */
+    private function seedReturns(Collection $assets, Collection $employees, Collection $loans): void
+    {
         AssetReturn::query()->upsert([
             [
                 'loan_id' => $loans['1234|amien@bengkalis.go.id|2026-04-22']->id,
@@ -255,5 +315,15 @@ class InventorySeeder extends Seeder
                 'report_note' => 'Berita acara sudah tersedia.',
             ],
         ], ['report_number'], ['loan_id', 'asset_id', 'user_id', 'returned_at', 'verified_note', 'condition', 'status', 'status_note', 'report_note']);
+    }
+
+    private function loanLookupKey(Loan $loan): string
+    {
+        $loanDate = $loan->loan_date;
+        $loanDateKey = $loanDate instanceof DateTimeInterface
+            ? $loanDate->format('Y-m-d')
+            : (string) $loanDate;
+
+        return $loan->asset->code.'|'.$loan->user->email.'|'.$loanDateKey;
     }
 }

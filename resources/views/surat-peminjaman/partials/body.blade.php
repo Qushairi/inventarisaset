@@ -142,7 +142,7 @@
         <tr>
             <td>
                 <div class="bold">PIHAK KEDUA</div>
-                <div>Yang Menerima,</div>
+                <div>,</div>
                 <div class="signature-shell">
                     @if ($pegawaiSignatureDataUri)
                         <img src="{{ $pegawaiSignatureDataUri }}" alt="Tanda tangan {{ $pegawai?->name }}">

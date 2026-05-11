@@ -4,6 +4,7 @@
 
 @push('styles')
     @include('surat-peminjaman.partials.styles')
+    @include('asset-return-letters.partials.styles')
     <style>
         .return-letter-preview-shell {
             overflow-x: auto;
@@ -17,7 +18,7 @@
             min-height: 297mm;
             margin: 0 auto;
             background: #fff;
-            padding: 20mm 16mm;
+            padding: 3cm 2cm 2cm 3cm;
             box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
         }
 
@@ -29,7 +30,7 @@
             .return-letter-preview-sheet {
                 width: 100%;
                 min-height: auto;
-                padding: 14px;
+                padding: 24px 20px 20px 24px;
             }
         }
     </style>

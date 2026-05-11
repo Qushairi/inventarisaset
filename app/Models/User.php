@@ -9,6 +9,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Notifications\Notifiable;
@@ -64,7 +65,7 @@ class User extends Authenticatable
     public function profilePhotoUrl(): ?string
     {
         return $this->hasProfilePhoto()
-            ? Storage::disk('public')->url($this->profile_photo_path)
+            ? $this->publicDisk()->url((string) $this->profile_photo_path)
             : null;
     }
 
@@ -76,7 +77,7 @@ class User extends Authenticatable
     public function signatureUrl(): ?string
     {
         return $this->hasSignature()
-            ? Storage::disk('public')->url($this->signature_path)
+            ? $this->publicDisk()->url((string) $this->signature_path)
             : null;
     }
 
@@ -90,5 +91,13 @@ class User extends Authenticatable
             ->join('');
 
         return Str::upper($initials ?: Str::substr($this->name, 0, 1));
+    }
+
+    private function publicDisk(): FilesystemAdapter
+    {
+        /** @var FilesystemAdapter $disk */
+        $disk = Storage::disk('public');
+
+        return $disk;
     }
 }

@@ -24,7 +24,7 @@
     ];
 
     $formatTanggal = function ($date) use ($hari, $bulan) {
-        if (! $date) {
+        if (!$date) {
             return '-';
         }
 
@@ -38,7 +38,7 @@
     };
 
     $formatTanggalSingkat = function ($date) use ($bulan) {
-        if (! $date) {
+        if (!$date) {
             return '-';
         }
 
@@ -65,7 +65,7 @@
         ->implode(' ');
 @endphp
 
-<div class="surat-peminjaman-document">
+<div class="surat-peminjaman-document asset-return-letter-document">
     <table class="header-table header">
         <tr>
             <td style="width: 95px;">
@@ -90,23 +90,55 @@
     <div class="doc-no">Nomor : {{ $returnRecord->report_number }}</div>
 
     <div class="paragraph">
-        Pada hari ini {{ strtolower($formatTanggal($printedDate)) }}, telah dilaksanakan serah terima pengembalian aset inventaris antara pihak-pihak yang bertandatangan di bawah ini:
+        Pada hari ini {{ strtolower($formatTanggal($printedDate)) }}, telah dilaksanakan serah terima pengembalian aset
+        inventaris antara pihak-pihak yang bertandatangan di bawah ini:
     </div>
 
     <table class="identitas">
-        <tr><td class="id-no">1.</td><td class="id-key">Nama</td><td class="id-sep">:</td><td class="bold">{{ strtoupper($approver?->name ?? 'ADMIN DINAS') }}</td></tr>
-        <tr><td></td><td>Jabatan</td><td>:</td><td>PIHAK PERTAMA / Admin Pengelola Aset</td></tr>
-        <tr><td></td><td>Instansi</td><td>:</td><td>{{ $office['agency_name'] }}, selanjutnya disebut <span class="bold">PIHAK PERTAMA</span></td></tr>
+        <tr>
+            <td class="id-no">1.</td>
+            <td class="id-key">Nama</td>
+            <td class="id-sep">:</td>
+            <td class="bold">{{ strtoupper($approver?->name ?? 'ADMIN DINAS') }}</td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>Jabatan</td>
+            <td>:</td>
+            <td>PIHAK PERTAMA / Admin Pengelola Aset</td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>Instansi</td>
+            <td>:</td>
+            <td>{{ $office['agency_name'] }}, selanjutnya disebut <span class="bold">PIHAK PERTAMA</span></td>
+        </tr>
     </table>
 
     <table class="identitas">
-        <tr><td class="id-no">2.</td><td class="id-key">Nama</td><td class="id-sep">:</td><td class="bold">{{ strtoupper($pegawai?->name ?? 'PEGAWAI') }}</td></tr>
-        <tr><td></td><td>Jabatan</td><td>:</td><td>PIHAK KEDUA / Pegawai Pengguna Aset</td></tr>
-        <tr><td></td><td>Instansi</td><td>:</td><td>{{ $office['agency_name'] }}, selanjutnya disebut <span class="bold">PIHAK KEDUA</span></td></tr>
+        <tr>
+            <td class="id-no">2.</td>
+            <td class="id-key">Nama</td>
+            <td class="id-sep">:</td>
+            <td class="bold">{{ strtoupper($pegawai?->name ?? 'PEGAWAI') }}</td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>Jabatan</td>
+            <td>:</td>
+            <td>PIHAK KEDUA / Pegawai Pengguna Aset</td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>Instansi</td>
+            <td>:</td>
+            <td>{{ $office['agency_name'] }}, selanjutnya disebut <span class="bold">PIHAK KEDUA</span></td>
+        </tr>
     </table>
 
     <div class="paragraph">
-        <span class="bold">PIHAK KEDUA</span> menyerahkan kembali kepada <span class="bold">PIHAK PERTAMA</span> aset inventaris yang sebelumnya dipinjam untuk kebutuhan kedinasan dengan rincian sebagai berikut:
+        <span class="bold">PIHAK KEDUA</span> menyerahkan kembali kepada <span class="bold">PIHAK PERTAMA</span> aset
+        inventaris yang sebelumnya dipinjam untuk kebutuhan kedinasan dengan rincian sebagai berikut:
     </div>
 
     <table class="asset-table">
@@ -135,7 +167,9 @@
     </table>
 
     <div class="paragraph">
-        Aset tersebut tercatat dipinjam pada tanggal <span class="bold">{{ $formatTanggalSingkat($loanDate) }}</span> dan dikembalikan pada tanggal <span class="bold">{{ $formatTanggalSingkat($returnedAt) }}</span> dengan status pengembalian <span class="bold">{{ $statusLabel }}</span>.
+        Aset tersebut tercatat dipinjam pada tanggal <span class="bold">{{ $formatTanggalSingkat($loanDate) }}</span>
+        dan dikembalikan pada tanggal <span class="bold">{{ $formatTanggalSingkat($returnedAt) }}</span> dengan status
+        pengembalian <span class="bold">{{ $statusLabel }}</span>.
     </div>
 
     @if ($combinedNote !== '')
@@ -145,14 +179,16 @@
     @endif
 
     <div class="paragraph">
-        Dengan ditandatanganinya berita acara ini, kedua belah pihak menyatakan bahwa proses serah terima pengembalian aset telah dilakukan sesuai data di atas dan menjadi bagian dari administrasi inventaris pada {{ $office['agency_name'] }}.
+        Dengan ditandatanganinya berita acara ini, kedua belah pihak menyatakan bahwa proses serah terima pengembalian
+        aset telah dilakukan sesuai data di atas dan menjadi bagian dari administrasi inventaris pada
+        {{ $office['agency_name'] }}.
     </div>
 
     <div class="paragraph">
         Demikian berita acara serah terima aset ini dibuat untuk dipergunakan sebagaimana mestinya.
     </div>
 
-    <div class="paragraph">
+    <div class="paragraph signature-date">
         Bengkalis, {{ $formatTanggalSingkat($printedDate) }}
     </div>
 

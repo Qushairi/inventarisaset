@@ -84,7 +84,7 @@ class AssetReturnLetterService
             'approver' => $approver,
             'pegawai' => $pegawai,
             'office' => $this->officeProfile(),
-            'logoDataUri' => $this->dataUriFromPublicPath(public_path('assets/logo/logobengkalis.png')),
+            'logoDataUri' => $this->dataUriFromPublicPath(public_path('assets/images/logo/logobengkalis.png')),
             'approverSignatureDataUri' => $return->status === 'Terverifikasi'
                 ? $this->dataUriFromStoragePath($approver?->signature_path)
                 : null,

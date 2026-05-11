@@ -2,11 +2,11 @@
 
 namespace App\Support;
 
+use Carbon\CarbonInterface;
 use App\Models\BeritaAcara;
 use App\Models\Loan;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -249,7 +249,7 @@ class SuratPeminjamanService
             ->first();
     }
 
-    private function generateNumber(Carbon $issuedAt): string
+    private function generateNumber(CarbonInterface $issuedAt): string
     {
         return 'SPA-'.$issuedAt->format('YmdHis').'-'.str_pad((string) random_int(1, 9999), 4, '0', STR_PAD_LEFT);
     }
@@ -296,7 +296,7 @@ class SuratPeminjamanService
         return 'surat-peminjaman/'.Str::slug($number).'.pdf';
     }
 
-    private function resolveDocumentNumber(BeritaAcara $suratPeminjaman, Carbon $issuedAt): string
+    private function resolveDocumentNumber(BeritaAcara $suratPeminjaman, CarbonInterface $issuedAt): string
     {
         if (filled($suratPeminjaman->number) && ! $this->usesLegacyNumberPrefix($suratPeminjaman)) {
             return (string) $suratPeminjaman->number;
