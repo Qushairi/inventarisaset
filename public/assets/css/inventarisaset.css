@@ -7,3 +7,7 @@
 .avatar img {
     object-fit: cover;
 }
+
+.navbar.navbar-header {
+    background-color: #fff;
+}

@@ -3,14 +3,6 @@
 @section('title', 'Laporan Inventaris Aset')
 
 @section('content')
-    <div class="page-heading">
-        @include('admin.partials.page-header', [
-            'title' => 'Laporan Inventaris Aset',
-            'subtitle' => 'Ringkasan data dan unduh laporan PDF.',
-            'breadcrumb' => 'Laporan',
-        ])
-    </div>
-
     <div class="page-content">
         <section class="section">
             <div class="card">

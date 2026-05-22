@@ -3,14 +3,6 @@
 @section('title', 'Tambah Lokasi')
 
 @section('content')
-    <div class="page-heading">
-        @include('admin.partials.page-header', [
-            'title' => 'Tambah Lokasi',
-            'subtitle' => 'Lengkapi data lokasi penyimpanan aset.',
-            'breadcrumb' => 'Tambah Lokasi',
-        ])
-    </div>
-
     <div class="page-content">
         <section class="section">
             <div class="row match-height">

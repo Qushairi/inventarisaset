@@ -6,19 +6,47 @@ use App\Http\Controllers\Controller;
 use App\Models\Asset;
 use App\Models\Category;
 use App\Models\Location;
+use App\Support\AssetStateService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class AssetController extends Controller
 {
-    public function index()
+    public function __construct(
+        private readonly AssetStateService $assetStateService,
+    ) {
+    }
+
+    public function index(Request $request)
     {
+        $filters = $request->validate([
+            'search' => ['nullable', 'string', 'max:100'],
+            'category_id' => ['nullable', 'exists:categories,id'],
+            'location_id' => ['nullable', 'exists:locations,id'],
+            'condition' => ['nullable', Rule::in($this->conditionOptions())],
+            'status' => ['nullable', Rule::in($this->statusOptions())],
+        ]);
+
         $assets = Asset::query()
             ->with(['category', 'location'])
+            ->when($filters['search'] ?? null, function ($query, string $search) {
+                $query->where(function ($query) use ($search) {
+                    $query->where('name', 'like', '%'.$search.'%')
+                        ->orWhere('code', 'like', '%'.$search.'%')
+                        ->orWhere('note', 'like', '%'.$search.'%');
+                });
+            })
+            ->when($filters['category_id'] ?? null, fn ($query, string $categoryId) => $query->where('category_id', $categoryId))
+            ->when($filters['location_id'] ?? null, fn ($query, string $locationId) => $query->where('location_id', $locationId))
+            ->when($filters['condition'] ?? null, fn ($query, string $condition) => $query->where('condition', $condition))
+            ->when($filters['status'] ?? null, fn ($query, string $status) => $query->where('status', $status))
             ->orderBy('name')
             ->paginate(10)
+            ->withQueryString()
             ->through(function (Asset $asset) {
+                $resolvedState = $this->assetStateService->resolveState($asset);
+
                 return [
                     'name' => $asset->name,
                     'code' => $asset->code,
@@ -29,10 +57,10 @@ class AssetController extends Controller
                     'category_note' => $asset->category?->description ?? 'Kategori aset aktif pada sistem inventaris.',
                     'location' => $asset->location?->name,
                     'location_note' => $asset->location?->address ?? 'Lokasi aset tersimpan pada sistem.',
-                    'condition' => $asset->condition,
-                    'condition_variant' => $this->conditionVariant($asset->condition),
-                    'status' => $asset->status,
-                    'status_variant' => $this->statusVariant($asset->status),
+                    'condition' => $resolvedState['condition'],
+                    'condition_variant' => $this->conditionVariant($resolvedState['condition']),
+                    'status' => $resolvedState['status'],
+                    'status_variant' => $this->statusVariant($resolvedState['status']),
                     'price' => 'Rp ' . number_format((float) $asset->acquisition_price, 0, ',', '.'),
                     'acquired_at' => optional($asset->acquired_at)->format('d/m/Y'),
                 ];
@@ -40,6 +68,12 @@ class AssetController extends Controller
 
         return view('admin.assets.index', [
             'assets' => $assets,
+            'categories' => Category::query()->orderBy('name')->get(),
+            'locations' => Location::query()->orderBy('name')->get(),
+            'conditions' => $this->conditionOptions(),
+            'statuses' => $this->statusOptions(),
+            'filters' => $filters,
+            'hasActiveFilters' => collect($filters)->filter(fn ($value) => filled($value))->isNotEmpty(),
         ]);
     }
 

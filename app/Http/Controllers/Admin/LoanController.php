@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Asset;
 use App\Models\Loan;
 use App\Models\User;
+use App\Support\AssetStateService;
 use App\Support\PegawaiNotificationService;
 use App\Support\SuratPeminjamanService;
 use Illuminate\Http\Request;
@@ -14,6 +15,7 @@ use Illuminate\Validation\Rule;
 class LoanController extends Controller
 {
     public function __construct(
+        private readonly AssetStateService $assetStateService,
         private readonly PegawaiNotificationService $pegawaiNotificationService,
         private readonly SuratPeminjamanService $suratPeminjamanService,
     ) {
@@ -61,6 +63,8 @@ class LoanController extends Controller
 
         $loan = Loan::query()->create($validated);
         $this->syncApprover($loan, $request->user());
+        $this->assetStateService->syncLoanById($loan->id);
+        $loan->refresh();
 
         $this->refreshSuratPeminjamanIfEligible($loan, $request->user());
         $this->pegawaiNotificationService->sendLoanStatusNotification($loan);
@@ -82,11 +86,15 @@ class LoanController extends Controller
 
     public function update(Request $request, Loan $loan)
     {
+        $previousAssetId = $loan->asset_id;
         $validated = $this->validateLoan($request, $loan);
         $previousStatus = $loan->status;
 
         $loan->update($validated);
         $this->syncApprover($loan, $request->user());
+        $this->assetStateService->syncLoanById($loan->id);
+        $this->assetStateService->syncAssetIds([$previousAssetId, $loan->asset_id]);
+        $loan->refresh();
         $this->refreshSuratPeminjamanIfEligible($loan, $request->user());
 
         if ($previousStatus !== $loan->status) {
@@ -115,6 +123,8 @@ class LoanController extends Controller
             'approved_by_user_id' => $validated['status'] === 'Disetujui' ? $request->user()?->id : null,
         ]);
 
+        $this->assetStateService->syncLoanById($loan->id);
+        $loan->refresh();
         $this->refreshSuratPeminjamanIfEligible($loan, $request->user());
         $this->pegawaiNotificationService->sendLoanStatusNotification($loan);
 
@@ -131,7 +141,9 @@ class LoanController extends Controller
                 ->with('error', 'Peminjaman tidak bisa dihapus karena sudah memiliki data pengembalian.');
         }
 
+        $assetId = $loan->asset_id;
         $loan->delete();
+        $this->assetStateService->syncAssetById($assetId);
 
         return redirect()
             ->route('admin.loans.index')

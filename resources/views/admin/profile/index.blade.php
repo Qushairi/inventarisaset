@@ -8,15 +8,6 @@
         $signatureUrl = $adminUser->signatureUrl();
     @endphp
 
-    <div class="page-heading">
-        @include('admin.partials.page-header', [
-            'title' => 'Profil Admin',
-            'subtitle' => 'Kelola akun admin, foto profil, tanda tangan digital, dan keamanan akun.',
-            'breadcrumb' => 'Profil',
-            'homeRoute' => 'admin.dashboard',
-        ])
-    </div>
-
     <div class="page-content">
         <section class="row">
             <div class="col-12">

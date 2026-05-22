@@ -235,7 +235,7 @@
             <div class="col-12 col-xl-8">
                 <div class="card dashboard-panel dashboard-chart-card">
                     <div class="card-header">
-                        <h4>Aktivitas Bulanan</h4>
+                        <h4>Perbandingan Aset dan Peminjaman per Tahun</h4>
                     </div>
                     <div class="card-body">
                         <div id="chart-activity-overview"></div>
@@ -259,21 +259,25 @@
                     <div class="col-12 col-xl-6">
                         <div class="card dashboard-panel">
                             <div class="card-header">
-                                <h4>Tren Cepat</h4>
+                                <h4>Aset Sering Dipinjam</h4>
                             </div>
                             <div class="card-body">
-                                @foreach ($trendCards as $trendCard)
+                                @forelse ($popularAssets as $asset)
                                     <div class="dashboard-trend-item">
                                         <div class="dashboard-trend-head">
                                             <div class="d-flex align-items-center">
-                                                <span class="dashboard-trend-dot" style="background-color: {{ $trendCard['color'] }}"></span>
-                                                <h6 class="mb-0">{{ $trendCard['title'] }}</h6>
+                                                <span class="dashboard-highlight-badge me-3">{{ $asset['rank'] }}</span>
+                                                <div>
+                                                    <h6 class="mb-0">{{ $asset['name'] }}</h6>
+                                                    <small class="text-muted">{{ $asset['code'] }} - {{ $asset['category'] }}</small>
+                                                </div>
                                             </div>
-                                            <h6 class="mb-0">{{ $trendCard['value'] }}</h6>
+                                            <span class="badge bg-light-primary">{{ $asset['loan_count'] }} kali</span>
                                         </div>
-                                        <div id="{{ $trendCard['chart_id'] }}"></div>
                                     </div>
-                                @endforeach
+                                @empty
+                                    <p class="mb-0 text-center text-muted">Belum ada aset yang dipinjam.</p>
+                                @endforelse
                             </div>
                         </div>
                     </div>
@@ -281,22 +285,34 @@
                     <div class="col-12 col-xl-6">
                         <div class="card dashboard-panel">
                             <div class="card-header">
-                                <h4>Highlight Sistem</h4>
+                                <h4>Aset Perlu Dikembalikan</h4>
                             </div>
                             <div class="card-body">
-                                <div class="row g-3">
-                                    @foreach ($highlights as $highlight)
-                                        <div class="col-12">
-                                            <div class="dashboard-highlight-item">
-                                                <div class="dashboard-highlight-badge">{{ $highlight['value'] }}</div>
+                                @forelse ($returnDueLoans as $loan)
+                                    @php
+                                        $returnBadge = match ($loan['status_variant']) {
+                                            'danger' => 'bg-light-danger',
+                                            'warning' => 'bg-light-warning',
+                                            default => 'bg-light-info',
+                                        };
+                                    @endphp
+                                    <div class="dashboard-trend-item">
+                                        <div class="dashboard-trend-head">
+                                            <div>
+                                                <h6 class="mb-0">{{ $loan['asset_name'] }}</h6>
+                                                <small class="text-muted">{{ $loan['asset_code'] }} - {{ $loan['employee_name'] }}</small>
+                                            </div>
+                                            <div class="text-end">
+                                                <span class="badge {{ $returnBadge }}">{{ $loan['status_label'] }}</span>
                                                 <div>
-                                                    <h6 class="mb-1">{{ $highlight['title'] }}</h6>
-                                                    <p class="mb-0 text-sm text-muted">{{ $highlight['note'] }}</p>
+                                                    <small class="text-muted">{{ $loan['planned_return_date'] }}</small>
                                                 </div>
                                             </div>
                                         </div>
-                                    @endforeach
-                                </div>
+                                    </div>
+                                @empty
+                                    <p class="mb-0 text-center text-muted">Tidak ada aset yang perlu dikembalikan.</p>
+                                @endforelse
                             </div>
                         </div>
                     </div>
@@ -306,7 +322,7 @@
             <div class="col-12 col-xl-6">
                 <div class="card dashboard-panel dashboard-table-card">
                     <div class="card-header">
-                        <h4>Aset Terbaru</h4>
+                        <h4>Aset Maintenance</h4>
                     </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">
@@ -314,13 +330,25 @@
                                 <thead>
                                     <tr>
                                         <th>Aset</th>
-                                        <th>Kategori</th>
                                         <th>Lokasi</th>
+                                        <th>Kondisi</th>
                                         <th>Status</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @forelse ($recentAssets as $asset)
+                                    @forelse ($maintenanceAssets as $asset)
+                                        @php
+                                            $conditionBadge = match ($asset['condition_variant']) {
+                                                'danger' => 'bg-light-danger',
+                                                'warning' => 'bg-light-warning',
+                                                default => 'bg-light-success',
+                                            };
+                                            $statusBadge = match ($asset['status_variant']) {
+                                                'danger' => 'bg-light-danger',
+                                                'warning' => 'bg-light-warning',
+                                                default => 'bg-light-info',
+                                            };
+                                        @endphp
                                         <tr>
                                             <td>
                                                 <div class="d-flex align-items-center">
@@ -333,25 +361,24 @@
                                                     </div>
                                                     <div>
                                                         <h6 class="mb-0">{{ $asset['name'] }}</h6>
-                                                        <small class="text-muted">{{ $asset['code'] }}</small>
+                                                        <small class="text-muted">{{ $asset['code'] }} - {{ $asset['category'] }}</small>
                                                     </div>
                                                 </div>
-                                            </td>
-                                            <td>
-                                                <div>{{ $asset['category'] }}</div>
-                                                <small class="text-muted">{{ $asset['category_note'] }}</small>
                                             </td>
                                             <td>
                                                 <div>{{ $asset['location'] }}</div>
                                                 <small class="text-muted">{{ $asset['location_note'] }}</small>
                                             </td>
                                             <td>
-                                                <span class="badge {{ $asset['status_variant'] === 'success' ? 'bg-light-success' : 'bg-light-warning' }}">{{ $asset['status'] }}</span>
+                                                <span class="badge {{ $conditionBadge }}">{{ $asset['condition'] }}</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge {{ $statusBadge }}">{{ $asset['status'] }}</span>
                                             </td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="4" class="text-center text-muted">Belum ada data aset terbaru.</td>
+                                            <td colspan="4" class="text-center text-muted">Tidak ada aset yang perlu maintenance.</td>
                                         </tr>
                                     @endforelse
                                 </tbody>
@@ -435,16 +462,13 @@
             stroke: {
                 show: false
             },
-            colors: ['#435ebe', '#55c6e8', '#00b894'],
+            colors: ['#435ebe', '#55c6e8'],
             series: [{
-                name: 'Aset Masuk',
+                name: 'Total Aset',
                 data: @json($activityChart['asset_series'])
             }, {
                 name: 'Peminjaman',
                 data: @json($activityChart['loan_series'])
-            }, {
-                name: 'Pengembalian',
-                data: @json($activityChart['return_series'])
             }],
             xaxis: {
                 categories: @json($activityChart['labels'])
@@ -478,42 +502,6 @@
                     }
                 }
             }
-        });
-
-        const trendCards = @json($trendCards);
-
-        trendCards.forEach(function (trend) {
-            new ApexCharts(document.querySelector('#' + trend.chart_id), {
-                series: [{
-                    name: trend.title,
-                    data: trend.series
-                }],
-                chart: {
-                    height: 80,
-                    type: 'area',
-                    toolbar: {
-                        show: false
-                    },
-                    sparkline: {
-                        enabled: true
-                    }
-                },
-                colors: [trend.color],
-                stroke: {
-                    width: 2
-                },
-                fill: {
-                    opacity: 0.25
-                },
-                dataLabels: {
-                    enabled: false
-                },
-                tooltip: {
-                    x: {
-                        show: false
-                    }
-                }
-            }).render();
         });
 
         activityChart.render();

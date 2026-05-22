@@ -3,14 +3,6 @@
 @section('title', 'Data Aset')
 
 @section('content')
-    <div class="page-heading">
-        @include('admin.partials.page-header', [
-            'title' => 'Data Aset',
-            'subtitle' => 'Kelola data inventaris aset.',
-            'breadcrumb' => 'Aset',
-        ])
-    </div>
-
     <div class="page-content">
         <section class="section">
             @if (session('success'))
@@ -36,6 +28,60 @@
                     </a>
                 </div>
                 <div class="card-body">
+                    <form action="{{ route('admin.assets.index') }}" method="GET" class="mb-4">
+                        <div class="row g-3 align-items-end">
+                            <div class="col-lg-3 col-md-6 col-12">
+                                <label for="search" class="form-label">Cari Aset</label>
+                                <input type="search" id="search" name="search" class="form-control" placeholder="Nama, kode, atau catatan" value="{{ $filters['search'] ?? '' }}">
+                            </div>
+                            <div class="col-lg-2 col-md-6 col-12">
+                                <label for="category_id" class="form-label">Kategori</label>
+                                <select id="category_id" name="category_id" class="form-select">
+                                    <option value="">Semua kategori</option>
+                                    @foreach ($categories as $category)
+                                        <option value="{{ $category->id }}" @selected(($filters['category_id'] ?? '') == $category->id)>{{ $category->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-lg-2 col-md-6 col-12">
+                                <label for="location_id" class="form-label">Lokasi</label>
+                                <select id="location_id" name="location_id" class="form-select">
+                                    <option value="">Semua lokasi</option>
+                                    @foreach ($locations as $location)
+                                        <option value="{{ $location->id }}" @selected(($filters['location_id'] ?? '') == $location->id)>{{ $location->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-lg-2 col-md-6 col-12">
+                                <label for="condition" class="form-label">Kondisi</label>
+                                <select id="condition" name="condition" class="form-select">
+                                    <option value="">Semua kondisi</option>
+                                    @foreach ($conditions as $condition)
+                                        <option value="{{ $condition }}" @selected(($filters['condition'] ?? '') === $condition)>{{ $condition }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-lg-2 col-md-6 col-12">
+                                <label for="status" class="form-label">Status</label>
+                                <select id="status" name="status" class="form-select">
+                                    <option value="">Semua status</option>
+                                    @foreach ($statuses as $status)
+                                        <option value="{{ $status }}" @selected(($filters['status'] ?? '') === $status)>{{ $status }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-lg-1 col-md-6 col-12 d-flex gap-2">
+                                <button type="submit" class="btn btn-primary icon">
+                                    <i class="bi bi-funnel"></i>
+                                </button>
+                                @if ($hasActiveFilters)
+                                    <a href="{{ route('admin.assets.index') }}" class="btn btn-light-secondary icon">
+                                        <i class="bi bi-arrow-counterclockwise"></i>
+                                    </a>
+                                @endif
+                            </div>
+                        </div>
+                    </form>
                     <div class="table-responsive">
                         <table class="table table-hover table-lg">
                             <thead>

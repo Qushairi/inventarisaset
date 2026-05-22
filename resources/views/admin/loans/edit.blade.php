@@ -3,14 +3,6 @@
 @section('title', 'Edit Peminjaman')
 
 @section('content')
-    <div class="page-heading">
-        @include('admin.partials.page-header', [
-            'title' => 'Edit Peminjaman',
-            'subtitle' => 'Perbarui data transaksi peminjaman aset.',
-            'breadcrumb' => 'Edit Peminjaman',
-        ])
-    </div>
-
     <div class="page-content">
         <section class="section">
             <div class="row match-height">

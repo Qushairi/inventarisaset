@@ -37,15 +37,6 @@
 @endpush
 
 @section('content')
-    <div class="page-heading">
-        @include('admin.partials.page-header', [
-            'title' => 'Surat Serah Terima Aset',
-            'subtitle' => 'Preview berita acara pengembalian aset yang dapat diunduh dalam format PDF.',
-            'breadcrumb' => 'Surat Pengembalian',
-            'homeRoute' => 'admin.returns.index',
-        ])
-    </div>
-
     <div class="page-content">
         <section class="section">
             @if ($returnRecord->status !== 'Terverifikasi')

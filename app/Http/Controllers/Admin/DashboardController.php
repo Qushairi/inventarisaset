@@ -17,28 +17,68 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $assetTotal = Asset::query()->count();
-        $categoryTotal = Category::query()->count();
-        $loanTotal = Loan::query()->count();
-        $returnTotal = AssetReturn::query()->count();
-        $availableAssetTotal = Asset::query()->where('status', 'Tersedia')->count();
-        $attentionAssetTotal = Asset::query()->whereIn('condition', ['Rusak Ringan', 'Rusak Berat'])->count();
-        $locationTotal = Location::query()->count();
-        $employeeTotal = User::query()->where('role', 'pegawai')->count();
-        $pendingLoanTotal = Loan::query()->where('status', 'Menunggu')->count();
+        return view('admin.dashboard', [
+            'statCards' => $this->statCards(),
+            'activityChart' => $this->activityChart(),
+            'assetConditionChart' => $this->assetConditionChart(),
+            'popularAssets' => $this->popularAssets(),
+            'returnDueLoans' => $this->returnDueLoans(),
+            'maintenanceAssets' => $this->maintenanceAssets(),
+            'recentLoans' => $this->recentLoans(),
+        ]);
+    }
 
-        $months = collect(range(5, 0))
-            ->map(fn (int $offset) => now()->subMonths($offset)->startOfMonth());
+    private function statCards(): array
+    {
+        return [
+            [
+                'label' => 'Total Aset',
+                'value' => Asset::query()->count(),
+                'helper' => 'Aset aktif yang tercatat saat ini.',
+                'icon' => 'box-seam',
+                'variant' => 'primary',
+            ],
+            [
+                'label' => 'Kategori',
+                'value' => Category::query()->count(),
+                'helper' => 'Kelompok aset yang tersedia.',
+                'icon' => 'tags',
+                'variant' => 'success',
+            ],
+            [
+                'label' => 'Peminjaman',
+                'value' => Loan::query()->count(),
+                'helper' => 'Riwayat pengajuan peminjaman aset.',
+                'icon' => 'clipboard-check',
+                'variant' => 'warning',
+            ],
+            [
+                'label' => 'Pengembalian',
+                'value' => AssetReturn::query()->count(),
+                'helper' => 'Data pengembalian yang sudah diverifikasi.',
+                'icon' => 'arrow-counterclockwise',
+                'variant' => 'info',
+            ],
+        ];
+    }
 
-        $chartLabels = $months
-            ->map(fn (Carbon $month) => $month->translatedFormat('M'))
-            ->all();
+    private function activityChart(): array
+    {
+        $years = collect(range(4, 0))
+            ->map(fn(int $offset) => now()->subYears($offset)->startOfYear());
 
-        $assetTrend = $this->buildMonthlySeries(Asset::class, 'created_at', $months);
-        $loanTrend = $this->buildMonthlySeries(Loan::class, 'loan_date', $months);
-        $returnTrend = $this->buildMonthlySeries(AssetReturn::class, 'returned_at', $months);
+        return [
+            'labels' => $years
+                ->map(fn(Carbon $year) => $year->format('Y'))
+                ->all(),
+            'asset_series' => $this->buildYearlySeries(Asset::class, 'created_at', $years),
+            'loan_series' => $this->buildYearlySeries(Loan::class, 'loan_date', $years),
+        ];
+    }
 
-        $assetConditionChart = [
+    private function assetConditionChart(): array
+    {
+        return [
             'labels' => ['Baik', 'Rusak Ringan', 'Rusak Berat'],
             'series' => [
                 Asset::query()->where('condition', 'Baik')->count(),
@@ -46,11 +86,19 @@ class DashboardController extends Controller
                 Asset::query()->where('condition', 'Rusak Berat')->count(),
             ],
         ];
+    }
 
-        $recentAssets = Asset::query()
+    private function maintenanceAssets(): Collection
+    {
+        return Asset::query()
             ->with(['category', 'location'])
-            ->latest()
-            ->take(3)
+            ->where(function ($query) {
+                $query->whereIn('condition', ['Rusak Ringan', 'Rusak Berat'])
+                    ->orWhere('status', 'Perbaikan');
+            })
+            ->orderByRaw("case when `condition` = ? then 0 when `condition` = ? then 1 else 2 end", ['Rusak Berat', 'Rusak Ringan'])
+            ->orderBy('name')
+            ->take(5)
             ->get()
             ->map(function (Asset $asset) {
                 return [
@@ -62,12 +110,25 @@ class DashboardController extends Controller
                     'category_note' => $asset->category?->description ?? 'Kategori aset aktif pada sistem inventaris.',
                     'location' => $asset->location?->name,
                     'location_note' => $asset->location?->address ?? 'Lokasi aset tersimpan pada sistem.',
+                    'condition' => $asset->condition,
+                    'condition_variant' => match ($asset->condition) {
+                        'Rusak Ringan' => 'warning',
+                        'Rusak Berat' => 'danger',
+                        default => 'success',
+                    },
                     'status' => $asset->status,
-                    'status_variant' => $asset->status === 'Tersedia' ? 'success' : 'warning',
+                    'status_variant' => match ($asset->status) {
+                        'Perbaikan' => 'danger',
+                        'Dipinjam' => 'warning',
+                        default => 'info',
+                    },
                 ];
             });
+    }
 
-        $recentLoans = Loan::query()
+    private function recentLoans(): Collection
+    {
+        return Loan::query()
             ->with(['asset', 'user'])
             ->latest('loan_date')
             ->take(4)
@@ -88,103 +149,72 @@ class DashboardController extends Controller
                     },
                 ];
             });
-
-        return view('admin.dashboard', [
-            'statCards' => [
-                [
-                    'label' => 'Total Aset',
-                    'value' => $assetTotal,
-                    'helper' => 'Aset aktif yang tercatat saat ini.',
-                    'icon' => 'box-seam',
-                    'variant' => 'primary',
-                ],
-                [
-                    'label' => 'Kategori',
-                    'value' => $categoryTotal,
-                    'helper' => 'Kelompok aset yang tersedia.',
-                    'icon' => 'tags',
-                    'variant' => 'success',
-                ],
-                [
-                    'label' => 'Peminjaman',
-                    'value' => $loanTotal,
-                    'helper' => 'Riwayat pengajuan peminjaman aset.',
-                    'icon' => 'clipboard-check',
-                    'variant' => 'warning',
-                ],
-                [
-                    'label' => 'Pengembalian',
-                    'value' => $returnTotal,
-                    'helper' => 'Data pengembalian yang sudah diverifikasi.',
-                    'icon' => 'arrow-counterclockwise',
-                    'variant' => 'info',
-                ],
-            ],
-            'highlights' => [
-                [
-                    'title' => 'Aset tersedia',
-                    'value' => $availableAssetTotal,
-                    'note' => 'Siap digunakan atau dipinjam saat ini.',
-                ],
-                [
-                    'title' => 'Butuh perhatian',
-                    'value' => $attentionAssetTotal,
-                    'note' => 'Perlu pengecekan kondisi fisik.',
-                ],
-                [
-                    'title' => 'Peminjaman menunggu',
-                    'value' => $pendingLoanTotal,
-                    'note' => 'Masih menunggu tindak lanjut admin.',
-                ],
-                [
-                    'title' => 'Akun pegawai',
-                    'value' => $employeeTotal,
-                    'note' => 'Sudah dapat mengakses sistem.',
-                ],
-            ],
-            'activityChart' => [
-                'labels' => $chartLabels,
-                'asset_series' => $assetTrend,
-                'loan_series' => $loanTrend,
-                'return_series' => $returnTrend,
-            ],
-            'assetConditionChart' => $assetConditionChart,
-            'trendCards' => [
-                [
-                    'title' => 'Aset Masuk',
-                    'value' => array_sum($assetTrend),
-                    'color' => '#435ebe',
-                    'chart_id' => 'chart-assets-trend',
-                    'series' => $assetTrend,
-                ],
-                [
-                    'title' => 'Peminjaman',
-                    'value' => array_sum($loanTrend),
-                    'color' => '#55c6e8',
-                    'chart_id' => 'chart-loans-trend',
-                    'series' => $loanTrend,
-                ],
-                [
-                    'title' => 'Pengembalian',
-                    'value' => array_sum($returnTrend),
-                    'color' => '#00b894',
-                    'chart_id' => 'chart-returns-trend',
-                    'series' => $returnTrend,
-                ],
-            ],
-            'recentAssets' => $recentAssets,
-            'recentLoans' => $recentLoans,
-        ]);
     }
 
-    private function buildMonthlySeries(string $modelClass, string $column, Collection $months): array
+    private function popularAssets(): Collection
     {
-        return $months
-            ->map(function (Carbon $month) use ($modelClass, $column) {
+        return Asset::query()
+            ->with(['category'])
+            ->withCount([
+                'loans as loan_count' => fn($query) => $query->whereIn('status', ['Disetujui', 'Selesai']),
+            ])
+            ->having('loan_count', '>', 0)
+            ->orderByDesc('loan_count')
+            ->orderBy('name')
+            ->take(5)
+            ->get()
+            ->values()
+            ->map(function (Asset $asset, int $index) {
+                return [
+                    'rank' => $index + 1,
+                    'name' => $asset->name,
+                    'code' => $asset->code,
+                    'category' => $asset->category?->name ?? 'Tanpa kategori',
+                    'loan_count' => $asset->loan_count,
+                ];
+            });
+    }
+
+    private function returnDueLoans(): Collection
+    {
+        $today = now()->startOfDay();
+
+        return Loan::query()
+            ->with(['asset', 'user'])
+            ->where('status', 'Disetujui')
+            ->whereNotNull('planned_return_date')
+            ->whereDoesntHave('returnRecord', function ($query) {
+                $query->where('status', 'Terverifikasi');
+            })
+            ->orderBy('planned_return_date')
+            ->take(5)
+            ->get()
+            ->map(function (Loan $loan) use ($today) {
+                $plannedReturnDate = $loan->planned_return_date
+                    ? Carbon::parse($loan->planned_return_date)->startOfDay()
+                    : null;
+                $isOverdue = $plannedReturnDate?->lt($today) ?? false;
+                $isDueToday = $plannedReturnDate?->isSameDay($today) ?? false;
+
+                return [
+                    'asset_name' => $loan->asset?->name,
+                    'asset_code' => $loan->asset?->code,
+                    'employee_name' => $loan->user?->name,
+                    'planned_return_date' => optional($loan->planned_return_date)->format('d/m/Y'),
+                    'status_label' => $isOverdue ? 'Terlambat' : ($isDueToday ? 'Hari ini' : 'Akan kembali'),
+                    'status_variant' => $isOverdue ? 'danger' : ($isDueToday ? 'warning' : 'info'),
+                ];
+            });
+    }
+
+    private function buildYearlySeries(string $modelClass, string $column, Collection $years): array
+    {
+        return $years
+            ->map(function (Carbon $year) use ($modelClass, $column) {
                 return $modelClass::query()
                     ->whereBetween($column, [
-                        $month->copy()->startOfMonth(),
-                        $month->copy()->endOfMonth(),
+                        $year->copy()->startOfYear(),
+                        $year->copy()->endOfYear(),
                     ])
                     ->count();
             })

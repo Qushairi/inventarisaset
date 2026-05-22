@@ -51,6 +51,10 @@ class LoanApprovalTest extends TestCase
             'status' => 'Disetujui',
             'status_note' => 'Butuh laptop untuk presentasi.',
         ]);
+        $this->assertDatabaseHas('assets', [
+            'id' => $asset->id,
+            'status' => 'Dipinjam',
+        ]);
 
         $loan->refresh();
         $beritaAcara = $loan->beritaAcara()->first();

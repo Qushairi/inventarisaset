@@ -3,14 +3,6 @@
 @section('title', 'Peminjaman Aset')
 
 @section('content')
-    <div class="page-heading">
-        @include('admin.partials.page-header', [
-            'title' => 'Peminjaman Aset',
-            'subtitle' => 'Kelola pengajuan dan persetujuan peminjaman.',
-            'breadcrumb' => 'Peminjaman',
-        ])
-    </div>
-
     <div class="page-content">
         <section class="section">
             @if (session('success'))

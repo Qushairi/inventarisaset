@@ -3,14 +3,6 @@
 @section('title', 'Edit Aset')
 
 @section('content')
-    <div class="page-heading">
-        @include('admin.partials.page-header', [
-            'title' => 'Edit Aset',
-            'subtitle' => 'Perbarui data inventaris aset.',
-            'breadcrumb' => 'Edit Aset',
-        ])
-    </div>
-
     <div class="page-content">
         <section class="section">
             <div class="row match-height">

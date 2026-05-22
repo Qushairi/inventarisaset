@@ -7,6 +7,7 @@ use App\Models\Asset;
 use App\Models\AssetReturn;
 use App\Models\Loan;
 use App\Models\User;
+use App\Support\AssetStateService;
 use App\Support\AssetReturnLetterService;
 use App\Support\PegawaiNotificationService;
 use Illuminate\Http\Request;
@@ -15,6 +16,7 @@ use Illuminate\Validation\Rule;
 class ReturnController extends Controller
 {
     public function __construct(
+        private readonly AssetStateService $assetStateService,
         private readonly AssetReturnLetterService $assetReturnLetterService,
         private readonly PegawaiNotificationService $pegawaiNotificationService,
     ) {
@@ -56,7 +58,6 @@ class ReturnController extends Controller
             'employees' => User::query()->where('role', 'pegawai')->orderBy('name')->get(),
             'loans' => Loan::query()->with(['asset', 'user'])->latest('loan_date')->get(),
             'conditions' => $this->conditionOptions(),
-            'statuses' => $this->statusOptions(),
         ]);
     }
 
@@ -65,6 +66,8 @@ class ReturnController extends Controller
         $validated = $this->validateReturn($request);
 
         $returnRecord = AssetReturn::query()->create($validated);
+        $this->assetStateService->syncLoanById($returnRecord->loan_id);
+        $this->assetStateService->syncAssetIds([$returnRecord->asset_id]);
 
         $this->pegawaiNotificationService->sendReturnVerifiedNotification($returnRecord);
 
@@ -81,16 +84,20 @@ class ReturnController extends Controller
             'employees' => User::query()->where('role', 'pegawai')->orderBy('name')->get(),
             'loans' => Loan::query()->with(['asset', 'user'])->latest('loan_date')->get(),
             'conditions' => $this->conditionOptions(),
-            'statuses' => $this->statusOptions(),
         ]);
     }
 
     public function update(Request $request, AssetReturn $return)
     {
+        $previousAssetId = $return->asset_id;
+        $previousLoanId = $return->loan_id;
         $validated = $this->validateReturn($request, $return);
         $previousStatus = $return->status;
 
         $return->update($validated);
+        $this->assetStateService->syncLoanById($previousLoanId);
+        $this->assetStateService->syncLoanById($return->loan_id);
+        $this->assetStateService->syncAssetIds([$previousAssetId, $return->asset_id]);
 
         if ($previousStatus !== $return->status || $return->status === 'Terverifikasi') {
             $this->pegawaiNotificationService->sendReturnVerifiedNotification($return);
@@ -103,7 +110,11 @@ class ReturnController extends Controller
 
     public function destroy(AssetReturn $return)
     {
+        $assetId = $return->asset_id;
+        $loanId = $return->loan_id;
         $return->delete();
+        $this->assetStateService->syncLoanById($loanId);
+        $this->assetStateService->syncAssetById($assetId);
 
         return redirect()
             ->route('admin.returns.index')
@@ -147,25 +158,23 @@ class ReturnController extends Controller
         return ['Baik', 'Rusak Ringan', 'Rusak Berat'];
     }
 
-    private function statusOptions(): array
-    {
-        return ['Terverifikasi', 'Menunggu Verifikasi'];
-    }
-
     private function validateReturn(Request $request, ?AssetReturn $return = null): array
     {
-        return $request->validate([
+        $validated = $request->validate([
             'loan_id' => ['nullable', 'exists:loans,id'],
             'asset_id' => ['required', 'exists:assets,id'],
             'user_id' => ['required', 'exists:users,id'],
             'returned_at' => ['required', 'date'],
             'verified_note' => ['nullable', 'string', 'max:255'],
             'condition' => ['required', Rule::in($this->conditionOptions())],
-            'status' => ['required', Rule::in($this->statusOptions())],
             'status_note' => ['nullable', 'string', 'max:255'],
             'report_number' => ['required', 'string', 'max:100', Rule::unique('asset_returns', 'report_number')->ignore($return?->id)],
             'report_note' => ['nullable', 'string', 'max:255'],
         ]);
+
+        $validated['status'] = 'Terverifikasi';
+
+        return $validated;
     }
 
     private function currentAdmin(): ?User

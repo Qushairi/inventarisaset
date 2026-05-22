@@ -3,14 +3,6 @@
 @section('title', 'Data Pegawai')
 
 @section('content')
-    <div class="page-heading">
-        @include('admin.partials.page-header', [
-            'title' => 'Data Pegawai',
-            'subtitle' => 'Kelola akun pegawai (dibuat oleh admin).',
-            'breadcrumb' => 'Pegawai',
-        ])
-    </div>
-
     <div class="page-content">
         <section class="section">
             @if (session('success'))

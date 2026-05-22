@@ -3,14 +3,6 @@
 @section('title', 'Edit Kategori')
 
 @section('content')
-    <div class="page-heading">
-        @include('admin.partials.page-header', [
-            'title' => 'Edit Kategori',
-            'subtitle' => 'Perbarui data kategori aset yang sudah tersedia.',
-            'breadcrumb' => 'Edit Kategori',
-        ])
-    </div>
-
     <div class="page-content">
         <section class="section">
             <div class="row match-height">

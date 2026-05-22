@@ -3,14 +3,6 @@
 @section('title', 'Data Lokasi Aset')
 
 @section('content')
-    <div class="page-heading">
-        @include('admin.partials.page-header', [
-            'title' => 'Data Lokasi Aset',
-            'subtitle' => 'Kelola penempatan lokasi inventaris.',
-            'breadcrumb' => 'Lokasi',
-        ])
-    </div>
-
     <div class="page-content">
         <section class="section">
             @if (session('success'))
