@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers\Pegawai;
 
-use App\Models\AssetReturn;
-use App\Models\Loan;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -14,52 +12,7 @@ class ProfileController extends BasePegawaiController
 {
     public function index()
     {
-        $pegawai = $this->currentPegawai();
-
-        $recentLoans = Loan::query()
-            ->with('asset')
-            ->where('user_id', $pegawai->id)
-            ->latest('loan_date')
-            ->take(4)
-            ->get();
-
-        $recentReturns = AssetReturn::query()
-            ->with('asset')
-            ->where('user_id', $pegawai->id)
-            ->latest('returned_at')
-            ->take(4)
-            ->get();
-
-        return view('pegawai.profile.index', $this->layoutData([
-            'profileStats' => [
-                [
-                    'label' => 'Total Peminjaman',
-                    'value' => Loan::query()->where('user_id', $pegawai->id)->count(),
-                    'icon' => 'journal-check',
-                    'variant' => 'warning',
-                ],
-                [
-                    'label' => 'Menunggu Persetujuan',
-                    'value' => Loan::query()->where('user_id', $pegawai->id)->where('status', 'Menunggu')->count(),
-                    'icon' => 'hourglass-split',
-                    'variant' => 'primary',
-                ],
-                [
-                    'label' => 'Total Pengembalian',
-                    'value' => AssetReturn::query()->where('user_id', $pegawai->id)->count(),
-                    'icon' => 'arrow-counterclockwise',
-                    'variant' => 'info',
-                ],
-                [
-                    'label' => 'Pengembalian Terverifikasi',
-                    'value' => AssetReturn::query()->where('user_id', $pegawai->id)->where('status', 'Terverifikasi')->count(),
-                    'icon' => 'check-circle',
-                    'variant' => 'success',
-                ],
-            ],
-            'recentLoans' => $recentLoans,
-            'recentReturns' => $recentReturns,
-        ]));
+        return view('pegawai.profile.index', $this->layoutData());
     }
 
     public function update(Request $request): RedirectResponse
@@ -148,7 +101,17 @@ class ProfileController extends BasePegawaiController
     private function deleteStoredFile(?string $path): void
     {
         if (filled($path)) {
-            Storage::disk('public')->delete($path);
+            $disk = Storage::disk('public');
+
+            if ($disk->delete($path)) {
+                return;
+            }
+
+            $absolutePath = $disk->path($path);
+
+            if (is_file($absolutePath)) {
+                @unlink($absolutePath);
+            }
         }
     }
 }

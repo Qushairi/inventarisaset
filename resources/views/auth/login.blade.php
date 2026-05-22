@@ -1,166 +1,278 @@
 <x-guest-layout title="Login">
-    <x-slot:visual>
-        <div class="auth-hero">
-            <span class="auth-hero-kicker">Portal Inventaris Aset</span>
-            <h2 class="auth-hero-title">Akses inventaris dinas dalam satu ruang kerja yang lebih rapi.</h2>
-            <p class="auth-hero-text">
-                Pantau peminjaman, pengembalian, dan status aset dengan akses yang dikendalikan langsung oleh admin.
-            </p>
+    @push('styles')
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+        <style>
+            body,
+            #auth {
+                font-family: 'Plus Jakarta Sans', sans-serif;
+                background: #f3f4f6;
+            }
 
-            <div class="auth-hero-grid">
-                <div class="auth-hero-card">
-                    <div class="auth-hero-icon">
-                        <i class="bi bi-shield-check"></i>
-                    </div>
-                    <div>
-                        <h6>Login sederhana</h6>
-                        <p>Masuk cukup dengan email dan password yang sudah didaftarkan.</p>
-                    </div>
-                </div>
-                <div class="auth-hero-card">
-                    <div class="auth-hero-icon">
-                        <i class="bi bi-people"></i>
-                    </div>
-                    <div>
-                        <h6>Akun terkontrol</h6>
-                        <p>Penambahan akun pegawai dilakukan dari panel admin, bukan registrasi publik.</p>
-                    </div>
-                </div>
-                <div class="auth-hero-card">
-                    <div class="auth-hero-icon">
-                        <i class="bi bi-key"></i>
-                    </div>
-                    <div>
-                        <h6>Password mandiri</h6>
-                        <p>Setelah masuk, setiap akun bisa mengganti password dari halaman profil masing-masing.</p>
-                    </div>
-                </div>
-            </div>
+            #auth > .row {
+                justify-content: center;
+            }
 
-            <div class="auth-hero-note">
-                <i class="bi bi-info-circle"></i>
+            #auth > .row > .col-lg-7 {
+                display: none !important;
+            }
+
+            #auth .auth-column {
+                justify-content: center;
+            }
+
+            #auth #auth-left {
+                max-width: 34rem;
+                padding: 2.5rem 1.5rem;
+            }
+
+            .login-card {
+                border: 0;
+                border-radius: 1.35rem;
+                box-shadow: 0 20px 50px rgba(31, 41, 55, 0.08);
+                overflow: hidden;
+            }
+
+            .login-card .card-body {
+                padding: 2.25rem;
+            }
+
+            .login-brand {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 1rem;
+                text-align: left;
+            }
+
+            .login-brand img {
+                width: 52px;
+                height: 52px;
+                object-fit: contain;
+                flex-shrink: 0;
+            }
+
+            .login-brand-primary {
+                margin-bottom: 0.1rem;
+                font-size: 13px;
+                font-weight: 600;
+                color: var(--bs-primary);
+            }
+
+            .login-brand-secondary {
+                font-size: 11px;
+                color: #6c757d;
+            }
+
+            .login-divider {
+                margin: 1.5rem 0;
+                border-top: 1px solid var(--bs-border-color, #dee2e6);
+            }
+
+            .login-title {
+                margin-bottom: 0.35rem;
+                font-size: 2rem;
+                font-weight: 700;
+                color: var(--bs-heading-color, #25396f);
+            }
+
+            .login-subtitle {
+                margin-bottom: 0;
+                color: #6c757d;
+            }
+
+            .login-input-wrap {
+                position: relative;
+            }
+
+            .login-input-wrap .form-control.form-control-xl {
+                padding-left: 3rem;
+                padding-right: 3rem;
+                border-radius: 0.9rem;
+            }
+
+            .login-input-icon {
+                position: absolute;
+                top: 50%;
+                left: 1rem;
+                transform: translateY(-50%);
+                color: #9ca3af;
+                pointer-events: none;
+            }
+
+            .login-password-toggle {
+                position: absolute;
+                top: 50%;
+                right: 0.8rem;
+                transform: translateY(-50%);
+                width: 2rem;
+                height: 2rem;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                border: 0;
+                border-radius: 999px;
+                background: transparent;
+                color: #9ca3af;
+                transition: background-color 0.2s ease, color 0.2s ease;
+            }
+
+            .login-password-toggle:hover {
+                color: var(--bs-primary);
+                background: rgba(var(--bs-primary-rgb), 0.08);
+            }
+
+            .login-meta {
+                font-size: 0.75rem;
+                font-style: italic;
+                color: #9ca3af;
+            }
+
+            .login-submit {
+                border-radius: 0.9rem;
+                font-weight: 700;
+            }
+
+            .login-footer-note {
+                margin-bottom: 0;
+                font-size: 0.75rem;
+                text-align: center;
+                color: #d1d5db;
+            }
+
+            @media (max-width: 767px) {
+                #auth #auth-left {
+                    padding: 1.5rem 1rem;
+                }
+
+                .login-card .card-body {
+                    padding: 1.5rem;
+                }
+            }
+        </style>
+    @endpush
+
+    <div class="card login-card">
+        <div class="card-body">
+            <div class="login-brand">
+                <img src="{{ asset('images/logo-bengkalis.png') }}" alt="Logo Dinas Pendidikan Kabupaten Bengkalis">
                 <div>
-                    <strong>Akses aman dan tertib</strong>
-                    <span>Sistem ini ditata untuk membatasi pembuatan akun dari sisi admin agar data inventaris tetap terjaga.</span>
+                    <div class="login-brand-primary">Dinas Pendidikan</div>
+                    <div class="login-brand-secondary">Kabupaten Bengkalis</div>
                 </div>
             </div>
-        </div>
-    </x-slot:visual>
 
-    <div class="auth-shell">
-        <div class="auth-brand">
-            <div class="auth-brand-mark">
-                <img src="{{ asset('assets/images/logo/logobengkalis.png') }}" alt="Logo Inventaris Aset">
+            <hr class="login-divider">
+
+            <div class="mb-4 text-center text-md-start">
+                <h1 class="login-title">Masuk ke Sistem</h1>
+                <p class="login-subtitle">Inventaris Aset Dinas Pendidikan</p>
             </div>
-            <div>
-                <span class="auth-brand-kicker">Sistem Inventaris</span>
-                <h1 class="auth-title">Masuk ke akun Anda</h1>
-                <p class="auth-subtitle">
-                    Gunakan email dan password yang sudah didaftarkan. Pembuatan akun pegawai hanya melalui admin.
-                </p>
-            </div>
-        </div>
 
-        <x-auth-session-status :status="session('status')" class="mb-4" />
+            <x-auth-session-status :status="session('status')" class="mb-4" />
 
-        @if ($errors->any())
-            <div class="alert alert-danger alert-dismissible show fade">
-                <div class="fw-semibold mb-1">Login gagal.</div>
-                <ul class="mb-0 ps-3">
+            @if ($errors->any())
+                <div class="alert alert-danger mb-4">
                     @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
+                        <p>{{ $error }}</p>
                     @endforeach
-                </ul>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
+                </div>
+            @endif
 
-        <div class="auth-panel">
-            <form method="POST" action="{{ route('login') }}" class="auth-form">
+            <form action="{{ route('login') }}" method="POST">
                 @csrf
 
-                <div class="auth-field">
-                    <x-input-label for="email" value="Email" class="form-label auth-label" />
-                    <div class="auth-input-wrap">
-                        <span class="auth-input-icon">
-                            <i class="bi bi-envelope"></i>
+                <div class="form-group mb-4">
+                    <label for="email" class="form-label">Email</label>
+                    <div class="login-input-wrap">
+                        <span class="login-input-icon" aria-hidden="true">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 7.5 10.94 13a2 2 0 0 0 2.12 0L21 7.5M5 19h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2Z"/>
+                            </svg>
                         </span>
-                        <x-text-input
+                        <input
                             id="email"
                             type="email"
                             name="email"
-                            class="form-control auth-input @error('email') is-invalid @enderror"
-                            placeholder="nama@instansi.go.id"
                             value="{{ old('email') }}"
+                            class="form-control form-control-xl @error('email') is-invalid @enderror"
+                            placeholder="nama@instansi.go.id"
                             required
                             autofocus
                             autocomplete="username"
-                        />
+                        >
                     </div>
-                    <x-input-error :messages="$errors->get('email')" />
                 </div>
 
-                <div class="auth-field">
-                    <x-input-label for="password" value="Password" class="form-label auth-label" />
-                    <div class="auth-input-wrap">
-                        <span class="auth-input-icon">
-                            <i class="bi bi-shield-lock"></i>
+                <div class="form-group mb-4">
+                    <label for="password" class="form-label">Password</label>
+                    <div class="login-input-wrap">
+                        <span class="login-input-icon" aria-hidden="true">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V7.875a4.5 4.5 0 1 0-9 0V10.5m-.75 0h10.5A2.25 2.25 0 0 1 19.5 12.75v6A2.25 2.25 0 0 1 17.25 21h-10.5A2.25 2.25 0 0 1 4.5 18.75v-6A2.25 2.25 0 0 1 6.75 10.5Z"/>
+                            </svg>
                         </span>
-                        <x-text-input
+                        <input
                             id="password"
                             type="password"
                             name="password"
-                            class="form-control auth-input @error('password') is-invalid @enderror"
+                            class="form-control form-control-xl @error('password') is-invalid @enderror"
                             placeholder="Masukkan password"
                             required
                             autocomplete="current-password"
-                        />
-                        <button type="button" class="auth-toggle-password" data-password-toggle aria-label="Tampilkan password">
-                            <i class="bi bi-eye"></i>
+                        >
+                        <button type="button" class="login-password-toggle" id="togglePassword" aria-label="Tampilkan password">
+                            <svg data-eye="show" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5.25 12 5.25c4.478 0 8.268 2.693 9.542 6.75-1.274 4.057-5.064 6.75-9.542 6.75-4.477 0-8.268-2.693-9.542-6.75Z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 15.75a3.75 3.75 0 1 0 0-7.5 3.75 3.75 0 0 0 0 7.5Z"/>
+                            </svg>
+                            <svg data-eye="hide" class="d-none" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m3 3 18 18"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M10.58 10.58a2 2 0 0 0 2.83 2.83"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.88 5.09A10.92 10.92 0 0 1 12 4.875c4.478 0 8.268 2.693 9.542 6.75a11.02 11.02 0 0 1-4.176 5.94M6.228 6.228A11.01 11.01 0 0 0 2.458 12c1.274 4.057 5.065 6.75 9.542 6.75a10.96 10.96 0 0 0 5.227-1.32"/>
+                            </svg>
                         </button>
                     </div>
-                    <x-input-error :messages="$errors->get('password')" />
                 </div>
 
-                <div class="form-check form-check-lg d-flex align-items-center mb-4">
-                    <input class="form-check-input me-2" type="checkbox" id="remember" name="remember">
-                    <label class="form-check-label text-gray-600" for="remember">
-                        Ingat saya
-                    </label>
+                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                    <div class="form-check mb-0">
+                        <input class="form-check-input" type="checkbox" value="1" id="remember" name="remember" @checked(old('remember'))>
+                        <label class="form-check-label text-muted" for="remember">Ingat saya</label>
+                    </div>
+                    <span class="login-meta">Hubungi admin</span>
                 </div>
 
-                <x-primary-button class="btn auth-submit w-100">Masuk ke dashboard</x-primary-button>
+                <button type="submit" class="btn btn-primary btn-block btn-lg shadow-lg login-submit">
+                    Masuk ke Dashboard
+                </button>
             </form>
 
-            <div class="auth-help">
-                <div class="auth-inline-note">
-                    <i class="bi bi-chat-square-dots"></i>
-                    <div>
-                        Butuh akun baru atau perlu bantuan akses? Hubungi admin inventaris. Password akun bisa diganti kembali dari halaman profil setelah login.
-                    </div>
-                </div>
-            </div>
+            <p class="login-footer-note mt-4">Akun dibuat oleh admin sistem &middot; &copy; 2025</p>
         </div>
     </div>
 
     @push('scripts')
         <script>
             document.addEventListener('DOMContentLoaded', function () {
-                const toggleButton = document.querySelector('[data-password-toggle]');
+                const toggleButton = document.getElementById('togglePassword');
                 const passwordInput = document.getElementById('password');
 
                 if (!toggleButton || !passwordInput) {
                     return;
                 }
 
+                const showIcon = toggleButton.querySelector('[data-eye="show"]');
+                const hideIcon = toggleButton.querySelector('[data-eye="hide"]');
+
                 toggleButton.addEventListener('click', function () {
                     const isHidden = passwordInput.type === 'password';
 
                     passwordInput.type = isHidden ? 'text' : 'password';
                     toggleButton.setAttribute('aria-label', isHidden ? 'Sembunyikan password' : 'Tampilkan password');
-                    toggleButton.innerHTML = isHidden
-                        ? '<i class="bi bi-eye-slash"></i>'
-                        : '<i class="bi bi-eye"></i>';
+                    showIcon.classList.toggle('d-none', isHidden);
+                    hideIcon.classList.toggle('d-none', !isHidden);
                 });
             });
         </script>

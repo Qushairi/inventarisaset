@@ -19,18 +19,6 @@ class DashboardController extends BasePegawaiController
         $availableAssetTotal = Asset::query()->where('status', 'Tersedia')->count();
         $loanTotal = Loan::query()->where('user_id', $pegawai->id)->count();
         $returnTotal = AssetReturn::query()->where('user_id', $pegawai->id)->count();
-        $pendingLoanTotal = Loan::query()
-            ->where('user_id', $pegawai->id)
-            ->where('status', 'Menunggu')
-            ->count();
-        $approvedLoanTotal = Loan::query()
-            ->where('user_id', $pegawai->id)
-            ->where('status', 'Disetujui')
-            ->count();
-        $verifiedReturnTotal = AssetReturn::query()
-            ->where('user_id', $pegawai->id)
-            ->where('status', 'Terverifikasi')
-            ->count();
 
         $months = collect(range(5, 0))
             ->map(fn (int $offset) => now()->subMonths($offset)->startOfMonth());
@@ -104,14 +92,14 @@ class DashboardController extends BasePegawaiController
                     'label' => 'Total Aset',
                     'value' => $assetTotal,
                     'helper' => 'Jumlah seluruh aset yang tercatat di sistem.',
-                    'icon' => 'boxes',
+                    'icon' => 'box-seam',
                     'variant' => 'primary',
                 ],
                 [
                     'label' => 'Aset Tersedia',
                     'value' => $availableAssetTotal,
                     'helper' => 'Aset yang siap dipinjam atau digunakan.',
-                    'icon' => 'box2-heart',
+                    'icon' => 'check2-circle',
                     'variant' => 'success',
                 ],
                 [
@@ -127,55 +115,6 @@ class DashboardController extends BasePegawaiController
                     'helper' => 'Data pengembalian yang sudah Anda catat.',
                     'icon' => 'arrow-counterclockwise',
                     'variant' => 'info',
-                ],
-            ],
-            'highlights' => [
-                [
-                    'title' => 'Peminjaman menunggu',
-                    'value' => $pendingLoanTotal,
-                    'note' => 'Masih menunggu persetujuan admin.',
-                ],
-                [
-                    'title' => 'Peminjaman disetujui',
-                    'value' => $approvedLoanTotal,
-                    'note' => 'Sudah dapat ditindaklanjuti oleh pegawai.',
-                ],
-                [
-                    'title' => 'Pengembalian terverifikasi',
-                    'value' => $verifiedReturnTotal,
-                    'note' => 'Sudah diverifikasi oleh admin.',
-                ],
-            ],
-            'quickLinks' => [
-                [
-                    'title' => 'Data Aset',
-                    'description' => 'Lihat daftar aset dan status ketersediaannya.',
-                    'route' => 'pegawai.assets.index',
-                    'icon' => 'boxes',
-                ],
-                [
-                    'title' => 'Peminjaman',
-                    'description' => 'Pantau riwayat pengajuan peminjaman Anda.',
-                    'route' => 'pegawai.loans.index',
-                    'icon' => 'journal-check',
-                ],
-                [
-                    'title' => 'Pengembalian',
-                    'description' => 'Pantau status pengembalian dan verifikasi aset.',
-                    'route' => 'pegawai.returns.index',
-                    'icon' => 'arrow-counterclockwise',
-                ],
-                [
-                    'title' => 'Notifikasi',
-                    'description' => 'Lihat persetujuan, verifikasi, dan pengingat aktivitas Anda.',
-                    'route' => 'pegawai.notifications.index',
-                    'icon' => 'bell',
-                ],
-                [
-                    'title' => 'Profile',
-                    'description' => 'Lihat informasi akun pegawai dan aktivitas terbaru.',
-                    'route' => 'pegawai.profile.index',
-                    'icon' => 'person-circle',
                 ],
             ],
             'activityChart' => [

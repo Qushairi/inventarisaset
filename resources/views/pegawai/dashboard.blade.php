@@ -17,7 +17,7 @@
     </div>
 
     <div class="page-content">
-        <section class="row">
+        <section class="row g-4 pegawai-dashboard-grid">
             @foreach ($statCards as $card)
                 @php
                     $iconClass = match ($card['variant']) {
@@ -28,18 +28,20 @@
                     };
                 @endphp
                 <div class="col-12 col-md-6 col-xl-3">
-                    <div class="card">
-                        <div class="card-body px-3 py-4-5">
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <div class="stats-icon {{ $iconClass }}">
+                    <div class="card pegawai-panel pegawai-stat-card h-100">
+                        <div class="card-body">
+                            <div class="row align-items-center pegawai-stat-row">
+                                <div class="col-3 col-md-4">
+                                    <div class="stats-icon {{ $iconClass }} mx-auto mx-md-0">
                                         <i class="bi bi-{{ $card['icon'] }}"></i>
                                     </div>
                                 </div>
-                                <div class="col-md-8">
-                                    <h6 class="text-muted font-semibold">{{ $card['label'] }}</h6>
-                                    <h6 class="font-extrabold mb-0">{{ $card['value'] }}</h6>
-                                    <small class="text-muted">{{ $card['helper'] }}</small>
+                                <div class="col-9 col-md-8">
+                                    <div class="pegawai-stat-copy">
+                                        <h6 class="pegawai-stat-label">{{ $card['label'] }}</h6>
+                                        <h4 class="pegawai-stat-value font-extrabold">{{ $card['value'] }}</h4>
+                                        <small class="pegawai-stat-helper">{{ $card['helper'] }}</small>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -47,8 +49,8 @@
                 </div>
             @endforeach
 
-            <div class="col-12 col-xl-8">
-                <div class="card">
+            <div class="col-12">
+                <div class="card pegawai-panel">
                     <div class="card-header">
                         <h4>Aktivitas Bulanan Saya</h4>
                     </div>
@@ -58,54 +60,12 @@
                 </div>
             </div>
 
-            <div class="col-12 col-xl-4">
-                <div class="card">
-                    <div class="card-header">
-                        <h4>Highlight Pegawai</h4>
-                    </div>
-                    <div class="card-body">
-                        @foreach ($highlights as $highlight)
-                            <div class="d-flex align-items-start {{ $loop->last ? '' : 'mb-3' }}">
-                                <div class="badge bg-light-primary me-3">{{ $highlight['value'] }}</div>
-                                <div>
-                                    <h6 class="mb-1">{{ $highlight['title'] }}</h6>
-                                    <p class="mb-0 text-sm text-muted">{{ $highlight['note'] }}</p>
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-12 col-xl-4">
-                <div class="card">
-                    <div class="card-header">
-                        <h4>Fitur Pegawai</h4>
-                    </div>
-                    <div class="card-body">
-                        <div class="list-group">
-                            @foreach ($quickLinks as $link)
-                                <a href="{{ route($link['route']) }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-start">
-                                    <div class="me-3">
-                                        <div class="fw-bold">
-                                            <i class="bi bi-{{ $link['icon'] }} me-2 text-primary"></i>{{ $link['title'] }}
-                                        </div>
-                                        <small class="text-muted">{{ $link['description'] }}</small>
-                                    </div>
-                                    <i class="bi bi-arrow-right text-muted"></i>
-                                </a>
-                            @endforeach
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-12 col-xl-8">
-                <div class="card">
+            <div class="col-12">
+                <div class="card pegawai-panel pegawai-table-card">
                     <div class="card-header">
                         <h4>Peminjaman Terbaru Saya</h4>
                     </div>
-                    <div class="card-body p-0">
+                    <div class="card-body">
                         <div class="table-responsive">
                             <table class="table table-hover table-lg mb-0">
                                 <thead>
@@ -151,11 +111,11 @@
             </div>
 
             <div class="col-12">
-                <div class="card">
+                <div class="card pegawai-panel pegawai-table-card">
                     <div class="card-header">
                         <h4>Data Aset Terbaru</h4>
                     </div>
-                    <div class="card-body p-0">
+                    <div class="card-body">
                         <div class="table-responsive">
                             <table class="table table-hover table-lg mb-0">
                                 <thead>
