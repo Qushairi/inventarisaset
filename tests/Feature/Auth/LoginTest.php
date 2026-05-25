@@ -15,9 +15,10 @@ class LoginTest extends TestCase
         $response = $this->get(route('login'));
 
         $response->assertOk();
-        $response->assertSee('Masuk ke akun Anda', escape: false);
-        $response->assertSee('Pembuatan akun pegawai hanya melalui admin.', escape: false);
-        $response->assertDontSee('Akun demo', escape: false);
+        $response->assertSee('Dinas Pendidikan', escape: false);
+        $response->assertSee('Kabupaten Bengkalis', escape: false);
+        $response->assertSee('Login', escape: false);
+        $response->assertDontSee('Hubungi admin', escape: false);
     }
 
     public function test_admin_is_redirected_to_admin_dashboard_after_login(): void

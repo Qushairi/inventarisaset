@@ -9,11 +9,9 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 #[Fillable(['name', 'email', 'password', 'role', 'profile_photo_path', 'signature_path', 'signature_updated_at'])]
@@ -64,9 +62,7 @@ class User extends Authenticatable
 
     public function profilePhotoUrl(): ?string
     {
-        return $this->hasProfilePhoto()
-            ? $this->publicDisk()->url((string) $this->profile_photo_path)
-            : null;
+        return $this->publicFileUrl($this->profile_photo_path);
     }
 
     public function hasSignature(): bool
@@ -76,9 +72,7 @@ class User extends Authenticatable
 
     public function signatureUrl(): ?string
     {
-        return $this->hasSignature()
-            ? $this->publicDisk()->url((string) $this->signature_path)
-            : null;
+        return $this->publicFileUrl($this->signature_path);
     }
 
     public function initials(): string
@@ -93,11 +87,18 @@ class User extends Authenticatable
         return Str::upper($initials ?: Str::substr($this->name, 0, 1));
     }
 
-    private function publicDisk(): FilesystemAdapter
+    private function publicFileUrl(?string $path): ?string
     {
-        /** @var FilesystemAdapter $disk */
-        $disk = Storage::disk('public');
+        if (blank($path)) {
+            return null;
+        }
 
-        return $disk;
+        $path = ltrim(str_replace('\\', '/', $path), '/');
+
+        if (Str::startsWith($path, ['http://', 'https://', '//'])) {
+            return $path;
+        }
+
+        return asset('storage/'.$path);
     }
 }

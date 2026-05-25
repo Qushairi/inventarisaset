@@ -4,11 +4,9 @@
 
 @section('content')
     <div class="page-heading">
-        @include('admin.partials.page-header', [
+        @include('pegawai.partials.page-heading', [
             'title' => 'Notifikasi Pegawai',
-            'subtitle' => 'Pantau persetujuan peminjaman, verifikasi pengembalian, dan pengingat jatuh tempo.',
             'breadcrumb' => 'Notifikasi',
-            'homeRoute' => 'pegawai.dashboard',
         ])
     </div>
 

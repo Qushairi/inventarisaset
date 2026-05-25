@@ -17,15 +17,17 @@ class LoanController extends BasePegawaiController
     ) {
     }
 
-    public function index()
+    public function index(Request $request)
     {
         $pegawai = $this->currentPegawai();
+        $perPage = $this->perPage($request);
 
         $loans = Loan::query()
             ->with('asset')
             ->where('user_id', $pegawai->id)
             ->latest('loan_date')
-            ->paginate(10)
+            ->paginate($perPage)
+            ->withQueryString()
             ->through(function (Loan $loan) {
                 $suratPeminjaman = $this->suratPeminjamanService->ensureForLoan($loan);
 
@@ -107,8 +109,18 @@ class LoanController extends BasePegawaiController
             ->with(['category', 'location'])
             ->where('status', 'Tersedia')
             ->whereDoesntHave('loans', function ($query) {
-                $query->whereIn('status', ['Menunggu', 'Disetujui']);
+                $query->where('status', 'Disetujui')
+                    ->whereDoesntHave('returnRecord', function ($query) {
+                        $query->where('status', 'Terverifikasi');
+                    });
             })
             ->orderBy('name');
+    }
+
+    private function perPage(Request $request): int
+    {
+        $perPage = (int) $request->query('per_page', 10);
+
+        return in_array($perPage, [10, 25, 50], true) ? $perPage : 10;
     }
 }

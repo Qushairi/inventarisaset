@@ -3,16 +3,20 @@
 namespace App\Http\Controllers\Pegawai;
 
 use App\Models\Asset;
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class AssetController extends BasePegawaiController
 {
-    public function index()
+    public function index(Request $request)
     {
+        $perPage = $this->perPage($request);
+
         $assets = Asset::query()
             ->with(['category', 'location'])
             ->orderBy('name')
-            ->paginate(10)
+            ->paginate($perPage)
+            ->withQueryString()
             ->through(function (Asset $asset) {
                 return [
                     'name' => $asset->name,
@@ -45,5 +49,12 @@ class AssetController extends BasePegawaiController
         return view('pegawai.assets.index', $this->layoutData([
             'assets' => $assets,
         ]));
+    }
+
+    private function perPage(Request $request): int
+    {
+        $perPage = (int) $request->query('per_page', 10);
+
+        return in_array($perPage, [10, 25, 50], true) ? $perPage : 10;
     }
 }
