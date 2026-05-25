@@ -196,7 +196,7 @@ class SuratPeminjamanService
             'approver' => $approver,
             'pegawai' => $pegawai,
             'office' => $this->officeProfile(),
-            'logoDataUri' => $this->dataUriFromPublicPath(public_path('assets/logo/logobengkalis.png')),
+            'logoDataUri' => $this->dataUriFromPublicPath(public_path('assets/images/logo/logobengkalis.png')),
             'approverSignatureDataUri' => $this->dataUriFromStoragePath($approver?->signature_path),
             'pegawaiSignatureDataUri' => $this->dataUriFromStoragePath($pegawai?->signature_path),
             'asalPengadaan' => $this->originLabel($asset?->acquired_at),

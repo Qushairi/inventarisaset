@@ -4,6 +4,7 @@
 
 @push('styles')
     @include('surat-peminjaman.partials.styles')
+    @include('asset-return-letters.partials.styles')
 @endpush
 
 @section('content')

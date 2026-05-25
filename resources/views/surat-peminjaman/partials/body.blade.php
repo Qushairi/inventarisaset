@@ -59,7 +59,7 @@
     $printedDate = $printedAt ?? now();
 @endphp
 
-<div class="surat-peminjaman-document">
+<div class="surat-peminjaman-document asset-return-letter-document">
     <table class="header-table header">
         <tr>
             <td style="width: 95px;">

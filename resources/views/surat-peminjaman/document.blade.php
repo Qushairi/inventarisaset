@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     @include('surat-peminjaman.partials.styles')
+    @include('asset-return-letters.partials.styles')
 </head>
 <body>
     @include('surat-peminjaman.partials.body')

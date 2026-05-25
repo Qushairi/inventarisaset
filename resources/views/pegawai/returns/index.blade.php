@@ -64,7 +64,7 @@
                                             type="search"
                                             id="pegawaiReturnSearchInput"
                                             class="form-control"
-                                            placeholder="Cari aset atau nomor berita acara"
+                                            placeholder="Cari aset atau kode aset"
                                         >
                                     </div>
                                 </div>
@@ -124,7 +124,6 @@
                                     <th>Kondisi</th>
                                     <th>Status</th>
                                     <th>Surat Peminjaman</th>
-                                    <th>Berita Acara</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -136,7 +135,7 @@
                                             default => 'bg-light-success',
                                         };
                                         $statusBadge = $return['status_variant'] === 'success' ? 'bg-light-success' : 'bg-light-info';
-                                        $searchSource = strtolower(trim(($return['asset_name'] ?? '').' '.($return['asset_code'] ?? '').' '.($return['report_number'] ?? '')));
+                                        $searchSource = strtolower(trim(($return['asset_name'] ?? '').' '.($return['asset_code'] ?? '')));
                                     @endphp
                                     <tr
                                         data-pegawai-return-row
@@ -178,19 +177,15 @@
                                                 <small class="text-muted">Belum tersedia</small>
                                             @endif
                                         </td>
-                                        <td>
-                                            <div>{{ $return['report_number'] }}</div>
-                                            <small class="text-muted">{{ $return['report_note'] ?: 'Nomor berita acara dibuat saat pengajuan.' }}</small>
-                                        </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="7" class="text-center text-muted">Belum ada data pengembalian.</td>
+                                        <td colspan="6" class="text-center text-muted">Belum ada data pengembalian.</td>
                                     </tr>
                                 @endforelse
                                 @if ($returns->count() > 0)
                                     <tr id="pegawaiReturnEmptyRow" class="d-none">
-                                        <td colspan="7" class="text-center text-muted">Tidak ada data yang sesuai</td>
+                                        <td colspan="6" class="text-center text-muted">Tidak ada data yang sesuai</td>
                                     </tr>
                                 @endif
                             </tbody>
