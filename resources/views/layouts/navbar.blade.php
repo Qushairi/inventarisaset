@@ -25,17 +25,6 @@
 
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
-                    <li class="nav-item dropdown nav-icon me-2">
-                        <a class="nav-link" href="#" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-envelope fs-5 text-gray-600"></i>
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li>
-                                <h6 class="dropdown-header">Pesan</h6>
-                            </li>
-                            <li><a class="dropdown-item" href="#">Belum ada pesan baru</a></li>
-                        </ul>
-                    </li>
                     <li class="nav-item dropdown nav-icon me-3">
                         <a class="nav-link position-relative" href="#" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-bell fs-5 text-gray-600"></i>

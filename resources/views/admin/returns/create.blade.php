@@ -77,8 +77,8 @@
                                         </div>
                                         <div class="col-md-4 col-12">
                                             <div class="form-group">
-                                                <label for="verified_note">Catatan Verifikasi</label>
-                                                <input type="text" id="verified_note" name="verified_note" class="form-control @error('verified_note') is-invalid @enderror" placeholder="Contoh: Diverifikasi admin" value="{{ old('verified_note') }}">
+                                                <label for="verified_note">Catatan Pengembalian</label>
+                                                <input type="text" id="verified_note" name="verified_note" class="form-control @error('verified_note') is-invalid @enderror" placeholder="Contoh: Diterima admin" value="{{ old('verified_note') }}">
                                             </div>
                                         </div>
                                         <div class="col-md-6 col-12">

@@ -21,13 +21,40 @@
                 <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-3">
                     <div>
                         <h4 class="card-title mb-1">Daftar Pengembalian</h4>
-                        <p class="mb-0 text-muted">Kelola data pengembalian dan verifikasi aset.</p>
+                        <p class="mb-0 text-muted">Kelola data pengembalian aset yang sudah terverifikasi.</p>
                     </div>
                     <a href="{{ route('admin.returns.create') }}" class="btn btn-primary btn-sm icon icon-left">
                         <i class="bi bi-plus-circle"></i><span>Tambah Pengembalian</span>
                     </a>
                 </div>
                 <div class="card-body">
+                    <form action="{{ route('admin.returns.index') }}" method="GET" class="mb-4">
+                        <div class="row g-3 align-items-end">
+                            <div class="col-lg-3 col-md-6 col-12">
+                                <label for="search" class="form-label">Cari Pengembalian</label>
+                                <input type="search" id="search" name="search" class="form-control" placeholder="Aset, kode, pegawai, atau BA" value="{{ $filters['search'] ?? '' }}">
+                            </div>
+                            <div class="col-lg-3 col-md-6 col-12">
+                                <label for="condition" class="form-label">Kondisi</label>
+                                <select id="condition" name="condition" class="form-select">
+                                    <option value="">Semua kondisi</option>
+                                    @foreach ($conditions as $condition)
+                                        <option value="{{ $condition }}" @selected(($filters['condition'] ?? '') === $condition)>{{ $condition }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-lg-2 col-md-6 col-12 d-flex gap-2">
+                                <button type="submit" class="btn btn-primary icon">
+                                    <i class="bi bi-funnel"></i>
+                                </button>
+                                @if ($hasActiveFilters)
+                                    <a href="{{ route('admin.returns.index') }}" class="btn btn-light-secondary icon">
+                                        <i class="bi bi-arrow-counterclockwise"></i>
+                                    </a>
+                                @endif
+                            </div>
+                        </div>
+                    </form>
                     <div class="table-responsive">
                         <table class="table table-hover table-lg">
                             <thead>

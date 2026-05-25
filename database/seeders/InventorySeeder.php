@@ -39,7 +39,7 @@ class InventorySeeder extends Seeder
             ->delete();
 
         User::query()->updateOrCreate(
-            ['email' => 'admin@inventarisaset.test'],
+            ['email' => 'admin@inventarisaset.bengkalis.go.id'],
             [
                 'name' => 'Admin Inventaris',
                 'password' => Hash::make('Admin123!'),

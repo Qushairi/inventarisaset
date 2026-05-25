@@ -28,6 +28,33 @@
                     </a>
                 </div>
                 <div class="card-body">
+                    <form action="{{ route('admin.loans.index') }}" method="GET" class="mb-4">
+                        <div class="row g-3 align-items-end">
+                            <div class="col-lg-4 col-md-6 col-12">
+                                <label for="search" class="form-label">Cari Peminjaman</label>
+                                <input type="search" id="search" name="search" class="form-control" placeholder="Aset, kode, pegawai, atau catatan" value="{{ $filters['search'] ?? '' }}">
+                            </div>
+                            <div class="col-lg-3 col-md-6 col-12">
+                                <label for="status" class="form-label">Status</label>
+                                <select id="status" name="status" class="form-select">
+                                    <option value="">Semua status</option>
+                                    @foreach ($statuses as $status)
+                                        <option value="{{ $status }}" @selected(($filters['status'] ?? '') === $status)>{{ $status }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-lg-2 col-md-6 col-12 d-flex gap-2">
+                                <button type="submit" class="btn btn-primary icon">
+                                    <i class="bi bi-funnel"></i>
+                                </button>
+                                @if ($hasActiveFilters)
+                                    <a href="{{ route('admin.loans.index') }}" class="btn btn-light-secondary icon">
+                                        <i class="bi bi-arrow-counterclockwise"></i>
+                                    </a>
+                                @endif
+                            </div>
+                        </div>
+                    </form>
                     <div class="table-responsive">
                         <table class="table table-hover table-lg">
                             <thead>

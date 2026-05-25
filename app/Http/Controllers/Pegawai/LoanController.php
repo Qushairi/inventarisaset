@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Pegawai;
 
 use App\Models\Asset;
 use App\Models\Loan;
+use App\Support\AdminNotificationService;
 use App\Support\SuratPeminjamanService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -14,6 +15,7 @@ class LoanController extends BasePegawaiController
 {
     public function __construct(
         private readonly SuratPeminjamanService $suratPeminjamanService,
+        private readonly AdminNotificationService $adminNotificationService,
     ) {
     }
 
@@ -24,6 +26,7 @@ class LoanController extends BasePegawaiController
         $loans = Loan::query()
             ->with('asset')
             ->where('user_id', $pegawai->id)
+            ->whereDoesntHave('returnRecord')
             ->latest('loan_date')
             ->paginate(10)
             ->through(function (Loan $loan) {
@@ -55,7 +58,10 @@ class LoanController extends BasePegawaiController
         return view('pegawai.loans.index', $this->layoutData([
             'availableAssets' => $this->availableAssetsQuery()->get(),
             'loans' => $loans,
-            'loanTotal' => Loan::query()->where('user_id', $pegawai->id)->count(),
+            'loanTotal' => Loan::query()
+                ->where('user_id', $pegawai->id)
+                ->whereDoesntHave('returnRecord')
+                ->count(),
         ]));
     }
 
@@ -87,7 +93,7 @@ class LoanController extends BasePegawaiController
             ])->errorBag('createLoan');
         }
 
-        Loan::query()->create([
+        $loan = Loan::query()->create([
             'asset_id' => $asset->id,
             'user_id' => $pegawai->id,
             'loan_date' => $validated['loan_date'],
@@ -95,6 +101,8 @@ class LoanController extends BasePegawaiController
             'status' => 'Menunggu',
             'status_note' => $validated['status_note'] ?: 'Pengajuan peminjaman dari pegawai.',
         ]);
+
+        $this->adminNotificationService->sendLoanRequestNotification($loan);
 
         return redirect()
             ->route('pegawai.loans.index')

@@ -41,7 +41,11 @@ class AppServiceProvider extends ServiceProvider
                 $notifications = $user->notifications()->latest()->limit(6)->get();
                 $unreadNotificationCount = $user->unreadNotifications()->count();
 
-                if ($user->role === 'pegawai') {
+                if ($user->role === 'admin') {
+                    $notificationIndexUrl = route('admin.notifications.index', absolute: false);
+                    $notificationMarkAllUrl = route('admin.notifications.read-all', absolute: false);
+                    $notificationShowRouteName = 'admin.notifications.show';
+                } elseif ($user->role === 'pegawai') {
                     $notificationIndexUrl = route('pegawai.notifications.index', absolute: false);
                     $notificationMarkAllUrl = route('pegawai.notifications.read-all', absolute: false);
                     $notificationShowRouteName = 'pegawai.notifications.show';

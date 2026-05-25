@@ -124,7 +124,7 @@ class ProfileTest extends TestCase
         Storage::disk('public')->assertExists($user->signature_path);
     }
 
-    public function test_pegawai_cannot_upload_non_png_signature(): void
+    public function test_pegawai_can_upload_jpg_signature(): void
     {
         Storage::fake('public');
 
@@ -132,11 +132,16 @@ class ProfileTest extends TestCase
             'role' => 'pegawai',
         ]);
 
-        $response = $this->actingAs($user)->from(route('pegawai.profile.index'))->patch(route('pegawai.profile.update'), [
+        $response = $this->actingAs($user)->patch(route('pegawai.profile.update'), [
             'signature_file' => UploadedFile::fake()->image('signature.jpg'),
         ]);
 
         $response->assertRedirect(route('pegawai.profile.index'));
-        $response->assertSessionHasErrors(['signature_file'], null, 'updateSignature');
+        $response->assertSessionHasNoErrors();
+
+        $user->refresh();
+
+        $this->assertNotNull($user->signature_path);
+        Storage::disk('public')->assertExists($user->signature_path);
     }
 }

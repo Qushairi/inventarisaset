@@ -45,21 +45,22 @@
     }
 
     .asset-return-letter-document .paragraph {
-        line-height: 1.22;
-        margin-bottom: 4px;
+        line-height: 1.45;
+        margin-bottom: 10px;
     }
 
     .asset-return-letter-document .signature-date {
         margin-top: 2cm;
         margin-bottom: 6px;
+        text-align: right;
     }
 
     .asset-return-letter-document .identitas {
-        margin-bottom: 4px;
+        margin-bottom: 8px;
     }
 
     .asset-return-letter-document .identitas td {
-        padding: 0;
+        padding: 1px 0;
         font-size: 9.6pt;
     }
 
@@ -72,7 +73,7 @@
     }
 
     .asset-return-letter-document .asset-table {
-        margin: 6px 0 8px;
+        margin: 10px 0 14px;
     }
 
     .asset-return-letter-document .asset-table th,

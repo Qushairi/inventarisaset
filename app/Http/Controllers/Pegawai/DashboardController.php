@@ -48,8 +48,8 @@ class DashboardController extends BasePegawaiController
                 return [
                     'name' => $asset->name,
                     'code' => $asset->code,
-                    'avatar_type' => $asset->image_path ? 'image' : 'initial',
-                    'avatar_value' => $asset->image_path ?: Str::upper(Str::substr($asset->name, 0, 1)),
+                    'avatar_type' => $asset->hasImage() ? 'image' : 'initial',
+                    'avatar_value' => $asset->imageUrl() ?: Str::upper(Str::substr($asset->name, 0, 1)),
                     'category' => $asset->category?->name,
                     'category_note' => $asset->category?->description ?? 'Kategori aset aktif pada sistem inventaris.',
                     'location' => $asset->location?->name,

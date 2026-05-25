@@ -57,9 +57,11 @@
                             <thead>
                                 <tr>
                                     <th>Aset</th>
-                                    <th>Pengembalian</th>
+                                    <th>Tanggal Peminjaman</th>
+                                    <th>Tanggal Pengembalian</th>
                                     <th>Kondisi</th>
                                     <th>Status</th>
+                                    <th>Surat Peminjaman</th>
                                     <th>Berita Acara</th>
                                 </tr>
                             </thead>
@@ -79,6 +81,10 @@
                                             <small class="text-muted">{{ $return['asset_code'] }}</small>
                                         </td>
                                         <td>
+                                            <div>{{ $return['loan_date'] ?: '-' }}</div>
+                                            <small class="text-muted">Tanggal aset dipinjam.</small>
+                                        </td>
+                                        <td>
                                             <div>{{ $return['returned_at'] }}</div>
                                             <small class="text-muted">{{ $return['verified_note'] ?: 'Menunggu catatan verifikasi admin.' }}</small>
                                         </td>
@@ -90,13 +96,28 @@
                                             <div><small class="text-muted">{{ $return['status_note'] }}</small></div>
                                         </td>
                                         <td>
+                                            @if ($return['letter_url'])
+                                                <div class="fw-semibold">{{ $return['letter_number'] }}</div>
+                                                <div class="d-flex flex-wrap gap-2 mt-2">
+                                                    <a href="{{ $return['letter_url'] }}" class="btn btn-sm btn-light-primary">
+                                                        Lihat Surat
+                                                    </a>
+                                                    <a href="{{ $return['letter_download_url'] }}" class="btn btn-sm btn-light-secondary">
+                                                        Download PDF
+                                                    </a>
+                                                </div>
+                                            @else
+                                                <small class="text-muted">Belum tersedia</small>
+                                            @endif
+                                        </td>
+                                        <td>
                                             <div>{{ $return['report_number'] }}</div>
                                             <small class="text-muted">{{ $return['report_note'] ?: 'Nomor berita acara dibuat saat pengajuan.' }}</small>
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="5" class="text-center text-muted">Belum ada data pengembalian.</td>
+                                        <td colspan="7" class="text-center text-muted">Belum ada data pengembalian.</td>
                                     </tr>
                                 @endforelse
                             </tbody>

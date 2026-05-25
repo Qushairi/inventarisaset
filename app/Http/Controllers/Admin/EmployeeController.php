@@ -11,12 +11,23 @@ use Illuminate\Validation\Rule;
 
 class EmployeeController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $filters = $request->validate([
+            'search' => ['nullable', 'string', 'max:100'],
+        ]);
+
         $employees = User::query()
             ->where('role', 'pegawai')
+            ->when($filters['search'] ?? null, function ($query, string $search) {
+                $query->where(function ($query) use ($search) {
+                    $query->where('name', 'like', '%'.$search.'%')
+                        ->orWhere('email', 'like', '%'.$search.'%');
+                });
+            })
             ->orderBy('name')
             ->paginate(10)
+            ->withQueryString()
             ->through(function (User $user) {
                 return [
                     'id' => $user->id,
@@ -33,6 +44,8 @@ class EmployeeController extends Controller
 
         return view('admin.employees.index', [
             'employees' => $employees,
+            'filters' => $filters,
+            'hasActiveFilters' => collect($filters)->filter(fn ($value) => filled($value))->isNotEmpty(),
         ]);
     }
 

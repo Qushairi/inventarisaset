@@ -9,11 +9,24 @@ use Illuminate\Validation\Rule;
 
 class CategoryController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $filters = $request->validate([
+            'search' => ['nullable', 'string', 'max:100'],
+        ]);
+
         $categories = Category::query()
+            ->when($filters['search'] ?? null, function ($query, string $search) {
+                $query->where(function ($query) use ($search) {
+                    $query->where('name', 'like', '%'.$search.'%')
+                        ->orWhere('code', 'like', '%'.$search.'%')
+                        ->orWhere('description', 'like', '%'.$search.'%')
+                        ->orWhere('note', 'like', '%'.$search.'%');
+                });
+            })
             ->orderBy('name')
             ->paginate(10)
+            ->withQueryString()
             ->through(fn (Category $category) => [
                 'name' => $category->name,
                 'code' => $category->code,
@@ -23,6 +36,8 @@ class CategoryController extends Controller
 
         return view('admin.categories.index', [
             'categories' => $categories,
+            'filters' => $filters,
+            'hasActiveFilters' => collect($filters)->filter(fn ($value) => filled($value))->isNotEmpty(),
         ]);
     }
 

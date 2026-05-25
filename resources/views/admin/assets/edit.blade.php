@@ -22,7 +22,7 @@
                                     </div>
                                 @endif
 
-                                <form class="form" action="{{ route('admin.assets.update', $asset) }}" method="POST">
+                                <form class="form" action="{{ route('admin.assets.update', $asset) }}" method="POST" enctype="multipart/form-data">
                                     @csrf
                                     @method('PUT')
                                     <div class="row">
@@ -84,6 +84,12 @@
                                         </div>
                                         <div class="col-md-4 col-12">
                                             <div class="form-group">
+                                                <label for="quantity">Jumlah Aset</label>
+                                                <input type="number" min="1" step="1" id="quantity" name="quantity" class="form-control @error('quantity') is-invalid @enderror" placeholder="1" value="{{ old('quantity', $asset->quantity) }}">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 col-12">
+                                            <div class="form-group">
                                                 <label for="acquisition_price">Nilai Perolehan</label>
                                                 <input type="number" step="0.01" id="acquisition_price" name="acquisition_price" class="form-control @error('acquisition_price') is-invalid @enderror" placeholder="0" value="{{ old('acquisition_price', $asset->acquisition_price) }}">
                                             </div>
@@ -96,10 +102,25 @@
                                         </div>
                                         <div class="col-md-4 col-12">
                                             <div class="form-group">
-                                                <label for="image_path">Path Gambar</label>
-                                                <input type="text" id="image_path" name="image_path" class="form-control @error('image_path') is-invalid @enderror" placeholder="assets/images/..." value="{{ old('image_path', $asset->image_path) }}">
+                                                <label for="image_file">Upload Gambar</label>
+                                                <input type="file" id="image_file" name="image_file" class="form-control @error('image_file') is-invalid @enderror" accept=".jpg,.jpeg,.png,.webp">
+                                                <small class="text-muted">Kosongkan jika tidak ingin mengganti gambar.</small>
                                             </div>
                                         </div>
+                                        @if ($asset->hasImage())
+                                            <div class="col-12">
+                                                <div class="form-group">
+                                                    <label>Gambar Saat Ini</label>
+                                                    <div class="d-flex align-items-center gap-3 flex-wrap">
+                                                        <img src="{{ $asset->imageUrl() }}" alt="{{ $asset->name }}" class="rounded" style="width: 96px; height: 96px; object-fit: cover;">
+                                                        <div class="form-check">
+                                                            <input type="checkbox" id="remove_image" name="remove_image" value="1" class="form-check-input">
+                                                            <label for="remove_image" class="form-check-label">Hapus gambar saat ini</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endif
                                         <div class="col-12">
                                             <div class="form-group">
                                                 <label for="note">Catatan</label>

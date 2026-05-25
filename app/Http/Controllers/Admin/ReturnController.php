@@ -22,12 +22,35 @@ class ReturnController extends Controller
     ) {
     }
 
-    public function index()
+    public function index(Request $request)
     {
+        $filters = $request->validate([
+            'search' => ['nullable', 'string', 'max:100'],
+            'condition' => ['nullable', Rule::in($this->conditionOptions())],
+        ]);
+
         $returns = AssetReturn::query()
             ->with(['asset', 'user', 'loan'])
+            ->when($filters['search'] ?? null, function ($query, string $search) {
+                $query->where(function ($query) use ($search) {
+                    $query->where('verified_note', 'like', '%'.$search.'%')
+                        ->orWhere('status_note', 'like', '%'.$search.'%')
+                        ->orWhere('report_number', 'like', '%'.$search.'%')
+                        ->orWhere('report_note', 'like', '%'.$search.'%')
+                        ->orWhereHas('asset', function ($query) use ($search) {
+                            $query->where('name', 'like', '%'.$search.'%')
+                                ->orWhere('code', 'like', '%'.$search.'%');
+                        })
+                        ->orWhereHas('user', function ($query) use ($search) {
+                            $query->where('name', 'like', '%'.$search.'%')
+                                ->orWhere('email', 'like', '%'.$search.'%');
+                        });
+                });
+            })
+            ->when($filters['condition'] ?? null, fn ($query, string $condition) => $query->where('condition', $condition))
             ->latest('returned_at')
             ->paginate(10)
+            ->withQueryString()
             ->through(function (AssetReturn $return) {
                 return [
                     'id' => $return->id,
@@ -47,7 +70,10 @@ class ReturnController extends Controller
 
         return view('admin.returns.index', [
             'returns' => $returns,
-            'returnTotal' => AssetReturn::query()->count(),
+            'returnTotal' => $returns->total(),
+            'conditions' => $this->conditionOptions(),
+            'filters' => $filters,
+            'hasActiveFilters' => collect($filters)->filter(fn ($value) => filled($value))->isNotEmpty(),
         ]);
     }
 
@@ -67,7 +93,7 @@ class ReturnController extends Controller
 
         $returnRecord = AssetReturn::query()->create($validated);
         $this->assetStateService->syncLoanById($returnRecord->loan_id);
-        $this->assetStateService->syncAssetIds([$returnRecord->asset_id]);
+        $this->assetStateService->syncAssetIds([$returnRecord->asset_id], true);
 
         $this->pegawaiNotificationService->sendReturnVerifiedNotification($returnRecord);
 
@@ -97,7 +123,7 @@ class ReturnController extends Controller
         $return->update($validated);
         $this->assetStateService->syncLoanById($previousLoanId);
         $this->assetStateService->syncLoanById($return->loan_id);
-        $this->assetStateService->syncAssetIds([$previousAssetId, $return->asset_id]);
+        $this->assetStateService->syncAssetIds([$previousAssetId, $return->asset_id], true);
 
         if ($previousStatus !== $return->status || $return->status === 'Terverifikasi') {
             $this->pegawaiNotificationService->sendReturnVerifiedNotification($return);
@@ -114,7 +140,7 @@ class ReturnController extends Controller
         $loanId = $return->loan_id;
         $return->delete();
         $this->assetStateService->syncLoanById($loanId);
-        $this->assetStateService->syncAssetById($assetId);
+        $this->assetStateService->syncAssetById($assetId, true);
 
         return redirect()
             ->route('admin.returns.index')

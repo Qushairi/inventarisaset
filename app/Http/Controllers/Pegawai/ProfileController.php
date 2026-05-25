@@ -46,7 +46,7 @@ class ProfileController extends BasePegawaiController
 
         if ($request->hasFile('signature_file')) {
             $validated = $request->validateWithBag('updateSignature', [
-                'signature_file' => ['required', 'image', 'mimes:png', 'max:2048'],
+                'signature_file' => ['required', 'image', 'mimes:png,jpg,jpeg', 'max:2048'],
             ]);
 
             $this->deleteStoredFile($pegawai->signature_path);

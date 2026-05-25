@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\Loan;
 use App\Models\Location;
 use App\Models\User;
+use App\Support\AssetStateService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -131,6 +132,56 @@ class ReturnAssetSyncTest extends TestCase
             'id' => $loan->id,
             'status' => 'Selesai',
         ]);
+    }
+
+    public function test_admin_asset_edit_can_override_latest_return_condition(): void
+    {
+        $admin = User::factory()->create([
+            'role' => 'admin',
+        ]);
+
+        $pegawai = User::factory()->create([
+            'role' => 'pegawai',
+        ]);
+
+        $asset = $this->createAsset([
+            'condition' => 'Rusak Berat',
+            'status' => 'Perbaikan',
+        ]);
+
+        AssetReturn::query()->create([
+            'loan_id' => null,
+            'asset_id' => $asset->id,
+            'user_id' => $pegawai->id,
+            'returned_at' => '2026-05-04',
+            'verified_note' => 'Sudah dicek admin.',
+            'condition' => 'Rusak Berat',
+            'status' => 'Terverifikasi',
+            'status_note' => 'Perlu perbaikan.',
+            'report_number' => 'RET-20260504-0003',
+            'report_note' => 'Kondisi awal rusak berat.',
+        ]);
+
+        $response = $this->actingAs($admin)->put(route('admin.assets.update', $asset), [
+            'category_id' => $asset->category_id,
+            'location_id' => $asset->location_id,
+            'name' => $asset->name,
+            'code' => $asset->code,
+            'note' => $asset->note,
+            'condition' => 'Rusak Ringan',
+            'status' => 'Perbaikan',
+            'quantity' => $asset->quantity ?: 1,
+            'acquisition_price' => $asset->acquisition_price,
+            'acquired_at' => optional($asset->acquired_at)->format('Y-m-d'),
+        ]);
+
+        $response->assertRedirect(route('admin.assets.index'));
+
+        $asset->refresh();
+        $resolvedState = app(AssetStateService::class)->resolveState($asset);
+
+        $this->assertSame('Rusak Ringan', $asset->condition);
+        $this->assertSame('Rusak Ringan', $resolvedState['condition']);
     }
 
     private function createAsset(array $overrides = []): Asset

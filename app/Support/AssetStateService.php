@@ -8,19 +8,12 @@ use App\Models\Loan;
 
 class AssetStateService
 {
-    public function resolveState(Asset $asset): array
+    public function resolveState(Asset $asset, bool $preferLatestReturn = false): array
     {
-        $latestVerifiedReturn = AssetReturn::query()
-            ->where('asset_id', $asset->id)
-            ->where('status', 'Terverifikasi')
-            ->latest('returned_at')
-            ->latest('id')
-            ->first();
-
-        $resolvedCondition = $latestVerifiedReturn?->condition ?? $asset->condition;
+        $resolvedCondition = $this->resolvedCondition($asset, $preferLatestReturn);
         $resolvedStatus = $this->hasActiveLoan($asset->id)
             ? 'Dipinjam'
-            : $this->statusFromCondition($resolvedCondition);
+            : $this->statusWithoutActiveLoan($asset, $resolvedCondition, $preferLatestReturn);
 
         return [
             'condition' => $resolvedCondition,
@@ -58,7 +51,7 @@ class AssetStateService
         $this->syncAssetById($loan->asset_id);
     }
 
-    public function syncAssetById(?int $assetId): void
+    public function syncAssetById(?int $assetId, bool $preferLatestReturn = false): void
     {
         if (! $assetId) {
             return;
@@ -70,7 +63,7 @@ class AssetStateService
             return;
         }
 
-        $resolvedState = $this->resolveState($asset);
+        $resolvedState = $this->resolveState($asset, $preferLatestReturn);
         $resolvedCondition = $resolvedState['condition'];
         $resolvedStatus = $resolvedState['status'];
 
@@ -84,10 +77,10 @@ class AssetStateService
         ])->saveQuietly();
     }
 
-    public function syncAssetIds(array $assetIds): void
+    public function syncAssetIds(array $assetIds, bool $preferLatestReturn = false): void
     {
         foreach (array_unique(array_filter($assetIds)) as $assetId) {
-            $this->syncAssetById((int) $assetId);
+            $this->syncAssetById((int) $assetId, $preferLatestReturn);
         }
     }
 
@@ -102,10 +95,41 @@ class AssetStateService
             ->exists();
     }
 
-    private function statusFromCondition(string $condition): string
+    private function resolvedCondition(Asset $asset, bool $preferLatestReturn = false): string
     {
-        return $condition === 'Rusak Berat'
-            ? 'Perbaikan'
-            : 'Tersedia';
+        $latestVerifiedReturn = AssetReturn::query()
+            ->where('asset_id', $asset->id)
+            ->where('status', 'Terverifikasi')
+            ->latest('updated_at')
+            ->latest('returned_at')
+            ->latest('id')
+            ->first();
+
+        if (! $latestVerifiedReturn) {
+            return $asset->condition;
+        }
+
+        if ($preferLatestReturn) {
+            return $latestVerifiedReturn->condition;
+        }
+
+        if ($asset->updated_at && $latestVerifiedReturn->updated_at && $asset->updated_at->greaterThanOrEqualTo($latestVerifiedReturn->updated_at)) {
+            return $asset->condition;
+        }
+
+        return $latestVerifiedReturn->condition;
+    }
+
+    private function statusWithoutActiveLoan(Asset $asset, string $condition, bool $preferLatestReturn = false): string
+    {
+        if ($preferLatestReturn) {
+            return $condition === 'Rusak Berat' ? 'Perbaikan' : 'Tersedia';
+        }
+
+        if ($asset->status !== 'Dipinjam') {
+            return $asset->status;
+        }
+
+        return $condition === 'Rusak Berat' ? 'Perbaikan' : 'Tersedia';
     }
 }

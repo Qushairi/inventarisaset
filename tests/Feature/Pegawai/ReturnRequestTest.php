@@ -42,7 +42,7 @@ class ReturnRequestTest extends TestCase
         ]);
 
         $response->assertRedirect(route('pegawai.returns.index'));
-        $response->assertSessionHas('success', 'Pengajuan pengembalian berhasil dikirim dan menunggu verifikasi admin.');
+        $response->assertSessionHas('success', 'Pengembalian berhasil dikirim dan otomatis terverifikasi.');
 
         $this->assertDatabaseHas('asset_returns', [
             'loan_id' => $loan->id,
@@ -50,12 +50,21 @@ class ReturnRequestTest extends TestCase
             'user_id' => $pegawai->id,
             'returned_at' => '2026-05-04 00:00:00',
             'condition' => 'Baik',
-            'status' => 'Menunggu Verifikasi',
-            'status_note' => 'Pengajuan pengembalian dari pegawai.',
+            'verified_note' => 'Terverifikasi otomatis oleh sistem.',
+            'status' => 'Terverifikasi',
+            'status_note' => 'Pengembalian otomatis terverifikasi.',
             'report_note' => 'Aset sudah selesai dipakai.',
         ]);
 
         $this->assertNotNull(AssetReturn::query()->first()?->report_number);
+        $this->assertDatabaseHas('loans', [
+            'id' => $loan->id,
+            'status' => 'Selesai',
+        ]);
+        $this->assertDatabaseHas('assets', [
+            'id' => $asset->id,
+            'status' => 'Tersedia',
+        ]);
     }
 
     public function test_pegawai_cannot_submit_return_request_for_unreturnable_loan(): void

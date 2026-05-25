@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EmployeeController;
 use App\Http\Controllers\Admin\LoanController;
 use App\Http\Controllers\Admin\LocationController;
+use App\Http\Controllers\Admin\NotificationController as AdminNotificationController;
 use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\ReturnController;
@@ -16,6 +17,7 @@ use App\Http\Controllers\Pegawai\NotificationController as PegawaiNotificationCo
 use App\Http\Controllers\Pegawai\ProfileController as PegawaiProfileController;
 use App\Http\Controllers\Pegawai\ReturnController as PegawaiReturnController;
 use App\Http\Controllers\Pegawai\SuratPeminjamanController as PegawaiSuratPeminjamanController;
+use App\Http\Controllers\ProfileMediaController;
 use App\Support\DashboardRedirector;
 use Illuminate\Support\Facades\Route;
 
@@ -24,6 +26,10 @@ Route::get('/', function () {
         ? redirect()->route(DashboardRedirector::routeNameFor(auth()->user()))
         : redirect()->route('login');
 })->name('dashboard');
+
+Route::middleware('auth')->get('/profile-media/{path}', [ProfileMediaController::class, 'show'])
+    ->where('path', '.*')
+    ->name('profile-media.show');
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
@@ -74,6 +80,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/pengembalian/{return}/surat/download', [ReturnController::class, 'downloadLetter'])->name('returns.letter.download');
 
     Route::get('/laporan', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/laporan/{type}/download', [ReportController::class, 'download'])->name('reports.download');
+    Route::get('/notifikasi', [AdminNotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/notifikasi/{notification}', [AdminNotificationController::class, 'show'])->name('notifications.show');
+    Route::patch('/notifikasi', [AdminNotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
     Route::get('/profile', [AdminProfileController::class, 'index'])->name('profile.index');
     Route::patch('/profile', [AdminProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [AdminProfileController::class, 'updatePassword'])->name('profile.password.update');

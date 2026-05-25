@@ -144,8 +144,8 @@
                             @method('PATCH')
                             <div class="form-group">
                                 <label for="signature_file">Upload Tanda Tangan</label>
-                                <input type="file" id="signature_file" name="signature_file" class="form-control @error('signature_file', 'updateSignature') is-invalid @enderror" accept=".png">
-                                <small class="text-muted d-block mt-2">Gunakan file PNG transparan dengan ukuran maksimal 2 MB agar tampil rapi pada surat peminjaman.</small>
+                                <input type="file" id="signature_file" name="signature_file" class="form-control @error('signature_file', 'updateSignature') is-invalid @enderror" accept=".png,.jpg,.jpeg">
+                                <small class="text-muted d-block mt-2">Format PNG, JPG, atau JPEG dengan ukuran maksimal 2 MB. PNG transparan tetap disarankan agar tampil rapi pada surat peminjaman.</small>
                                 @error('signature_file', 'updateSignature')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror

@@ -22,7 +22,7 @@
                                     </div>
                                 @endif
 
-                                <form class="form" action="{{ route('admin.assets.store') }}" method="POST">
+                                <form class="form" action="{{ route('admin.assets.store') }}" method="POST" enctype="multipart/form-data">
                                     @csrf
                                     <div class="row">
                                         <div class="col-md-6 col-12">
@@ -83,6 +83,12 @@
                                         </div>
                                         <div class="col-md-4 col-12">
                                             <div class="form-group">
+                                                <label for="quantity">Jumlah Aset</label>
+                                                <input type="number" min="1" step="1" id="quantity" name="quantity" class="form-control @error('quantity') is-invalid @enderror" placeholder="1" value="{{ old('quantity', 1) }}">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 col-12">
+                                            <div class="form-group">
                                                 <label for="acquisition_price">Nilai Perolehan</label>
                                                 <input type="number" step="0.01" id="acquisition_price" name="acquisition_price" class="form-control @error('acquisition_price') is-invalid @enderror" placeholder="0" value="{{ old('acquisition_price') }}">
                                             </div>
@@ -95,8 +101,9 @@
                                         </div>
                                         <div class="col-md-4 col-12">
                                             <div class="form-group">
-                                                <label for="image_path">Path Gambar</label>
-                                                <input type="text" id="image_path" name="image_path" class="form-control @error('image_path') is-invalid @enderror" placeholder="assets/images/..." value="{{ old('image_path') }}">
+                                                <label for="image_file">Upload Gambar</label>
+                                                <input type="file" id="image_file" name="image_file" class="form-control @error('image_file') is-invalid @enderror" accept=".jpg,.jpeg,.png,.webp">
+                                                <small class="text-muted">Format JPG, PNG, atau WebP. Maksimal 2 MB.</small>
                                             </div>
                                         </div>
                                         <div class="col-12">

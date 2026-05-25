@@ -23,17 +23,61 @@
         'Desember',
     ];
 
-    $formatTanggal = function ($date) use ($hari, $bulan) {
+    $terbilang = function ($number) use (&$terbilang) {
+        $number = (int) $number;
+        $words = [
+            '',
+            'satu',
+            'dua',
+            'tiga',
+            'empat',
+            'lima',
+            'enam',
+            'tujuh',
+            'delapan',
+            'sembilan',
+            'sepuluh',
+            'sebelas',
+        ];
+
+        if ($number < 12) {
+            return $words[$number];
+        }
+
+        if ($number < 20) {
+            return trim($terbilang($number - 10) . ' belas');
+        }
+
+        if ($number < 100) {
+            return trim($terbilang(intdiv($number, 10)) . ' puluh ' . $terbilang($number % 10));
+        }
+
+        if ($number < 200) {
+            return trim('seratus ' . $terbilang($number - 100));
+        }
+
+        if ($number < 1000) {
+            return trim($terbilang(intdiv($number, 100)) . ' ratus ' . $terbilang($number % 100));
+        }
+
+        if ($number < 2000) {
+            return trim('seribu ' . $terbilang($number - 1000));
+        }
+
+        return trim($terbilang(intdiv($number, 1000)) . ' ribu ' . $terbilang($number % 1000));
+    };
+
+    $formatTanggal = function ($date) use ($hari, $bulan, $terbilang) {
         if (!$date) {
             return '-';
         }
 
         return sprintf(
-            '%s, %02d %s %d',
+            '%s %s %s %s',
             $hari[$date->dayOfWeek] ?? '-',
-            $date->day,
+            $terbilang($date->day),
             $bulan[$date->month] ?? '-',
-            $date->year
+            $terbilang($date->year)
         );
     };
 
@@ -137,8 +181,8 @@
     </table>
 
     <div class="paragraph">
-        <span class="bold">PIHAK KEDUA</span> menyerahkan kembali kepada <span class="bold">PIHAK PERTAMA</span> aset
-        inventaris yang sebelumnya dipinjam untuk kebutuhan kedinasan dengan rincian sebagai berikut:
+        <span class="bold">PIHAK KEDUA</span> telah menyerahkan kepada <span class="bold">PIHAK PERTAMA</span> dan <span class="bold">PIHAK PERTAMA</span> telah menerima penyerahan barang
+        inventaris aset yang sebelumnya dipinjam untuk kebutuhan kedinasan dengan rincian sebagai berikut:
     </div>
 
     <table class="asset-table">
@@ -167,25 +211,13 @@
     </table>
 
     <div class="paragraph">
-        Aset tersebut tercatat dipinjam pada tanggal <span class="bold">{{ $formatTanggalSingkat($loanDate) }}</span>
-        dan dikembalikan pada tanggal <span class="bold">{{ $formatTanggalSingkat($returnedAt) }}</span> dengan status
-        pengembalian <span class="bold">{{ $statusLabel }}</span>.
-    </div>
-
-    @if ($combinedNote !== '')
-        <div class="paragraph">
-            Catatan serah terima: {{ $combinedNote }}
-        </div>
-    @endif
-
-    <div class="paragraph">
-        Dengan ditandatanganinya berita acara ini, kedua belah pihak menyatakan bahwa proses serah terima pengembalian
-        aset telah dilakukan sesuai data di atas dan menjadi bagian dari administrasi inventaris pada
-        {{ $office['agency_name'] }}.
+        Dengan ditandatangangannya Berita Acara Pinjam Pakai ini, maka berpindahlah hak dan tanggung jawab terhadap pemakaian/pemeliharaan barang inventaris kepada
+        <span class="bold">PIHAK PERTAMA</span> dan <span class="bold">PIHAK KEDUA</span> telah mengembalikan barang inventaris yang dipinjam pakai tersebut kepada <span class="bold">PIHAK PERTAMA</span>
+        di Dinas Pendidikan Kabupaten Bengkalis.
     </div>
 
     <div class="paragraph">
-        Demikian berita acara serah terima aset ini dibuat untuk dipergunakan sebagaimana mestinya.
+        Demikian berita acara pinjam pakai ini dibuat dalam rangkap 2(dua) dan ditandatangani di Bengkalis pada hari dan tanggal sebagaimana tersebut diatas.
     </div>
 
     <div class="paragraph signature-date">

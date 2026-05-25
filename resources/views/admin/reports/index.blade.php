@@ -12,9 +12,9 @@
                 </div>
                 <div class="card-body">
                     <div class="d-flex flex-wrap gap-2 mb-4">
-                        <a href="javascript:void(0)" class="btn btn-outline-primary btn-sm icon icon-left"><i class="bi bi-download"></i><span>Download PDF Inventaris</span></a>
-                        <a href="javascript:void(0)" class="btn btn-outline-success btn-sm icon icon-left"><i class="bi bi-download"></i><span>Download PDF Peminjaman</span></a>
-                        <a href="javascript:void(0)" class="btn btn-outline-warning btn-sm icon icon-left"><i class="bi bi-download"></i><span>Download PDF Pengembalian</span></a>
+                        <a href="{{ route('admin.reports.download', 'inventaris') }}" class="btn btn-outline-primary btn-sm icon icon-left"><i class="bi bi-download"></i><span>Download PDF Inventaris</span></a>
+                        <a href="{{ route('admin.reports.download', 'peminjaman') }}" class="btn btn-outline-success btn-sm icon icon-left"><i class="bi bi-download"></i><span>Download PDF Peminjaman</span></a>
+                        <a href="{{ route('admin.reports.download', 'pengembalian') }}" class="btn btn-outline-warning btn-sm icon icon-left"><i class="bi bi-download"></i><span>Download PDF Pengembalian</span></a>
                     </div>
                 </div>
             </div>

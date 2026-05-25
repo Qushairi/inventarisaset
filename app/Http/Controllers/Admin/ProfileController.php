@@ -35,9 +35,9 @@ class ProfileController extends Controller
                     'variant' => 'warning',
                 ],
                 [
-                    'label' => 'Pengembalian Menunggu',
-                    'value' => AssetReturn::query()->where('status', 'Menunggu Verifikasi')->count(),
-                    'icon' => 'arrow-counterclockwise',
+                    'label' => 'Pengembalian Terverifikasi',
+                    'value' => AssetReturn::query()->where('status', 'Terverifikasi')->count(),
+                    'icon' => 'clipboard-check',
                     'variant' => 'info',
                 ],
                 [
@@ -81,7 +81,7 @@ class ProfileController extends Controller
 
         if ($request->hasFile('signature_file')) {
             $validated = $request->validateWithBag('updateSignature', [
-                'signature_file' => ['required', 'image', 'mimes:png', 'max:2048'],
+                'signature_file' => ['required', 'image', 'mimes:png,jpg,jpeg', 'max:2048'],
             ]);
 
             $this->deleteStoredFile($admin->signature_path);
@@ -147,7 +147,17 @@ class ProfileController extends Controller
     private function deleteStoredFile(?string $path): void
     {
         if (filled($path)) {
-            Storage::disk('public')->delete($path);
+            $disk = Storage::disk('public');
+
+            if ($disk->delete($path)) {
+                return;
+            }
+
+            $absolutePath = $disk->path($path);
+
+            if (is_file($absolutePath)) {
+                @unlink($absolutePath);
+            }
         }
     }
 }

@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Filesystem\FilesystemAdapter;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 
 class Asset extends Model
 {
@@ -20,6 +23,7 @@ class Asset extends Model
         'image_path',
         'condition',
         'status',
+        'quantity',
         'acquisition_price',
         'acquired_at',
     ];
@@ -29,6 +33,7 @@ class Asset extends Model
         return [
             'acquired_at' => 'date',
             'acquisition_price' => 'decimal:2',
+            'quantity' => 'integer',
         ];
     }
 
@@ -57,8 +62,45 @@ class Asset extends Model
         return $this->hasMany(BeritaAcara::class);
     }
 
+    public function hasImage(): bool
+    {
+        return filled($this->image_path);
+    }
+
+    public function imageUrl(): ?string
+    {
+        if (! $this->hasImage()) {
+            return null;
+        }
+
+        $path = (string) $this->image_path;
+
+        if (str_starts_with($path, 'asset-images/')) {
+            return $this->publicFileUrl($path);
+        }
+
+        return asset($path);
+    }
+
     public function getRouteKeyName(): string
     {
         return 'code';
+    }
+
+    private function publicDisk(): FilesystemAdapter
+    {
+        /** @var FilesystemAdapter $disk */
+        $disk = Storage::disk('public');
+
+        return $disk;
+    }
+
+    private function publicFileUrl(string $path): string
+    {
+        if (Route::has('profile-media.show')) {
+            return route('profile-media.show', ['path' => $path]);
+        }
+
+        return $this->publicDisk()->url($path);
     }
 }

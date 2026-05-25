@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\Location;
 use App\Support\AssetStateService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -51,8 +52,8 @@ class AssetController extends Controller
                     'name' => $asset->name,
                     'code' => $asset->code,
                     'note' => $asset->note,
-                    'avatar_type' => $asset->image_path ? 'image' : 'initial',
-                    'avatar_value' => $asset->image_path ?: Str::upper(Str::substr($asset->name, 0, 1)),
+                    'avatar_type' => $asset->hasImage() ? 'image' : 'initial',
+                    'avatar_value' => $asset->imageUrl() ?: Str::upper(Str::substr($asset->name, 0, 1)),
                     'category' => $asset->category?->name,
                     'category_note' => $asset->category?->description ?? 'Kategori aset aktif pada sistem inventaris.',
                     'location' => $asset->location?->name,
@@ -61,6 +62,7 @@ class AssetController extends Controller
                     'condition_variant' => $this->conditionVariant($resolvedState['condition']),
                     'status' => $resolvedState['status'],
                     'status_variant' => $this->statusVariant($resolvedState['status']),
+                    'quantity' => $asset->quantity,
                     'price' => 'Rp ' . number_format((float) $asset->acquisition_price, 0, ',', '.'),
                     'acquired_at' => optional($asset->acquired_at)->format('d/m/Y'),
                 ];
@@ -90,6 +92,11 @@ class AssetController extends Controller
     public function store(Request $request)
     {
         $validated = $this->validateAsset($request);
+        unset($validated['image_file'], $validated['remove_image']);
+
+        if ($request->hasFile('image_file')) {
+            $validated['image_path'] = $request->file('image_file')->store('asset-images', 'public');
+        }
 
         Asset::query()->create($validated);
 
@@ -112,6 +119,17 @@ class AssetController extends Controller
     public function update(Request $request, Asset $asset)
     {
         $validated = $this->validateAsset($request, $asset);
+        unset($validated['image_file'], $validated['remove_image']);
+
+        if ($request->boolean('remove_image')) {
+            $this->deleteStoredAssetImage($asset->image_path);
+            $validated['image_path'] = null;
+        }
+
+        if ($request->hasFile('image_file')) {
+            $this->deleteStoredAssetImage($asset->image_path);
+            $validated['image_path'] = $request->file('image_file')->store('asset-images', 'public');
+        }
 
         $asset->update($validated);
 
@@ -129,6 +147,7 @@ class AssetController extends Controller
         }
 
         $name = $asset->name;
+        $this->deleteStoredAssetImage($asset->image_path);
         $asset->delete();
 
         return redirect()
@@ -173,11 +192,22 @@ class AssetController extends Controller
             'name' => ['required', 'string', 'max:100'],
             'code' => ['required', 'string', 'max:50', Rule::unique('assets', 'code')->ignore($asset?->id)],
             'note' => ['nullable', 'string', 'max:255'],
-            'image_path' => ['nullable', 'string', 'max:255'],
+            'image_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'remove_image' => ['nullable', 'boolean'],
             'condition' => ['required', Rule::in($this->conditionOptions())],
             'status' => ['required', Rule::in($this->statusOptions())],
+            'quantity' => ['required', 'integer', 'min:1'],
             'acquisition_price' => ['required', 'numeric', 'min:0'],
             'acquired_at' => ['nullable', 'date'],
         ]);
+    }
+
+    private function deleteStoredAssetImage(?string $path): void
+    {
+        if (! str_starts_with((string) $path, 'asset-images/')) {
+            return;
+        }
+
+        Storage::disk('public')->delete($path);
     }
 }

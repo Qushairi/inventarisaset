@@ -4,27 +4,46 @@ namespace App\Http\Controllers\Pegawai;
 
 use App\Models\AssetReturn;
 use App\Models\Loan;
+use App\Support\AdminNotificationService;
+use App\Support\AssetStateService;
+use App\Support\PegawaiNotificationService;
+use App\Support\SuratPeminjamanService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class ReturnController extends BasePegawaiController
 {
+    public function __construct(
+        private readonly SuratPeminjamanService $suratPeminjamanService,
+        private readonly AdminNotificationService $adminNotificationService,
+        private readonly AssetStateService $assetStateService,
+        private readonly PegawaiNotificationService $pegawaiNotificationService,
+    ) {
+    }
+
     public function index()
     {
         $pegawai = $this->currentPegawai();
 
         $returns = AssetReturn::query()
-            ->with(['asset', 'loan'])
+            ->with(['asset', 'loan.asset.category', 'loan.user', 'loan.approvedBy', 'loan.suratPeminjaman'])
             ->where('user_id', $pegawai->id)
             ->latest('returned_at')
             ->paginate(10)
             ->through(function (AssetReturn $return) {
+                $loan = $return->loan;
+                $suratPeminjaman = $loan
+                    ? $this->suratPeminjamanService->ensureForLoan($loan)
+                    : null;
+
                 return [
                     'asset_name' => $return->asset?->name,
                     'asset_code' => $return->asset?->code,
+                    'loan_date' => optional($loan?->loan_date)->format('d/m/Y'),
                     'returned_at' => optional($return->returned_at)->format('d/m/Y'),
                     'verified_note' => $return->verified_note,
                     'condition' => $return->condition,
@@ -38,6 +57,13 @@ class ReturnController extends BasePegawaiController
                     'status_note' => $return->status_note,
                     'report_number' => $return->report_number,
                     'report_note' => $return->report_note,
+                    'letter_number' => $suratPeminjaman?->number,
+                    'letter_url' => $suratPeminjaman && $loan
+                        ? route('pegawai.loans.letter.show', $loan)
+                        : null,
+                    'letter_download_url' => $suratPeminjaman && $loan
+                        ? route('pegawai.loans.letter.download', $loan)
+                        : null,
                 ];
             });
 
@@ -70,22 +96,33 @@ class ReturnController extends BasePegawaiController
             ])->errorBag('createReturn');
         }
 
-        AssetReturn::query()->create([
+        if ($loan->loan_date && $loan->loan_date->gt(Carbon::parse($validated['returned_at']))) {
+            throw ValidationException::withMessages([
+                'returned_at' => 'Tanggal kembali tidak boleh lebih awal dari tanggal peminjaman.',
+            ])->errorBag('createReturn');
+        }
+
+        $return = AssetReturn::query()->create([
             'loan_id' => $loan->id,
             'asset_id' => $loan->asset_id,
             'user_id' => $pegawai->id,
             'returned_at' => $validated['returned_at'],
-            'verified_note' => null,
+            'verified_note' => 'Terverifikasi otomatis oleh sistem.',
             'condition' => $validated['condition'],
-            'status' => 'Menunggu Verifikasi',
-            'status_note' => 'Pengajuan pengembalian dari pegawai.',
+            'status' => 'Terverifikasi',
+            'status_note' => 'Pengembalian otomatis terverifikasi.',
             'report_number' => $this->generateReportNumber(),
             'report_note' => $validated['report_note'] ?: null,
         ]);
 
+        $this->assetStateService->syncLoanById($return->loan_id);
+        $this->assetStateService->syncAssetIds([$return->asset_id], true);
+        $this->adminNotificationService->sendReturnRequestNotification($return);
+        $this->pegawaiNotificationService->sendReturnVerifiedNotification($return);
+
         return redirect()
             ->route('pegawai.returns.index')
-            ->with('success', 'Pengajuan pengembalian berhasil dikirim dan menunggu verifikasi admin.');
+            ->with('success', 'Pengembalian berhasil dikirim dan otomatis terverifikasi.');
     }
 
     private function conditionOptions(): array

@@ -13,6 +13,7 @@ use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -65,7 +66,7 @@ class User extends Authenticatable
     public function profilePhotoUrl(): ?string
     {
         return $this->hasProfilePhoto()
-            ? $this->publicDisk()->url((string) $this->profile_photo_path)
+            ? $this->publicFileUrl((string) $this->profile_photo_path)
             : null;
     }
 
@@ -77,7 +78,7 @@ class User extends Authenticatable
     public function signatureUrl(): ?string
     {
         return $this->hasSignature()
-            ? $this->publicDisk()->url((string) $this->signature_path)
+            ? $this->publicFileUrl((string) $this->signature_path)
             : null;
     }
 
@@ -99,5 +100,14 @@ class User extends Authenticatable
         $disk = Storage::disk('public');
 
         return $disk;
+    }
+
+    private function publicFileUrl(string $path): string
+    {
+        if (Route::has('profile-media.show')) {
+            return route('profile-media.show', ['path' => $path]);
+        }
+
+        return $this->publicDisk()->url($path);
     }
 }

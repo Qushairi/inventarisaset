@@ -21,12 +21,32 @@ class LoanController extends Controller
     ) {
     }
 
-    public function index()
+    public function index(Request $request)
     {
+        $filters = $request->validate([
+            'search' => ['nullable', 'string', 'max:100'],
+            'status' => ['nullable', Rule::in($this->statusOptions())],
+        ]);
+
         $loans = Loan::query()
             ->with(['asset', 'user'])
+            ->when($filters['search'] ?? null, function ($query, string $search) {
+                $query->where(function ($query) use ($search) {
+                    $query->where('status_note', 'like', '%'.$search.'%')
+                        ->orWhereHas('asset', function ($query) use ($search) {
+                            $query->where('name', 'like', '%'.$search.'%')
+                                ->orWhere('code', 'like', '%'.$search.'%');
+                        })
+                        ->orWhereHas('user', function ($query) use ($search) {
+                            $query->where('name', 'like', '%'.$search.'%')
+                                ->orWhere('email', 'like', '%'.$search.'%');
+                        });
+                });
+            })
+            ->when($filters['status'] ?? null, fn ($query, string $status) => $query->where('status', $status))
             ->latest('loan_date')
             ->paginate(10)
+            ->withQueryString()
             ->through(function (Loan $loan) {
                 return [
                     'id' => $loan->id,
@@ -44,7 +64,10 @@ class LoanController extends Controller
 
         return view('admin.loans.index', [
             'loans' => $loans,
-            'loanTotal' => Loan::query()->count(),
+            'loanTotal' => $loans->total(),
+            'statuses' => $this->statusOptions(),
+            'filters' => $filters,
+            'hasActiveFilters' => collect($filters)->filter(fn ($value) => filled($value))->isNotEmpty(),
         ]);
     }
 

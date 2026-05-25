@@ -9,11 +9,26 @@ use Illuminate\Validation\Rule;
 
 class LocationController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $filters = $request->validate([
+            'search' => ['nullable', 'string', 'max:100'],
+        ]);
+
         $locations = Location::query()
+            ->when($filters['search'] ?? null, function ($query, string $search) {
+                $query->where(function ($query) use ($search) {
+                    $query->where('name', 'like', '%'.$search.'%')
+                        ->orWhere('code', 'like', '%'.$search.'%')
+                        ->orWhere('address', 'like', '%'.$search.'%')
+                        ->orWhere('address_note', 'like', '%'.$search.'%')
+                        ->orWhere('description', 'like', '%'.$search.'%')
+                        ->orWhere('note', 'like', '%'.$search.'%');
+                });
+            })
             ->orderBy('name')
             ->paginate(10)
+            ->withQueryString()
             ->through(fn (Location $location) => [
                 'name' => $location->name,
                 'code' => $location->code,
@@ -25,6 +40,8 @@ class LocationController extends Controller
 
         return view('admin.locations.index', [
             'locations' => $locations,
+            'filters' => $filters,
+            'hasActiveFilters' => collect($filters)->filter(fn ($value) => filled($value))->isNotEmpty(),
         ]);
     }
 
