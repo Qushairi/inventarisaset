@@ -15,12 +15,14 @@ class AssetReturn extends Model
     protected $fillable = [
         'loan_id',
         'asset_id',
+        'stock_asset_id',
         'user_id',
         'returned_at',
         'verified_note',
         'condition',
         'status',
         'status_note',
+        'stock_applied_at',
         'report_number',
         'report_note',
     ];
@@ -29,12 +31,18 @@ class AssetReturn extends Model
     {
         return [
             'returned_at' => 'date',
+            'stock_applied_at' => 'datetime',
         ];
     }
 
     public function asset(): BelongsTo
     {
         return $this->belongsTo(Asset::class);
+    }
+
+    public function stockAsset(): BelongsTo
+    {
+        return $this->belongsTo(Asset::class, 'stock_asset_id');
     }
 
     public function user(): BelongsTo

@@ -31,6 +31,7 @@ class AssetController extends Controller
 
         $assets = Asset::query()
             ->with(['category', 'location'])
+            ->where('quantity', '>', 0)
             ->when($filters['search'] ?? null, function ($query, string $search) {
                 $query->where(function ($query) use ($search) {
                     $query->where('name', 'like', '%'.$search.'%')
@@ -52,6 +53,9 @@ class AssetController extends Controller
                     'name' => $asset->name,
                     'code' => $asset->code,
                     'note' => $asset->note,
+                    'serial_number' => $asset->serial_number,
+                    'size' => $asset->size,
+                    'material' => $asset->material,
                     'avatar_type' => $asset->hasImage() ? 'image' : 'initial',
                     'avatar_value' => $asset->imageUrl() ?: Str::upper(Str::substr($asset->name, 0, 1)),
                     'category' => $asset->category?->name,
@@ -64,7 +68,7 @@ class AssetController extends Controller
                     'status_variant' => $this->statusVariant($resolvedState['status']),
                     'quantity' => $asset->quantity,
                     'price' => 'Rp ' . number_format((float) $asset->acquisition_price, 0, ',', '.'),
-                    'acquired_at' => optional($asset->acquired_at)->format('d/m/Y'),
+                    'acquisition_year' => $asset->acquisition_year ?: optional($asset->acquired_at)->format('Y'),
                 ];
             });
 
@@ -118,6 +122,7 @@ class AssetController extends Controller
 
     public function update(Request $request, Asset $asset)
     {
+        $previousCondition = $asset->condition;
         $validated = $this->validateAsset($request, $asset);
         unset($validated['image_file'], $validated['remove_image']);
 
@@ -132,6 +137,7 @@ class AssetController extends Controller
         }
 
         $asset->update($validated);
+        $this->assetStateService->mergeAssetAfterManualUpdate($asset, $previousCondition);
 
         return redirect()
             ->route('admin.assets.index')
@@ -194,10 +200,14 @@ class AssetController extends Controller
             'note' => ['nullable', 'string', 'max:255'],
             'image_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'remove_image' => ['nullable', 'boolean'],
+            'serial_number' => ['nullable', 'string', 'max:100'],
+            'size' => ['nullable', 'string', 'max:100'],
+            'material' => ['nullable', 'string', 'max:100'],
             'condition' => ['required', Rule::in($this->conditionOptions())],
             'status' => ['required', Rule::in($this->statusOptions())],
             'quantity' => ['required', 'integer', 'min:1'],
             'acquisition_price' => ['required', 'numeric', 'min:0'],
+            'acquisition_year' => ['nullable', 'integer', 'min:1900', 'max:' . ((int) date('Y') + 1)],
             'acquired_at' => ['nullable', 'date'],
         ]);
     }

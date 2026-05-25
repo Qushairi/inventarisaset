@@ -56,6 +56,7 @@ class LoanController extends Controller
                     'employee_email' => $loan->user?->email,
                     'loan_date' => optional($loan->loan_date)->format('d/m/Y'),
                     'return_plan' => 'Rencana kembali ' . optional($loan->planned_return_date)->format('d/m/Y'),
+                    'quantity' => $loan->quantity,
                     'status' => $loan->status,
                     'status_variant' => $this->statusVariant($loan->status),
                     'status_note' => $loan->status_note,
@@ -74,7 +75,7 @@ class LoanController extends Controller
     public function create()
     {
         return view('admin.loans.create', [
-            'assets' => Asset::query()->orderBy('name')->get(),
+            'assets' => Asset::query()->where('quantity', '>', 0)->orderBy('name')->get(),
             'employees' => User::query()->where('role', 'pegawai')->orderBy('name')->get(),
             'statuses' => $this->statusOptions(),
         ]);
@@ -86,6 +87,7 @@ class LoanController extends Controller
 
         $loan = Loan::query()->create($validated);
         $this->syncApprover($loan, $request->user());
+        $this->assetStateService->applyLoanStock($loan);
         $this->assetStateService->syncLoanById($loan->id);
         $loan->refresh();
 
@@ -110,11 +112,25 @@ class LoanController extends Controller
     public function update(Request $request, Loan $loan)
     {
         $previousAssetId = $loan->asset_id;
+        $shouldReapplyStock = $loan->stock_applied_at
+            && ! $loan->returnRecord()->whereNotNull('stock_applied_at')->exists()
+            && (
+                (int) $request->input('asset_id') !== (int) $loan->asset_id
+                || (int) $request->input('quantity') !== (int) $loan->quantity
+            );
         $validated = $this->validateLoan($request, $loan);
         $previousStatus = $loan->status;
 
+        if ($shouldReapplyStock) {
+            $this->assetStateService->reverseLoanStock($loan);
+        }
+
         $loan->update($validated);
         $this->syncApprover($loan, $request->user());
+        if (! in_array($loan->status, ['Disetujui', 'Selesai'], true)) {
+            $this->assetStateService->reverseLoanStock($loan);
+        }
+        $this->assetStateService->applyLoanStock($loan);
         $this->assetStateService->syncLoanById($loan->id);
         $this->assetStateService->syncAssetIds([$previousAssetId, $loan->asset_id]);
         $loan->refresh();
@@ -146,6 +162,7 @@ class LoanController extends Controller
             'approved_by_user_id' => $validated['status'] === 'Disetujui' ? $request->user()?->id : null,
         ]);
 
+        $this->assetStateService->applyLoanStock($loan);
         $this->assetStateService->syncLoanById($loan->id);
         $loan->refresh();
         $this->refreshSuratPeminjamanIfEligible($loan, $request->user());
@@ -165,6 +182,7 @@ class LoanController extends Controller
         }
 
         $assetId = $loan->asset_id;
+        $this->assetStateService->reverseLoanStock($loan);
         $loan->delete();
         $this->assetStateService->syncAssetById($assetId);
 
@@ -223,6 +241,7 @@ class LoanController extends Controller
             'user_id' => ['required', 'exists:users,id'],
             'loan_date' => ['required', 'date', $uniqueRule],
             'planned_return_date' => ['nullable', 'date', 'after_or_equal:loan_date'],
+            'quantity' => ['required', 'integer', 'min:1'],
             'status' => ['required', Rule::in($this->statusOptions())],
             'status_note' => ['nullable', 'string', 'max:255'],
         ]);

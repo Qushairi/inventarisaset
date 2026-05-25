@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Pegawai;
 use App\Models\Asset;
 use App\Models\Loan;
 use App\Support\AdminNotificationService;
+use App\Support\AssetStateService;
 use App\Support\SuratPeminjamanService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -16,6 +17,7 @@ class LoanController extends BasePegawaiController
     public function __construct(
         private readonly SuratPeminjamanService $suratPeminjamanService,
         private readonly AdminNotificationService $adminNotificationService,
+        private readonly AssetStateService $assetStateService,
     ) {
     }
 
@@ -40,6 +42,7 @@ class LoanController extends BasePegawaiController
                     'asset_code' => $loan->asset?->code,
                     'loan_date' => optional($loan->loan_date)->format('d/m/Y'),
                     'return_plan' => 'Rencana kembali ' . optional($loan->planned_return_date)->format('d/m/Y'),
+                    'quantity' => $loan->quantity,
                     'status' => $loan->status,
                     'status_variant' => match ($loan->status) {
                         'Ditolak' => 'danger',
@@ -82,6 +85,7 @@ class LoanController extends BasePegawaiController
                     ->where('loan_date', $request->input('loan_date'))),
             ],
             'planned_return_date' => ['required', 'date', 'after_or_equal:loan_date'],
+            'quantity' => ['required', 'integer', 'min:1'],
             'status_note' => ['nullable', 'string', 'max:255'],
         ]);
 
@@ -95,11 +99,18 @@ class LoanController extends BasePegawaiController
             ])->errorBag('createLoan');
         }
 
+        if ((int) $validated['quantity'] > $asset->quantity) {
+            throw ValidationException::withMessages([
+                'quantity' => 'Jumlah peminjaman melebihi stok aset yang tersedia.',
+            ])->errorBag('createLoan');
+        }
+
         $loan = Loan::query()->create([
             'asset_id' => $asset->id,
             'user_id' => $pegawai->id,
             'loan_date' => $validated['loan_date'],
             'planned_return_date' => $validated['planned_return_date'],
+            'quantity' => $validated['quantity'],
             'status' => 'Menunggu',
             'status_note' => $validated['status_note'] ?: 'Pengajuan peminjaman dari pegawai.',
         ]);
@@ -116,8 +127,10 @@ class LoanController extends BasePegawaiController
         return Asset::query()
             ->with(['category', 'location'])
             ->where('status', 'Tersedia')
+            ->where('quantity', '>', 0)
             ->whereDoesntHave('loans', function ($query) {
                 $query->where('status', 'Disetujui')
+                    ->whereColumn('loans.quantity', '>=', 'assets.quantity')
                     ->whereDoesntHave('returnRecord', function ($query) {
                         $query->where('status', 'Terverifikasi');
                     });

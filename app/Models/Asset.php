@@ -10,6 +10,24 @@ use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * @property int $id
+ * @property int $category_id
+ * @property int $location_id
+ * @property string $name
+ * @property string $code
+ * @property string|null $note
+ * @property string|null $image_path
+ * @property string|null $serial_number
+ * @property string|null $size
+ * @property string|null $material
+ * @property string $condition
+ * @property string $status
+ * @property int $quantity
+ * @property string|float|null $acquisition_price
+ * @property int|null $acquisition_year
+ * @property \Illuminate\Support\Carbon|null $acquired_at
+ */
 class Asset extends Model
 {
     use HasFactory;
@@ -21,10 +39,14 @@ class Asset extends Model
         'code',
         'note',
         'image_path',
+        'serial_number',
+        'size',
+        'material',
         'condition',
         'status',
         'quantity',
         'acquisition_price',
+        'acquisition_year',
         'acquired_at',
     ];
 
@@ -33,6 +55,7 @@ class Asset extends Model
         return [
             'acquired_at' => 'date',
             'acquisition_price' => 'decimal:2',
+            'acquisition_year' => 'integer',
             'quantity' => 'integer',
         ];
     }

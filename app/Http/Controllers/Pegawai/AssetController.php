@@ -14,35 +14,43 @@ class AssetController extends BasePegawaiController
 
         $assets = Asset::query()
             ->with(['category', 'location'])
+            ->where('quantity', '>', 0)
             ->orderBy('name')
             ->paginate($perPage)
             ->withQueryString()
             ->through(function (Asset $asset) {
+                $name = (string) $asset->getAttribute('name');
+                $condition = (string) $asset->getAttribute('condition');
+                $status = (string) $asset->getAttribute('status');
+
                 return [
-                    'name' => $asset->name,
-                    'code' => $asset->code,
-                    'note' => $asset->note,
+                    'name' => $name,
+                    'code' => $asset->getAttribute('code'),
+                    'note' => $asset->getAttribute('note'),
+                    'serial_number' => $asset->getAttribute('serial_number'),
+                    'size' => $asset->getAttribute('size'),
+                    'material' => $asset->getAttribute('material'),
                     'avatar_type' => $asset->hasImage() ? 'image' : 'initial',
-                    'avatar_value' => $asset->imageUrl() ?: Str::upper(Str::substr($asset->name, 0, 1)),
+                    'avatar_value' => $asset->imageUrl() ?: Str::upper(Str::substr($name, 0, 1)),
                     'category' => $asset->category?->name,
                     'category_note' => $asset->category?->description ?? 'Kategori aset aktif pada sistem inventaris.',
                     'location' => $asset->location?->name,
                     'location_note' => $asset->location?->address ?? 'Lokasi aset tersimpan pada sistem.',
-                    'condition' => $asset->condition,
-                    'condition_variant' => match ($asset->condition) {
+                    'condition' => $condition,
+                    'condition_variant' => match ($condition) {
                         'Rusak Ringan' => 'warning',
                         'Rusak Berat' => 'danger',
                         default => 'success',
                     },
-                    'status' => $asset->status,
-                    'status_variant' => match ($asset->status) {
+                    'status' => $status,
+                    'status_variant' => match ($status) {
                         'Dipinjam' => 'warning',
                         'Perbaikan' => 'danger',
                         'Diverifikasi' => 'info',
                         default => 'success',
                     },
-                    'price' => 'Rp ' . number_format((float) $asset->acquisition_price, 0, ',', '.'),
-                    'acquired_at' => optional($asset->acquired_at)->format('d/m/Y'),
+                    'price' => 'Rp ' . number_format((float) $asset->getAttribute('acquisition_price'), 0, ',', '.'),
+                    'acquisition_year' => $asset->getAttribute('acquisition_year') ?: optional($asset->getAttribute('acquired_at'))->format('Y'),
                 ];
             });
 

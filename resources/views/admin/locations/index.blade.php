@@ -99,6 +99,7 @@
                         'to' => $locations->lastItem() ?? 0,
                         'total' => $locations->total(),
                         'label' => 'lokasi',
+                        'paginator' => $locations,
                     ])
                 </div>
             </div>

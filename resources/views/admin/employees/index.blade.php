@@ -105,6 +105,7 @@
                         'to' => $employees->lastItem() ?? 0,
                         'total' => $employees->total(),
                         'label' => 'pegawai',
+                        'paginator' => $employees,
                     ])
                 </div>
             </div>

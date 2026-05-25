@@ -48,7 +48,7 @@
                                             <select id="asset_id" name="asset_id" class="form-select @error('asset_id') is-invalid @enderror">
                                                 <option value="">Pilih aset</option>
                                                 @foreach ($assets as $asset)
-                                                    <option value="{{ $asset->id }}" @selected(old('asset_id') == $asset->id)>{{ $asset->name }} ({{ $asset->code }})</option>
+                                                    <option value="{{ $asset->id }}" @selected(old('asset_id') == $asset->id)>{{ $asset->name }} ({{ $asset->code }}) - Stok {{ $asset->quantity }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -86,7 +86,7 @@
                                 </div>
                             </div>
                             <div class="row g-3">
-                                <div class="col-md-4 col-12">
+                                <div class="col-md-3 col-12">
                                     <div class="form-group transaction-field">
                                         <label for="loan_date">Tanggal Pinjam</label>
                                         <div class="transaction-input-shell">
@@ -98,7 +98,7 @@
                                         @enderror
                                     </div>
                                 </div>
-                                <div class="col-md-4 col-12">
+                                <div class="col-md-3 col-12">
                                     <div class="form-group transaction-field">
                                         <label for="planned_return_date">Rencana Kembali</label>
                                         <div class="transaction-input-shell">
@@ -110,7 +110,19 @@
                                         @enderror
                                     </div>
                                 </div>
-                                <div class="col-md-4 col-12">
+                                <div class="col-md-3 col-12">
+                                    <div class="form-group transaction-field">
+                                        <label for="quantity">Jumlah</label>
+                                        <div class="transaction-input-shell">
+                                            <span class="transaction-input-icon"><i class="bi bi-123"></i></span>
+                                            <input type="number" min="1" step="1" id="quantity" name="quantity" class="form-control @error('quantity') is-invalid @enderror" value="{{ old('quantity', 1) }}">
+                                        </div>
+                                        @error('quantity')
+                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-12">
                                     <div class="form-group transaction-field">
                                         <label for="status">Status</label>
                                         <div class="transaction-input-shell">

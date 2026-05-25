@@ -116,6 +116,7 @@
                         'to' => $returns->lastItem() ?? 0,
                         'total' => $returnTotal,
                         'label' => 'pengembalian',
+                        'paginator' => $returns,
                     ])
                 </div>
             </div>

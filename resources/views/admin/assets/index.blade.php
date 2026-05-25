@@ -123,6 +123,8 @@
                                                 <div>
                                                     <h6 class="mb-0">{{ $asset['name'] }}</h6>
                                                     <small class="text-muted d-block">{{ $asset['code'] }}</small>
+                                                    <small class="text-muted d-block">Seri: {{ $asset['serial_number'] ?: '-' }}</small>
+                                                    <small class="text-muted d-block">Ukuran: {{ $asset['size'] ?: '-' }} | Bahan: {{ $asset['material'] ?: '-' }}</small>
                                                     <small class="text-muted">{{ $asset['note'] }}</small>
                                                 </div>
                                             </div>
@@ -139,7 +141,7 @@
                                         <td><span class="badge {{ $statusBadge }}">{{ $asset['status'] }}</span></td>
                                         <td>
                                             <div>{{ $asset['price'] }}</div>
-                                            <small class="text-muted">Perolehan {{ $asset['acquired_at'] }}</small>
+                                            <small class="text-muted">Tahun {{ $asset['acquisition_year'] ?: '-' }}</small>
                                         </td>
                                         <td class="text-end">
                                             <div class="d-inline-flex flex-nowrap gap-2">
@@ -167,6 +169,7 @@
                         'to' => $assets->lastItem() ?? 0,
                         'total' => $assets->total(),
                         'label' => 'aset',
+                        'paginator' => $assets,
                     ])
                 </div>
             </div>

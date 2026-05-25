@@ -79,6 +79,7 @@
                                         <td>
                                             <div>{{ $loan['asset_name'] }}</div>
                                             <small class="text-muted">{{ $loan['asset_code'] }}</small>
+                                            <div><small class="text-muted">Jumlah: {{ $loan['quantity'] }}</small></div>
                                         </td>
                                         <td>
                                             <div>{{ $loan['employee_name'] }}</div>
@@ -130,6 +131,7 @@
                         'to' => $loans->lastItem() ?? 0,
                         'total' => $loanTotal,
                         'label' => 'peminjaman',
+                        'paginator' => $loans,
                     ])
                 </div>
             </div>

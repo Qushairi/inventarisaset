@@ -92,8 +92,10 @@ class ReturnController extends Controller
         $validated = $this->validateReturn($request);
 
         $returnRecord = AssetReturn::query()->create($validated);
+        $this->assetStateService->applyReturnStock($returnRecord);
         $this->assetStateService->syncLoanById($returnRecord->loan_id);
-        $this->assetStateService->syncAssetIds([$returnRecord->asset_id], true);
+        $returnRecord->refresh();
+        $this->assetStateService->syncAssetIds([$returnRecord->asset_id, $returnRecord->stock_asset_id], true);
 
         $this->pegawaiNotificationService->sendReturnVerifiedNotification($returnRecord);
 
@@ -120,10 +122,13 @@ class ReturnController extends Controller
         $validated = $this->validateReturn($request, $return);
         $previousStatus = $return->status;
 
+        $this->assetStateService->reverseReturnStock($return);
         $return->update($validated);
+        $this->assetStateService->applyReturnStock($return);
+        $return->refresh();
         $this->assetStateService->syncLoanById($previousLoanId);
         $this->assetStateService->syncLoanById($return->loan_id);
-        $this->assetStateService->syncAssetIds([$previousAssetId, $return->asset_id], true);
+        $this->assetStateService->syncAssetIds([$previousAssetId, $return->asset_id, $return->stock_asset_id], true);
 
         if ($previousStatus !== $return->status || $return->status === 'Terverifikasi') {
             $this->pegawaiNotificationService->sendReturnVerifiedNotification($return);
@@ -138,9 +143,11 @@ class ReturnController extends Controller
     {
         $assetId = $return->asset_id;
         $loanId = $return->loan_id;
+        $stockAssetId = $return->stock_asset_id;
+        $this->assetStateService->reverseReturnStock($return);
         $return->delete();
         $this->assetStateService->syncLoanById($loanId);
-        $this->assetStateService->syncAssetById($assetId, true);
+        $this->assetStateService->syncAssetIds([$assetId, $stockAssetId], true);
 
         return redirect()
             ->route('admin.returns.index')

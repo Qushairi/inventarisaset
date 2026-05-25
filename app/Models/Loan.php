@@ -17,11 +17,13 @@ class Loan extends Model
         'approved_by_user_id',
         'loan_date',
         'planned_return_date',
+        'quantity',
         'status',
         'status_note',
         'loan_letter_number',
         'loan_letter_svg',
         'loan_letter_generated_at',
+        'stock_applied_at',
     ];
 
     protected function casts(): array
@@ -29,7 +31,9 @@ class Loan extends Model
         return [
             'loan_date' => 'date',
             'planned_return_date' => 'date',
+            'quantity' => 'integer',
             'loan_letter_generated_at' => 'datetime',
+            'stock_applied_at' => 'datetime',
         ];
     }
 

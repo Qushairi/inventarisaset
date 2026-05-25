@@ -145,6 +145,7 @@
                                         <td>
                                             <div>{{ $loan['asset_name'] }}</div>
                                             <small class="text-muted">{{ $loan['asset_code'] }}</small>
+                                            <div><small class="text-muted">Jumlah: {{ $loan['quantity'] }}</small></div>
                                         </td>
                                         <td>
                                             <div>Pinjam: {{ $loan['loan_date'] }}</div>
@@ -231,7 +232,7 @@
                                                 <option value="">Pilih aset yang tersedia</option>
                                                 @foreach ($availableAssets as $asset)
                                                     <option value="{{ $asset->id }}" @selected(old('asset_id') == $asset->id)>
-                                                        {{ $asset->name }} ({{ $asset->code }}) - {{ $asset->location?->name }}
+                                                        {{ $asset->name }} ({{ $asset->code }}) - Stok {{ $asset->quantity }} - {{ $asset->location?->name }}
                                                     </option>
                                                 @endforeach
                                             </select>
@@ -241,7 +242,28 @@
                                         @enderror
                                     </div>
                                 </div>
-                                <div class="col-md-6 col-12">
+                                <div class="col-md-3 col-12">
+                                    <div class="form-group transaction-field">
+                                        <label for="quantity">Jumlah</label>
+                                        <div class="transaction-input-shell">
+                                            <span class="transaction-input-icon"><i class="bi bi-123"></i></span>
+                                            <input
+                                                type="number"
+                                                min="1"
+                                                step="1"
+                                                id="quantity"
+                                                name="quantity"
+                                                class="form-control @error('quantity', 'createLoan') is-invalid @enderror"
+                                                value="{{ old('quantity', 1) }}"
+                                                @disabled($availableAssets->isEmpty())
+                                            >
+                                        </div>
+                                        @error('quantity', 'createLoan')
+                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-12">
                                     <div class="form-group transaction-field">
                                         <label for="status_info">Status Pengajuan</label>
                                         <div class="transaction-input-shell">

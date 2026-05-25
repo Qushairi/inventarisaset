@@ -94,6 +94,7 @@
                         'to' => $categories->lastItem() ?? 0,
                         'total' => $categories->total(),
                         'label' => 'kategori',
+                        'paginator' => $categories,
                     ])
                 </div>
             </div>

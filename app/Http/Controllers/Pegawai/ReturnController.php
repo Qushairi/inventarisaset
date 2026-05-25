@@ -117,8 +117,10 @@ class ReturnController extends BasePegawaiController
             'report_note' => $validated['report_note'] ?: null,
         ]);
 
+        $this->assetStateService->applyReturnStock($return);
         $this->assetStateService->syncLoanById($return->loan_id);
-        $this->assetStateService->syncAssetIds([$return->asset_id], true);
+        $return->refresh();
+        $this->assetStateService->syncAssetIds([$return->asset_id, $return->stock_asset_id], true);
         $this->adminNotificationService->sendReturnRequestNotification($return);
         $this->pegawaiNotificationService->sendReturnVerifiedNotification($return);
 

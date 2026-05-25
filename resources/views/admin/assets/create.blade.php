@@ -83,6 +83,24 @@
                                         </div>
                                         <div class="col-md-4 col-12">
                                             <div class="form-group">
+                                                <label for="serial_number">Nomor Seri</label>
+                                                <input type="text" id="serial_number" name="serial_number" class="form-control @error('serial_number') is-invalid @enderror" placeholder="Nomor seri pabrik" value="{{ old('serial_number') }}">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 col-12">
+                                            <div class="form-group">
+                                                <label for="size">Ukuran</label>
+                                                <input type="text" id="size" name="size" class="form-control @error('size') is-invalid @enderror" placeholder="Ukuran" value="{{ old('size') }}">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 col-12">
+                                            <div class="form-group">
+                                                <label for="material">Bahan</label>
+                                                <input type="text" id="material" name="material" class="form-control @error('material') is-invalid @enderror" placeholder="Bahan" value="{{ old('material') }}">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 col-12">
+                                            <div class="form-group">
                                                 <label for="quantity">Jumlah Aset</label>
                                                 <input type="number" min="1" step="1" id="quantity" name="quantity" class="form-control @error('quantity') is-invalid @enderror" placeholder="1" value="{{ old('quantity', 1) }}">
                                             </div>
@@ -95,8 +113,8 @@
                                         </div>
                                         <div class="col-md-4 col-12">
                                             <div class="form-group">
-                                                <label for="acquired_at">Tanggal Perolehan</label>
-                                                <input type="date" id="acquired_at" name="acquired_at" class="form-control @error('acquired_at') is-invalid @enderror" value="{{ old('acquired_at') }}">
+                                                <label for="acquisition_year">Tahun</label>
+                                                <input type="number" min="1900" max="{{ now()->addYear()->year }}" id="acquisition_year" name="acquisition_year" class="form-control @error('acquisition_year') is-invalid @enderror" placeholder="Contoh: 2021" value="{{ old('acquisition_year') }}">
                                             </div>
                                         </div>
                                         <div class="col-md-4 col-12">

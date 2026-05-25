@@ -306,7 +306,58 @@
     background-color: #fff;
 }
 
+.table-footer-meta {
+    color: #6b78ad;
+}
+
+.admin-pagination {
+    overflow-x: auto;
+    max-width: 100%;
+}
+
+.admin-pagination .pagination {
+    justify-content: flex-end;
+    gap: 0.25rem;
+}
+
+.admin-pagination .page-link {
+    min-width: 2.15rem;
+    padding: 0.45rem 0.65rem;
+    border-color: #e2e8f0;
+    border-radius: 0.35rem;
+    text-align: center;
+    text-decoration: none;
+}
+
+.admin-pagination .page-item:first-child .page-link,
+.admin-pagination .page-item:last-child .page-link {
+    min-width: 2rem;
+}
+
+.admin-pagination .page-item.active .page-link {
+    border-color: #435ebe;
+    background-color: #435ebe;
+}
+
+.admin-pagination .page-item.disabled .page-link {
+    color: #a8b3cf;
+    background-color: #f8fafc;
+}
+
 @media (max-width: 767.98px) {
+    .table-footer-meta {
+        align-items: flex-start !important;
+        flex-direction: column;
+    }
+
+    .admin-pagination {
+        width: 100%;
+    }
+
+    .admin-pagination .pagination {
+        justify-content: flex-start;
+    }
+
     .transaction-form-header {
         align-items: flex-start;
         flex-direction: column;
