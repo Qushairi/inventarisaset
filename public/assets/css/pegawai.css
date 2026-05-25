@@ -7,15 +7,33 @@ body.pegawai-layout {
     background: linear-gradient(180deg, #f4f7fb 0, #f9fbff 260px, #f4f7fb 100%);
 }
 
-.pegawai-layout .page-title {
-    background-color: #fff;
-    border-radius: 1rem;
-    padding: 1.5rem 1.75rem;
-    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
+.pegawai-layout .pegawai-page-heading {
+    margin-bottom: 1.5rem;
 }
 
-.pegawai-layout .page-title .breadcrumb {
-    margin-bottom: 0;
+.pegawai-layout .pegawai-page-heading h3 {
+    color: #071437;
+    font-size: 1.65rem;
+    font-weight: 800;
+    line-height: 1.2;
+}
+
+.pegawai-layout .pegawai-page-heading .breadcrumb {
+    font-size: 0.85rem;
+}
+
+.pegawai-layout .pegawai-page-heading .breadcrumb-item + .breadcrumb-item::before {
+    content: "\2022";
+    color: #a8b1c2;
+}
+
+.pegawai-layout .pegawai-page-heading .breadcrumb-item a {
+    color: #7c8db5;
+}
+
+.pegawai-layout .pegawai-page-heading .breadcrumb-item.active {
+    color: #25396f;
+    font-weight: 600;
 }
 
 .pegawai-layout .pegawai-panel {
@@ -50,14 +68,16 @@ body.pegawai-layout {
 .pegawai-layout .pegawai-stat-card .card-body {
     display: flex;
     align-items: center;
-    min-height: 8rem;
-    padding: 1.35rem 1.2rem;
+    min-height: 8.5rem;
+    padding: 1.15rem 1.2rem;
 }
 
-.pegawai-layout .pegawai-stat-row {
+.pegawai-layout .pegawai-stat-layout {
+    display: grid;
+    grid-template-columns: 3.25rem minmax(0, 1fr);
     width: 100%;
-    align-items: center;
-    margin: 0;
+    align-items: start;
+    gap: 0.9rem;
 }
 
 .pegawai-layout .pegawai-stat-card .stats-icon {
@@ -67,11 +87,14 @@ body.pegawai-layout {
     border-radius: 0.95rem;
     flex-shrink: 0;
     box-shadow: 0 14px 24px rgba(67, 94, 190, 0.16);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .pegawai-layout .pegawai-stat-card .stats-icon i {
     color: #fff;
-    font-size: 1.35rem;
+    font-size: 1.3rem;
     line-height: 1;
 }
 
@@ -80,13 +103,12 @@ body.pegawai-layout {
     flex-direction: column;
     justify-content: center;
     min-width: 0;
-    text-align: left;
 }
 
 .pegawai-layout .pegawai-stat-label {
-    margin-bottom: 0.3rem;
+    margin-bottom: 0.25rem;
     color: #6c7aa5;
-    font-size: 0.96rem;
+    font-size: 0.95rem;
     font-weight: 600;
     line-height: 1.35;
 }
@@ -94,6 +116,7 @@ body.pegawai-layout {
 .pegawai-layout .pegawai-stat-value {
     margin-bottom: 0.35rem;
     color: #25396f;
+    font-size: 1.7rem;
     line-height: 1;
 }
 
@@ -138,6 +161,105 @@ body.pegawai-layout {
 
 .pegawai-layout .pegawai-table-card .table small {
     line-height: 1.5;
+}
+
+.pegawai-layout .pegawai-card-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    flex: 1 1 20rem;
+}
+
+.pegawai-layout .pegawai-card-search {
+    width: min(100%, 21rem);
+}
+
+.pegawai-layout .btn.icon,
+.pegawai-layout .btn.icon.icon-left,
+.pegawai-layout .pegawai-toolbar-add {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    line-height: 1.2;
+}
+
+.pegawai-layout .btn.icon i,
+.pegawai-layout .btn.icon.icon-left i,
+.pegawai-layout .pegawai-toolbar-add i,
+.pegawai-layout .input-group-text i {
+    width: 1rem;
+    height: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    line-height: 1;
+}
+
+.pegawai-layout .pegawai-filter-toggle {
+    width: 2.5rem;
+    height: 2.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border-radius: 0.5rem;
+    line-height: 1;
+}
+
+.pegawai-layout .pegawai-filter-toggle::after {
+    display: none;
+}
+
+.pegawai-layout .pegawai-filter-toggle i {
+    width: 1.1rem;
+    height: 1.1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    line-height: 1;
+}
+
+.pegawai-layout .pegawai-filter-menu {
+    width: min(20rem, calc(100vw - 2rem));
+    z-index: 1080;
+}
+
+.pegawai-layout .pegawai-filter-panel {
+    background-color: #f8faff;
+    border-color: #edf2f7 !important;
+}
+
+.pegawai-layout .pegawai-table-footer {
+    margin-top: 1rem;
+    border-top-color: #edf2f7 !important;
+}
+
+.pegawai-layout .pegawai-page-size-select {
+    width: auto;
+    min-width: 4.25rem;
+}
+
+.pegawai-layout .pegawai-pagination .pagination {
+    margin-bottom: 0;
+    gap: 0.25rem;
+}
+
+.pegawai-layout .pegawai-pagination .page-link {
+    min-width: 2rem;
+    min-height: 2rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 0.55rem;
+}
+
+.pegawai-layout .pegawai-pagination .page-item.active .page-link {
+    color: #fff;
 }
 
 .pegawai-layout .pegawai-asset-toolbar {
@@ -244,11 +366,55 @@ body.pegawai-layout {
     border-top: 1px solid rgba(67, 94, 190, 0.12);
 }
 
+.pegawai-layout .pegawai-profile-hero .card-body {
+    padding: 1.5rem;
+}
+
+.pegawai-layout .pegawai-profile-photo {
+    width: 5.65rem;
+    height: 7.65rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: 0.45rem;
+    background-color: #f0f1f5;
+    flex-shrink: 0;
+}
+
+.pegawai-layout .pegawai-profile-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.pegawai-layout .pegawai-profile-preview-photo {
+    display: block;
+    max-width: 100%;
+    max-height: 18rem;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 0.35rem;
+}
+
+.pegawai-layout .pegawai-profile-identity h3 {
+    color: #111827;
+    font-size: 1.25rem;
+}
+
 .pegawai-layout .pegawai-profile-preview {
-    min-height: 9rem;
+    min-height: auto;
     display: flex;
     flex-direction: column;
     justify-content: center;
+}
+
+.pegawai-layout .pegawai-signature-preview {
+    max-width: 100%;
+    max-height: 7.5rem;
+    width: auto;
+    height: auto;
 }
 
 .pegawai-layout .pegawai-profile-preview img {
@@ -260,6 +426,33 @@ body.pegawai-layout {
 .pegawai-layout .pegawai-panel .btn.btn-light-primary,
 .pegawai-layout .pegawai-panel .btn.btn-light-danger {
     box-shadow: none;
+}
+
+.pegawai-layout .pegawai-sidebar-brand {
+    max-width: 13.5rem;
+    margin: 0 auto;
+}
+
+.pegawai-layout .pegawai-sidebar-brand img {
+    width: 4.75rem;
+    height: 4.75rem;
+    object-fit: contain;
+}
+
+.pegawai-layout .pegawai-sidebar-brand-title {
+    display: block;
+    color: #25396f;
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+.pegawai-layout .pegawai-sidebar-brand-subtitle {
+    display: block;
+    margin-top: 0.2rem;
+    color: #7b8899;
+    font-size: 0.78rem;
+    line-height: 1.45;
 }
 
 .pegawai-layout .notification-dropdown-menu {
@@ -321,8 +514,14 @@ body.pegawai-layout {
 }
 
 @media (max-width: 767.98px) {
-    .pegawai-layout .page-title {
-        padding: 1.25rem;
+    .pegawai-layout .pegawai-card-toolbar {
+        flex-basis: 100%;
+        justify-content: flex-start;
+    }
+
+    .pegawai-layout .pegawai-card-search {
+        flex: 1 1 auto;
+        width: auto;
     }
 
     .pegawai-layout .pegawai-panel .card-header,
@@ -347,7 +546,12 @@ body.pegawai-layout {
 
     .pegawai-layout .pegawai-stat-card .card-body {
         min-height: auto;
-        padding: 1.2rem 1rem;
+        padding: 1rem;
+    }
+
+    .pegawai-layout .pegawai-stat-layout {
+        gap: 0.85rem;
+        grid-template-columns: 3rem minmax(0, 1fr);
     }
 
     .pegawai-layout .pegawai-stat-card .stats-icon {
@@ -356,8 +560,12 @@ body.pegawai-layout {
         border-radius: 0.85rem;
     }
 
-    .pegawai-layout .pegawai-stat-copy {
-        padding-left: 0.1rem;
+    .pegawai-layout .pegawai-stat-card .stats-icon i {
+        font-size: 1.2rem;
+    }
+
+    .pegawai-layout .pegawai-stat-value {
+        font-size: 1.45rem;
     }
 
     .pegawai-layout .pegawai-profile-preview {

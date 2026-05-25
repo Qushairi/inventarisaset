@@ -1,10 +1,6 @@
 @php
     $sidebarMenus = [
         [
-            'title' => true,
-            'name' => 'Menu Pegawai',
-        ],
-        [
             'name' => 'Dashboard',
             'icon' => 'grid-fill',
             'route' => 'pegawai.dashboard',
@@ -12,7 +8,7 @@
         ],
         [
             'name' => 'Data Aset',
-            'icon' => 'box-seam-fill',
+            'icon' => 'box-seam',
             'route' => 'pegawai.assets.index',
             'active_patterns' => ['pegawai.assets.*'],
         ],
@@ -33,13 +29,13 @@
 
 <div class="sidebar-wrapper active">
     <div class="sidebar-header">
-        <div class="d-flex justify-content-between align-items-start">
-            <div class="w-100 text-center pe-4">
-                <a href="{{ route('pegawai.dashboard') }}" class="d-inline-block mb-3">
-                    <img src="{{ asset('assets/images/logo/logobengkalis.png') }}" alt="Logo Inventaris Aset" style="height: 72px; width: auto;">
+        <div class="d-flex justify-content-between">
+            <div class="pegawai-sidebar-brand text-center w-100 pe-4">
+                <a href="{{ route('pegawai.dashboard') }}" class="d-inline-flex flex-column align-items-center text-decoration-none">
+                    <img src="{{ asset('images/logo-bengkalis.png') }}" alt="Logo Dinas Pendidikan Kabupaten Bengkalis" width="72" height="72" class="mb-3">
+                    <span class="pegawai-sidebar-brand-title">Sistem Inventaris Aset</span>
+                    <span class="pegawai-sidebar-brand-subtitle">Dinas Pendidikan Kabupaten Bengkalis</span>
                 </a>
-                <h6 class="mb-1">Inventaris Aset</h6>
-                <p class="mb-0 text-sm text-muted">Pegawai Panel</p>
             </div>
             <div class="toggler">
                 <a href="#" class="sidebar-hide d-xl-none d-block">
@@ -71,9 +67,7 @@
 
                 <li class="sidebar-item {{ $isActive ? 'active' : '' }}">
                     <a href="{{ route($menu['route']) }}" class="sidebar-link">
-                        <div class="d-inline-flex align-items-center justify-content-center flex-shrink-0" style="width: 1.25rem; height: 1.25rem;">
-                            <i class="bi bi-{{ $menu['icon'] }}"></i>
-                        </div>
+                        <i class="bi bi-{{ $menu['icon'] }}"></i>
                         <span>{{ $menu['name'] }}</span>
                     </a>
                 </li>

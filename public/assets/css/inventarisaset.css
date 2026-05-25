@@ -11,3 +11,337 @@
 .navbar.navbar-header {
     background-color: #fff;
 }
+
+.transaction-form-card,
+.transaction-modal {
+    --transaction-accent: #435ebe;
+    --transaction-accent-soft: #eef4ff;
+    --transaction-focus: rgba(67, 94, 190, 0.16);
+}
+
+.transaction-form-card.is-return,
+.transaction-modal.is-return {
+    --transaction-accent: #198754;
+    --transaction-accent-soft: #eaf8f0;
+    --transaction-focus: rgba(25, 135, 84, 0.16);
+}
+
+.transaction-form-card {
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);
+}
+
+.transaction-form-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.35rem 1.5rem;
+    border-bottom: 1px solid #edf2f7;
+    background: linear-gradient(135deg, #fff 0%, var(--transaction-accent-soft) 100%);
+}
+
+.transaction-form-title {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    min-width: 0;
+}
+
+.transaction-form-icon {
+    width: 3rem;
+    height: 3rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 3rem;
+    border-radius: 0.5rem;
+    background-color: var(--transaction-accent);
+    color: #fff;
+    box-shadow: 0 12px 22px var(--transaction-focus);
+}
+
+.transaction-form-icon i {
+    font-size: 1.25rem;
+    line-height: 1;
+}
+
+.transaction-modal .transaction-form-icon i {
+    width: auto;
+    height: auto;
+    font-size: 1.25rem;
+}
+
+.transaction-form-title h4,
+.transaction-form-title h5 {
+    color: #111827;
+    line-height: 1.2;
+}
+
+.transaction-form-title p,
+.transaction-form-title small {
+    line-height: 1.45;
+}
+
+.transaction-form-body {
+    padding: 1.35rem 1.5rem 1.5rem;
+    background-color: #fff;
+}
+
+.transaction-form {
+    display: grid;
+    gap: 1rem;
+}
+
+.transaction-form-alert {
+    margin-bottom: 1rem;
+}
+
+.transaction-form-section {
+    padding: 1.15rem;
+    border: 1px solid #e8eef6;
+    border-radius: 0.5rem;
+    background-color: #fbfdff;
+}
+
+.transaction-section-heading {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.85rem;
+    border-bottom: 1px solid #edf2f7;
+}
+
+.transaction-section-heading > span {
+    width: 2.25rem;
+    height: 2.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 2.25rem;
+    border-radius: 0.5rem;
+    background-color: var(--transaction-accent-soft);
+    color: var(--transaction-accent);
+}
+
+.transaction-section-heading h5 {
+    margin-bottom: 0.15rem;
+    color: #172033;
+    font-size: 1rem;
+    line-height: 1.25;
+}
+
+.transaction-section-heading small {
+    color: #7b8899;
+    font-weight: 600;
+}
+
+.transaction-field {
+    margin-bottom: 0;
+}
+
+.transaction-field label {
+    margin-bottom: 0.45rem;
+    color: #25396f;
+    font-size: 0.88rem;
+    font-weight: 700;
+}
+
+.transaction-input-shell {
+    position: relative;
+}
+
+.transaction-input-icon {
+    position: absolute;
+    left: 0.85rem;
+    top: 50%;
+    z-index: 3;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1rem;
+    height: 1rem;
+    color: #7c8db5;
+    line-height: 1;
+    pointer-events: none;
+    transform: translateY(-50%);
+}
+
+.transaction-textarea-shell .transaction-input-icon {
+    top: 0.95rem;
+    transform: none;
+}
+
+.transaction-input-shell .form-control,
+.transaction-input-shell .form-select {
+    min-height: 2.8rem;
+    padding-left: 2.65rem;
+    border-color: #dfe7f1;
+    border-radius: 0.5rem;
+    background-color: #fff;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.transaction-input-shell .form-select {
+    padding-right: 2.25rem;
+}
+
+.transaction-input-shell textarea.form-control {
+    min-height: 8.5rem;
+    padding-top: 0.72rem;
+    resize: vertical;
+}
+
+.transaction-input-shell .form-control:focus,
+.transaction-input-shell .form-select:focus {
+    border-color: var(--transaction-accent);
+    box-shadow: 0 0 0 0.16rem var(--transaction-focus);
+}
+
+.transaction-input-shell .form-control[readonly] {
+    background-color: #f6f8fb;
+    color: #607080;
+}
+
+.transaction-input-shell .is-invalid {
+    border-color: #dc3545;
+}
+
+.transaction-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    padding-top: 0.25rem;
+}
+
+.transaction-form-actions .btn,
+.transaction-modal-footer .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    min-height: 2.5rem;
+}
+
+.transaction-modal {
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 3.5rem);
+    max-height: calc(100dvh - 3.5rem);
+    overflow: hidden;
+    border-radius: 0.5rem;
+}
+
+.transaction-modal > form {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.transaction-modal-header {
+    flex: 0 0 auto;
+    padding: 1.15rem 1.25rem;
+    border-bottom-color: #edf2f7;
+    background: linear-gradient(135deg, #fff 0%, var(--transaction-accent-soft) 100%);
+}
+
+.transaction-modal-body {
+    display: grid;
+    flex: 1 1 auto;
+    gap: 0.95rem;
+    min-height: 0;
+    max-height: calc(100vh - 13.5rem);
+    max-height: calc(100dvh - 13.5rem);
+    overflow-y: auto;
+    background-color: #fff;
+}
+
+.transaction-modal .transaction-form-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    flex-basis: 2.5rem;
+}
+
+.transaction-modal .transaction-section-heading,
+.transaction-modal .transaction-input-icon {
+    display: none;
+}
+
+.transaction-modal .transaction-form-section {
+    padding: 0;
+    border: 0;
+    background-color: transparent;
+}
+
+.transaction-modal .transaction-field label {
+    margin-bottom: 0.4rem;
+    font-size: 0.86rem;
+}
+
+.transaction-modal .transaction-input-shell .form-control,
+.transaction-modal .transaction-input-shell .form-select {
+    min-height: 2.65rem;
+    padding-left: 0.85rem;
+    border-radius: 0.45rem;
+}
+
+.transaction-modal .transaction-input-shell .form-select {
+    padding-right: 2.25rem;
+}
+
+.transaction-modal .transaction-input-shell textarea.form-control {
+    min-height: 6.75rem;
+    padding-top: 0.7rem;
+}
+
+.transaction-modal-footer {
+    flex: 0 0 auto;
+    gap: 0.6rem;
+    padding: 0.85rem 1.25rem;
+    border-top-color: #edf2f7;
+    background-color: #fff;
+}
+
+@media (max-width: 767.98px) {
+    .transaction-form-header {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 1.15rem;
+    }
+
+    .transaction-form-body {
+        padding: 1.15rem;
+    }
+
+    .transaction-form-section {
+        padding: 1rem;
+    }
+
+    .transaction-modal {
+        max-height: calc(100vh - 1rem);
+        max-height: calc(100dvh - 1rem);
+    }
+
+    .transaction-modal-header {
+        padding: 1rem;
+    }
+
+    .transaction-modal-body {
+        max-height: calc(100vh - 14.5rem);
+        max-height: calc(100dvh - 14.5rem);
+        padding: 1rem;
+    }
+
+    .transaction-form-actions {
+        justify-content: stretch;
+    }
+
+    .transaction-form-actions .btn,
+    .transaction-modal-footer .btn {
+        width: 100%;
+    }
+}

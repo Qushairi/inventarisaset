@@ -8,11 +8,11 @@
 
 @section('content')
     <div class="page-heading">
-        @include('admin.partials.page-header', [
+        @include('pegawai.partials.page-heading', [
             'title' => 'Surat Peminjaman Aset',
-            'subtitle' => 'Preview surat peminjaman aset yang dapat diunduh dalam format PDF.',
             'breadcrumb' => 'Surat Peminjaman',
             'homeRoute' => 'pegawai.loans.index',
+            'homeLabel' => 'Peminjaman',
         ])
     </div>
 

@@ -25,15 +25,17 @@ class ReturnController extends BasePegawaiController
     ) {
     }
 
-    public function index()
+    public function index(Request $request)
     {
         $pegawai = $this->currentPegawai();
+        $perPage = $this->perPage($request);
 
         $returns = AssetReturn::query()
             ->with(['asset', 'loan.asset.category', 'loan.user', 'loan.approvedBy', 'loan.suratPeminjaman'])
             ->where('user_id', $pegawai->id)
             ->latest('returned_at')
-            ->paginate(10)
+            ->paginate($perPage)
+            ->withQueryString()
             ->through(function (AssetReturn $return) {
                 $loan = $return->loan;
                 $suratPeminjaman = $loan
@@ -147,5 +149,12 @@ class ReturnController extends BasePegawaiController
             ->where('status', 'Disetujui')
             ->whereDoesntHave('returnRecord')
             ->orderByDesc('loan_date');
+    }
+
+    private function perPage(Request $request): int
+    {
+        $perPage = (int) $request->query('per_page', 10);
+
+        return in_array($perPage, [10, 25, 50], true) ? $perPage : 10;
     }
 }

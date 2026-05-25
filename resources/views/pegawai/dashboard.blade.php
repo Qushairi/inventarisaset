@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Dashboard Pegawai')
+@section('title', 'Dashboard')
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('assets/vendors/apexcharts/apexcharts.css') }}">
@@ -8,11 +8,9 @@
 
 @section('content')
     <div class="page-heading">
-        @include('admin.partials.page-header', [
-            'title' => 'Dashboard Pegawai',
-            'subtitle' => 'Ringkasan inventaris aset untuk aktivitas pegawai.',
+        @include('pegawai.partials.page-heading', [
+            'title' => 'Dashboard',
             'breadcrumb' => 'Dashboard',
-            'homeRoute' => 'pegawai.dashboard',
         ])
     </div>
 
@@ -30,18 +28,14 @@
                 <div class="col-12 col-md-6 col-xl-3">
                     <div class="card pegawai-panel pegawai-stat-card h-100">
                         <div class="card-body">
-                            <div class="row align-items-center pegawai-stat-row">
-                                <div class="col-3 col-md-4">
-                                    <div class="stats-icon {{ $iconClass }} mx-auto mx-md-0">
-                                        <i class="bi bi-{{ $card['icon'] }}"></i>
-                                    </div>
+                            <div class="pegawai-stat-layout">
+                                <div class="stats-icon {{ $iconClass }}">
+                                    <i class="bi bi-{{ $card['icon'] }}"></i>
                                 </div>
-                                <div class="col-9 col-md-8">
-                                    <div class="pegawai-stat-copy">
-                                        <h6 class="pegawai-stat-label">{{ $card['label'] }}</h6>
-                                        <h4 class="pegawai-stat-value font-extrabold">{{ $card['value'] }}</h4>
-                                        <small class="pegawai-stat-helper">{{ $card['helper'] }}</small>
-                                    </div>
+                                <div class="pegawai-stat-copy">
+                                    <div class="pegawai-stat-label">{{ $card['label'] }}</div>
+                                    <h5 class="font-extrabold pegawai-stat-value">{{ $card['value'] }}</h5>
+                                    <small class="pegawai-stat-helper">{{ $card['helper'] }}</small>
                                 </div>
                             </div>
                         </div>

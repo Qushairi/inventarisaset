@@ -1,12 +1,7 @@
 <x-guest-layout title="Login">
     @push('styles')
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
         <style>
-            body,
             #auth {
-                font-family: 'Plus Jakarta Sans', sans-serif;
                 background: #f3f4f6;
             }
 
@@ -47,21 +42,22 @@
             }
 
             .login-brand img {
-                width: 52px;
-                height: 52px;
+                width: 64px;
+                height: 64px;
                 object-fit: contain;
                 flex-shrink: 0;
             }
 
             .login-brand-primary {
                 margin-bottom: 0.1rem;
-                font-size: 13px;
-                font-weight: 600;
+                font-size: 1.35rem;
+                font-weight: 700;
                 color: var(--bs-primary);
             }
 
             .login-brand-secondary {
-                font-size: 11px;
+                font-size: 1.1rem;
+                font-weight: 600;
                 color: #6c757d;
             }
 
@@ -72,7 +68,7 @@
 
             .login-title {
                 margin-bottom: 0.35rem;
-                font-size: 2rem;
+                font-size: 1.9rem;
                 font-weight: 700;
                 color: var(--bs-heading-color, #25396f);
             }
@@ -86,10 +82,13 @@
                 position: relative;
             }
 
-            .login-input-wrap .form-control.form-control-xl {
+            .login-input-wrap .form-control {
                 padding-left: 3rem;
                 padding-right: 3rem;
+                padding-top: 0.95rem;
+                padding-bottom: 0.95rem;
                 border-radius: 0.9rem;
+                font-size: 1rem;
             }
 
             .login-input-icon {
@@ -121,12 +120,6 @@
             .login-password-toggle:hover {
                 color: var(--bs-primary);
                 background: rgba(var(--bs-primary-rgb), 0.08);
-            }
-
-            .login-meta {
-                font-size: 0.75rem;
-                font-style: italic;
-                color: #9ca3af;
             }
 
             .login-submit {
@@ -166,7 +159,7 @@
             <hr class="login-divider">
 
             <div class="mb-4 text-center text-md-start">
-                <h1 class="login-title">Masuk ke Sistem</h1>
+                <h1 class="login-title">Login</h1>
                 <p class="login-subtitle">Inventaris Aset Dinas Pendidikan</p>
             </div>
 
@@ -196,7 +189,7 @@
                             type="email"
                             name="email"
                             value="{{ old('email') }}"
-                            class="form-control form-control-xl @error('email') is-invalid @enderror"
+                            class="form-control @error('email') is-invalid @enderror"
                             placeholder="nama@instansi.go.id"
                             required
                             autofocus
@@ -217,7 +210,7 @@
                             id="password"
                             type="password"
                             name="password"
-                            class="form-control form-control-xl @error('password') is-invalid @enderror"
+                            class="form-control @error('password') is-invalid @enderror"
                             placeholder="Masukkan password"
                             required
                             autocomplete="current-password"
@@ -236,20 +229,19 @@
                     </div>
                 </div>
 
-                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                <div class="d-flex align-items-center mb-4">
                     <div class="form-check mb-0">
                         <input class="form-check-input" type="checkbox" value="1" id="remember" name="remember" @checked(old('remember'))>
                         <label class="form-check-label text-muted" for="remember">Ingat saya</label>
                     </div>
-                    <span class="login-meta">Hubungi admin</span>
                 </div>
 
                 <button type="submit" class="btn btn-primary btn-block btn-lg shadow-lg login-submit">
-                    Masuk ke Dashboard
+                    Login
                 </button>
             </form>
 
-            <p class="login-footer-note mt-4">Akun dibuat oleh admin sistem &middot; &copy; 2025</p>
+            <p class="login-footer-note mt-4">&copy; 2025 Sistem Inventaris Aset - Dinas Pendidikan Kabupaten Bengkalis</p>
         </div>
     </div>
 

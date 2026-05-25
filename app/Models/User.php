@@ -104,6 +104,12 @@ class User extends Authenticatable
 
     private function publicFileUrl(string $path): string
     {
+        $path = ltrim(str_replace('\\', '/', $path), '/');
+
+        if (Str::startsWith($path, ['http://', 'https://', '//'])) {
+            return $path;
+        }
+
         if (Route::has('profile-media.show')) {
             return route('profile-media.show', ['path' => $path]);
         }
