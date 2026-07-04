@@ -168,6 +168,12 @@
         </tr>
         <tr>
             <td></td>
+            <td>NIP</td>
+            <td>:</td>
+            <td>{{ $pegawai?->nip ?: '-' }}</td>
+        </tr>
+        <tr>
+            <td></td>
             <td>Jabatan</td>
             <td>:</td>
             <td>PIHAK KEDUA / Pegawai Pengguna Aset</td>
@@ -237,6 +243,7 @@
                     @endif
                 </div>
                 <div class="bold">{{ strtoupper($pegawai?->name ?? 'PEGAWAI') }}</div>
+                <div>NIP. {{ $pegawai?->nip ?: '-' }}</div>
             </td>
             <td>
                 <div class="bold">PIHAK PERTAMA</div>

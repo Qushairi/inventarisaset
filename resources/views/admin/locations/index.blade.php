@@ -23,9 +23,9 @@
                         <h4 class="card-title mb-1">Daftar Lokasi</h4>
                         <p class="mb-0 text-muted">Atur lokasi penempatan inventaris agar pelacakan aset lebih mudah dilakukan.</p>
                     </div>
-                    <a href="{{ route('admin.locations.create') }}" class="btn btn-primary btn-sm icon icon-left">
+                    <button type="button" class="btn btn-primary btn-sm icon icon-left" data-bs-toggle="modal" data-bs-target="#adminLocationCreateModal">
                         <i class="bi bi-plus-circle"></i><span>Tambah Lokasi</span>
-                    </a>
+                    </button>
                 </div>
                 <div class="card-body">
                     <form action="{{ route('admin.locations.index') }}" method="GET" class="mb-4">
@@ -73,13 +73,13 @@
                                         </td>
                                         <td class="text-end">
                                             <div class="d-inline-flex flex-nowrap gap-2">
-                                                <a href="{{ route('admin.locations.edit', $location['code']) }}" class="btn btn-sm btn-light-primary icon icon-left">
+                                                <button type="button" class="btn btn-sm btn-light-primary icon icon-left" data-bs-toggle="modal" data-bs-target="#adminLocationEditModal-{{ $location['id'] }}">
                                                     <i class="bi bi-pencil-square"></i><span>Edit</span>
-                                                </a>
-                                                <form action="{{ route('admin.locations.destroy', $location['code']) }}" method="POST" class="d-inline-block">
+                                                </button>
+                                                <form action="{{ route('admin.locations.destroy', $location['code']) }}" method="POST" class="d-inline-block" data-swal-confirm data-swal-title="Hapus lokasi?" data-swal-text="Apakah Anda yakin ingin menghapus data lokasi ini?" data-swal-confirm-text="Ya, hapus">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-light-danger icon icon-left" onclick="return confirm('Hapus lokasi ini?')">
+                                                    <button type="submit" class="btn btn-sm btn-light-danger icon icon-left">
                                                         <i class="bi bi-trash"></i><span>Hapus</span>
                                                     </button>
                                                 </form>
@@ -105,4 +105,8 @@
             </div>
         </section>
     </div>
+    @include('admin.partials.create-modal', ['resource' => 'location'])
+    @foreach ($locations as $location)
+        @include('admin.partials.edit-modal', ['resource' => 'location', 'record' => $location])
+    @endforeach
 @endsection

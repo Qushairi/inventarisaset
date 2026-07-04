@@ -25,19 +25,6 @@
 
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
-                    @if ($user?->role !== 'pegawai')
-                        <li class="nav-item dropdown nav-icon me-2">
-                            <a class="nav-link" href="#" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="bi bi-envelope fs-5 text-gray-600"></i>
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li>
-                                    <h6 class="dropdown-header">Pesan</h6>
-                                </li>
-                                <li><a class="dropdown-item" href="#">Belum ada pesan baru</a></li>
-                            </ul>
-                        </li>
-                    @endif
                     <li class="nav-item dropdown nav-icon me-3">
                         <a class="nav-link position-relative" href="#" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-bell fs-5 text-gray-600"></i>
@@ -54,7 +41,7 @@
                                     <small class="text-muted">{{ $navbarUnreadNotificationCount ?? 0 }} belum dibaca</small>
                                 </div>
                                 @if (!empty($notificationMarkAllUrl) && ($navbarUnreadNotificationCount ?? 0) > 0)
-                                    <form method="POST" action="{{ $notificationMarkAllUrl }}">
+                                    <form method="POST" action="{{ $notificationMarkAllUrl }}" data-swal-confirm data-swal-icon="question" data-swal-title="Tandai notifikasi dibaca?" data-swal-text="Semua notifikasi {{ $user?->role === 'pegawai' ? 'pegawai' : 'admin' }} akan ditandai sudah dibaca." data-swal-confirm-text="Ya, tandai" data-swal-confirm-color="#435ebe">
                                         @csrf
                                         @method('PATCH')
                                         <button type="submit" class="btn btn-sm btn-light-primary">Tandai dibaca</button>
@@ -145,7 +132,7 @@
                             <hr class="dropdown-divider">
                         </li>
                         <li>
-                            <form method="POST" action="{{ route('logout') }}">
+                            <form method="POST" action="{{ route('logout') }}" data-swal-confirm data-swal-icon="question" data-swal-title="Logout akun?" data-swal-text="Apakah Anda yakin ingin keluar dari akun {{ $user?->role === 'pegawai' ? 'pegawai' : 'admin' }}?" data-swal-confirm-text="Ya, logout" data-swal-confirm-color="#dc3545">
                                 @csrf
                                 <button type="submit" class="dropdown-item">
                                     <i class="icon-mid bi bi-box-arrow-right me-2"></i> Keluar

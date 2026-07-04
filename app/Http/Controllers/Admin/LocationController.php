@@ -11,11 +11,13 @@ class LocationController extends Controller
 {
     public function index(Request $request)
     {
+        $editId = $request->integer('edit');
         $filters = $request->validate([
             'search' => ['nullable', 'string', 'max:100'],
         ]);
 
         $locations = Location::query()
+            ->when($editId, fn ($query, int $id) => $query->whereKey($id))
             ->when($filters['search'] ?? null, function ($query, string $search) {
                 $query->where(function ($query) use ($search) {
                     $query->where('name', 'like', '%'.$search.'%')
@@ -30,12 +32,15 @@ class LocationController extends Controller
             ->paginate(10)
             ->withQueryString()
             ->through(fn (Location $location) => [
+                'id' => $location->id,
                 'name' => $location->name,
                 'code' => $location->code,
                 'address' => $location->address,
                 'address_note' => $location->address_note ?? 'Alamat lokasi tersimpan pada sistem.',
                 'description' => $location->description,
                 'note' => $location->note ?? 'Catatan lokasi tersedia.',
+                'edit_address_note' => $location->address_note,
+                'edit_note' => $location->note,
             ]);
 
         return view('admin.locations.index', [
@@ -47,7 +52,7 @@ class LocationController extends Controller
 
     public function create()
     {
-        return view('admin.locations.create');
+        return redirect()->route('admin.locations.index', ['create' => 1]);
     }
 
     public function store(Request $request)
@@ -70,9 +75,7 @@ class LocationController extends Controller
 
     public function edit(Location $location)
     {
-        return view('admin.locations.edit', [
-            'location' => $location,
-        ]);
+        return redirect()->route('admin.locations.index', ['edit' => $location->id]);
     }
 
     public function update(Request $request, Location $location)

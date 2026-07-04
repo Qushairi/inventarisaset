@@ -3,6 +3,7 @@
 <head>
     @php
         $isPegawaiPage = request()->routeIs('pegawai.*');
+        $isAdminPage = request()->routeIs('admin.*');
     @endphp
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,6 +16,9 @@
     <link rel="stylesheet" href="{{ asset('assets/vendors/bootstrap-icons/bootstrap-icons.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/app.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/inventarisaset.css') }}">
+    @if ($isAdminPage || $isPegawaiPage)
+        <link rel="stylesheet" href="{{ asset('assets/vendors/sweetalert2/sweetalert2.min.css') }}">
+    @endif
     @if ($isPegawaiPage)
         <link rel="stylesheet" href="{{ asset('assets/css/pegawai.css') }}">
     @endif
@@ -40,6 +44,10 @@
     <script src="{{ asset('assets/vendors/perfect-scrollbar/perfect-scrollbar.min.js') }}"></script>
     <script src="{{ asset('assets/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('assets/js/main.js') }}"></script>
+    @if ($isAdminPage || $isPegawaiPage)
+        <script src="{{ asset('assets/vendors/sweetalert2/sweetalert2.all.min.js') }}"></script>
+        @include('layouts.sweet-alerts')
+    @endif
     @stack('scripts')
 </body>
 </html>

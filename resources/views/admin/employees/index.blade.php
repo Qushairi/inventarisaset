@@ -23,16 +23,16 @@
                         <h4 class="card-title mb-1">Daftar Pegawai</h4>
                         <p class="mb-0 text-muted">Daftar akun pegawai yang dapat mengakses sistem inventaris aset.</p>
                     </div>
-                    <a href="{{ route('admin.employees.create') }}" class="btn btn-primary btn-sm icon icon-left">
+                    <button type="button" class="btn btn-primary btn-sm icon icon-left" data-bs-toggle="modal" data-bs-target="#adminEmployeeCreateModal">
                         <i class="bi bi-plus-circle"></i><span>Tambah Pegawai</span>
-                    </a>
+                    </button>
                 </div>
                 <div class="card-body">
                     <form action="{{ route('admin.employees.index') }}" method="GET" class="mb-4">
                         <div class="row g-3 align-items-end">
                             <div class="col-lg-4 col-md-6 col-12">
                                 <label for="search" class="form-label">Cari Pegawai</label>
-                                <input type="search" id="search" name="search" class="form-control" placeholder="Nama atau email" value="{{ $filters['search'] ?? '' }}">
+                                <input type="search" id="search" name="search" class="form-control" placeholder="Nama, NIP, atau email" value="{{ $filters['search'] ?? '' }}">
                             </div>
                             <div class="col-lg-2 col-md-6 col-12 d-flex gap-2">
                                 <button type="submit" class="btn btn-primary icon">
@@ -51,6 +51,7 @@
                             <thead>
                                 <tr>
                                     <th>Pegawai</th>
+                                    <th>NIP</th>
                                     <th>Email</th>
                                     <th>Terdaftar</th>
                                     <th class="text-end">Aksi</th>
@@ -71,6 +72,7 @@
                                                 </div>
                                             </div>
                                         </td>
+                                        <td>{{ $employee['nip'] ?: '-' }}</td>
                                         <td>
                                             <div>{{ $employee['email'] }}</div>
                                             <small class="text-muted">{{ $employee['email_note'] }}</small>
@@ -81,11 +83,11 @@
                                         </td>
                                         <td class="text-end">
                                             <div class="d-inline-flex flex-nowrap gap-2">
-                                                <a href="{{ route('admin.employees.edit', $employee['id']) }}" class="btn btn-sm btn-light-primary icon icon-left"><i class="bi bi-pencil-square"></i><span>Edit</span></a>
-                                                <form action="{{ route('admin.employees.destroy', $employee['id']) }}" method="POST" class="d-inline-block">
+                                                <button type="button" class="btn btn-sm btn-light-primary icon icon-left" data-bs-toggle="modal" data-bs-target="#adminEmployeeEditModal-{{ $employee['id'] }}"><i class="bi bi-pencil-square"></i><span>Edit</span></button>
+                                                <form action="{{ route('admin.employees.destroy', $employee['id']) }}" method="POST" class="d-inline-block" data-swal-confirm data-swal-title="Hapus pegawai?" data-swal-text="Apakah Anda yakin ingin menghapus akun pegawai ini?" data-swal-confirm-text="Ya, hapus">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-light-danger icon icon-left" onclick="return confirm('Hapus pegawai ini?')">
+                                                    <button type="submit" class="btn btn-sm btn-light-danger icon icon-left">
                                                         <i class="bi bi-trash"></i><span>Hapus</span>
                                                     </button>
                                                 </form>
@@ -94,7 +96,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="4" class="text-center text-muted">Belum ada data pegawai.</td>
+                                        <td colspan="5" class="text-center text-muted">Belum ada data pegawai.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -111,4 +113,8 @@
             </div>
         </section>
     </div>
+    @include('admin.partials.create-modal', ['resource' => 'employee'])
+    @foreach ($employees as $employee)
+        @include('admin.partials.edit-modal', ['resource' => 'employee', 'record' => $employee])
+    @endforeach
 @endsection

@@ -20,12 +20,12 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-3">
                     <div>
-                        <h4 class="card-title mb-1">Daftar Pengembalian</h4>
-                        <p class="mb-0 text-muted">Kelola data pengembalian aset yang sudah terverifikasi.</p>
+                        <h4 class="card-title mb-1">Riwayat Pengembalian</h4>
+                        <p class="mb-0 text-muted">Riwayat peminjaman yang sudah dikembalikan beserta detail pengembaliannya.</p>
                     </div>
-                    <a href="{{ route('admin.returns.create') }}" class="btn btn-primary btn-sm icon icon-left">
+                    <button type="button" class="btn btn-primary btn-sm icon icon-left" data-bs-toggle="modal" data-bs-target="#adminReturnCreateModal">
                         <i class="bi bi-plus-circle"></i><span>Tambah Pengembalian</span>
-                    </a>
+                    </button>
                 </div>
                 <div class="card-body">
                     <form action="{{ route('admin.returns.index') }}" method="GET" class="mb-4">
@@ -60,9 +60,10 @@
                             <thead>
                                 <tr>
                                     <th>Aset</th>
-                                    <th>Tanggal Kembali</th>
+                                    <th>Pegawai</th>
+                                    <th>Riwayat Peminjaman</th>
+                                    <th>Pengembalian</th>
                                     <th>Kondisi</th>
-                                    <th>Status</th>
                                     <th>Berita Acara</th>
                                     <th class="text-end">Aksi</th>
                                 </tr>
@@ -83,15 +84,21 @@
                                             <small class="text-muted">{{ $return['asset_code'] }}</small>
                                         </td>
                                         <td>
-                                            <div>{{ $return['returned_at'] }}</div>
-                                            <small class="text-muted">{{ $return['verified_note'] }}</small>
+                                            <div>{{ $return['employee_name'] }}</div>
+                                            <small class="text-muted">{{ $return['employee_email'] }}</small>
+                                        </td>
+                                        <td>
+                                            <div>Pinjam: {{ $return['loan_date'] ?: '-' }}</div>
+                                            <small class="text-muted d-block">Rencana kembali: {{ $return['planned_return_date'] ?: '-' }}</small>
+                                            <small class="text-muted d-block">Jumlah: {{ $return['loan_quantity'] }} | Durasi: {{ $return['loan_duration'] }}</small>
+                                        </td>
+                                        <td>
+                                            <div>Kembali: {{ $return['returned_at'] }}</div>
+                                            <span class="badge {{ $statusBadge }}">{{ $return['status'] }}</span>
+                                            <small class="text-muted d-block">{{ $return['verified_note'] ?: $return['status_note'] }}</small>
                                         </td>
                                         <td>
                                             <span class="badge {{ $conditionBadge }}">{{ $return['condition'] }}</span>
-                                        </td>
-                                        <td>
-                                            <span class="badge {{ $statusBadge }}">{{ $return['status'] }}</span>
-                                            <div><small class="text-muted">{{ $return['status_note'] }}</small></div>
                                         </td>
                                         <td>
                                             <div>{{ $return['report_number'] }}</div>
@@ -105,7 +112,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="6" class="text-center text-muted">Belum ada data pengembalian.</td>
+                                        <td colspan="7" class="text-center text-muted">Belum ada riwayat pengembalian.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -122,4 +129,5 @@
             </div>
         </section>
     </div>
+    @include('admin.partials.create-modal', ['resource' => 'return'])
 @endsection

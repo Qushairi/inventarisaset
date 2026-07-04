@@ -55,7 +55,12 @@
 </head>
 <body>
     <h1>{{ $title }}</h1>
-    <div class="meta">Diunduh pada {{ now()->timezone(config('app.timezone'))->format('d/m/Y H:i') }}</div>
+    <div class="meta">
+        Diunduh pada {{ now()->timezone(config('app.timezone'))->format('d/m/Y H:i') }}
+        @if (!empty($filterSummary))
+            <br>Filter: {{ implode(' | ', $filterSummary) }}
+        @endif
+    </div>
 
     <table>
         <thead>

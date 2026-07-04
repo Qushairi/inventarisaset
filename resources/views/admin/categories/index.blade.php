@@ -23,9 +23,9 @@
                         <h4 class="card-title mb-1">Daftar Kategori</h4>
                         <p class="mb-0 text-muted">Kelompokkan aset dengan kategori yang jelas agar pencatatan inventaris lebih rapi.</p>
                     </div>
-                    <a href="{{ route('admin.categories.create') }}" class="btn btn-primary btn-sm icon icon-left">
+                    <button type="button" class="btn btn-primary btn-sm icon icon-left" data-bs-toggle="modal" data-bs-target="#adminCategoryCreateModal">
                         <i class="bi bi-plus-circle"></i><span>Tambah Kategori</span>
-                    </a>
+                    </button>
                 </div>
                 <div class="card-body">
                     <form action="{{ route('admin.categories.index') }}" method="GET" class="mb-4">
@@ -68,13 +68,13 @@
                                         </td>
                                         <td class="text-end">
                                             <div class="d-inline-flex flex-nowrap gap-2">
-                                                <a href="{{ route('admin.categories.edit', $category['code']) }}" class="btn btn-sm btn-light-primary icon icon-left">
+                                                <button type="button" class="btn btn-sm btn-light-primary icon icon-left" data-bs-toggle="modal" data-bs-target="#adminCategoryEditModal-{{ $category['id'] }}">
                                                     <i class="bi bi-pencil-square"></i><span>Edit</span>
-                                                </a>
-                                                <form action="{{ route('admin.categories.destroy', $category['code']) }}" method="POST" class="d-inline-block">
+                                                </button>
+                                                <form action="{{ route('admin.categories.destroy', $category['code']) }}" method="POST" class="d-inline-block" data-swal-confirm data-swal-title="Hapus kategori?" data-swal-text="Apakah Anda yakin ingin menghapus data kategori ini?" data-swal-confirm-text="Ya, hapus">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-light-danger icon icon-left" onclick="return confirm('Hapus kategori ini?')">
+                                                    <button type="submit" class="btn btn-sm btn-light-danger icon icon-left">
                                                         <i class="bi bi-trash"></i><span>Hapus</span>
                                                     </button>
                                                 </form>
@@ -100,4 +100,8 @@
             </div>
         </section>
     </div>
+    @include('admin.partials.create-modal', ['resource' => 'category'])
+    @foreach ($categories as $category)
+        @include('admin.partials.edit-modal', ['resource' => 'category', 'record' => $category])
+    @endforeach
 @endsection

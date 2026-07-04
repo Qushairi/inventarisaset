@@ -95,6 +95,7 @@
 
     <table class="identitas">
         <tr><td class="id-no">2.</td><td class="id-key">Nama</td><td class="id-sep">:</td><td class="bold">{{ strtoupper($pegawai?->name ?? 'PEGAWAI') }}</td></tr>
+        <tr><td></td><td>NIP</td><td>:</td><td>{{ $pegawai?->nip ?: '-' }}</td></tr>
         <tr><td></td><td>Jabatan</td><td>:</td><td>PIHAK KEDUA / Pegawai Peminjam</td></tr>
         <tr><td></td><td>Instansi</td><td>:</td><td>{{ $office['agency_name'] }}, selanjutnya disebut <span class="bold">PIHAK KEDUA</span></td></tr>
     </table>
@@ -151,6 +152,7 @@
                     @endif
                 </div>
                 <div class="bold">{{ strtoupper($pegawai?->name ?? 'PEGAWAI') }}</div>
+                <div>NIP. {{ $pegawai?->nip ?: '-' }}</div>
             </td>
             <td>
                 <div class="bold">PIHAK PERTAMA</div>

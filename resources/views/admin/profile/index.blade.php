@@ -108,11 +108,11 @@
                         </form>
 
                         @if ($adminUser->hasProfilePhoto())
-                            <form action="{{ route('admin.profile.update') }}" method="POST" class="mt-3">
+                            <form action="{{ route('admin.profile.update') }}" method="POST" class="mt-3" data-swal-confirm data-swal-title="Hapus foto profil?" data-swal-text="Apakah Anda yakin ingin menghapus foto profil admin saat ini?" data-swal-confirm-text="Ya, hapus">
                                 @csrf
                                 @method('PATCH')
                                 <input type="hidden" name="remove_profile_photo" value="1">
-                                <button type="submit" class="btn btn-light-danger icon icon-left" onclick="return confirm('Hapus foto profil admin saat ini?')">
+                                <button type="submit" class="btn btn-light-danger icon icon-left">
                                     <i class="bi bi-trash"></i><span>Hapus Foto</span>
                                 </button>
                             </form>
@@ -156,11 +156,11 @@
                         </form>
 
                         @if ($adminUser->hasSignature())
-                            <form action="{{ route('admin.profile.update') }}" method="POST" class="mt-3">
+                            <form action="{{ route('admin.profile.update') }}" method="POST" class="mt-3" data-swal-confirm data-swal-title="Hapus tanda tangan?" data-swal-text="Apakah Anda yakin ingin menghapus tanda tangan admin saat ini?" data-swal-confirm-text="Ya, hapus">
                                 @csrf
                                 @method('PATCH')
                                 <input type="hidden" name="remove_signature" value="1">
-                                <button type="submit" class="btn btn-light-danger icon icon-left" onclick="return confirm('Hapus tanda tangan admin saat ini?')">
+                                <button type="submit" class="btn btn-light-danger icon icon-left">
                                     <i class="bi bi-trash"></i><span>Hapus Tanda Tangan</span>
                                 </button>
                             </form>

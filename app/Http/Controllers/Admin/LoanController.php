@@ -23,13 +23,16 @@ class LoanController extends Controller
 
     public function index(Request $request)
     {
+        $editId = $request->integer('edit');
         $filters = $request->validate([
             'search' => ['nullable', 'string', 'max:100'],
-            'status' => ['nullable', Rule::in($this->statusOptions())],
+            'status' => ['nullable', Rule::in($this->activeStatusOptions())],
         ]);
 
         $loans = Loan::query()
             ->with(['asset', 'user'])
+            ->whereDoesntHave('returnRecord')
+            ->when($editId, fn ($query, int $id) => $query->whereKey($id))
             ->when($filters['search'] ?? null, function ($query, string $search) {
                 $query->where(function ($query) use ($search) {
                     $query->where('status_note', 'like', '%'.$search.'%')
@@ -50,12 +53,16 @@ class LoanController extends Controller
             ->through(function (Loan $loan) {
                 return [
                     'id' => $loan->id,
+                    'asset_id' => $loan->asset_id,
+                    'user_id' => $loan->user_id,
                     'asset_name' => $loan->asset?->name,
                     'asset_code' => $loan->asset?->code,
                     'employee_name' => $loan->user?->name,
                     'employee_email' => $loan->user?->email,
                     'loan_date' => optional($loan->loan_date)->format('d/m/Y'),
+                    'edit_loan_date' => optional($loan->loan_date)->format('Y-m-d'),
                     'return_plan' => 'Rencana kembali ' . optional($loan->planned_return_date)->format('d/m/Y'),
+                    'planned_return_date' => optional($loan->planned_return_date)->format('Y-m-d'),
                     'quantity' => $loan->quantity,
                     'status' => $loan->status,
                     'status_variant' => $this->statusVariant($loan->status),
@@ -66,7 +73,13 @@ class LoanController extends Controller
         return view('admin.loans.index', [
             'loans' => $loans,
             'loanTotal' => $loans->total(),
-            'statuses' => $this->statusOptions(),
+            'statuses' => $this->activeStatusOptions(),
+            'createAssets' => Asset::query()->where('quantity', '>', 0)->orderBy('name')->get(),
+            'createEmployees' => User::query()->where('role', 'pegawai')->orderBy('name')->get(),
+            'createStatuses' => $this->statusOptions(),
+            'editAssets' => Asset::query()->orderBy('name')->get(),
+            'editEmployees' => User::query()->where('role', 'pegawai')->orderBy('name')->get(),
+            'editStatuses' => $this->statusOptions(),
             'filters' => $filters,
             'hasActiveFilters' => collect($filters)->filter(fn ($value) => filled($value))->isNotEmpty(),
         ]);
@@ -74,11 +87,7 @@ class LoanController extends Controller
 
     public function create()
     {
-        return view('admin.loans.create', [
-            'assets' => Asset::query()->where('quantity', '>', 0)->orderBy('name')->get(),
-            'employees' => User::query()->where('role', 'pegawai')->orderBy('name')->get(),
-            'statuses' => $this->statusOptions(),
-        ]);
+        return redirect()->route('admin.loans.index', ['create' => 1]);
     }
 
     public function store(Request $request)
@@ -101,12 +110,7 @@ class LoanController extends Controller
 
     public function edit(Loan $loan)
     {
-        return view('admin.loans.edit', [
-            'loan' => $loan,
-            'assets' => Asset::query()->orderBy('name')->get(),
-            'employees' => User::query()->where('role', 'pegawai')->orderBy('name')->get(),
-            'statuses' => $this->statusOptions(),
-        ]);
+        return redirect()->route('admin.loans.index', ['edit' => $loan->id]);
     }
 
     public function update(Request $request, Loan $loan)
@@ -203,6 +207,11 @@ class LoanController extends Controller
     private function statusOptions(): array
     {
         return ['Menunggu', 'Disetujui', 'Selesai', 'Ditolak'];
+    }
+
+    private function activeStatusOptions(): array
+    {
+        return ['Menunggu', 'Disetujui', 'Ditolak'];
     }
 
     private function refreshSuratPeminjamanIfEligible(Loan $loan, ?User $approver = null): void

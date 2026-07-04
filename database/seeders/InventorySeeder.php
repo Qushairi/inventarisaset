@@ -50,6 +50,7 @@ class InventorySeeder extends Seeder
 
         $employeePayloads = [[
             'name' => 'Muhammad Amien',
+            'nip' => '198801012010011001',
             'email' => 'amien@bengkalis.go.id',
             'password' => Hash::make('Pegawai123!'),
             'role' => 'pegawai',
@@ -61,7 +62,7 @@ class InventorySeeder extends Seeder
         User::query()->upsert(
             $employeePayloads,
             ['email'],
-            ['name', 'password', 'role', 'email_verified_at', 'created_at', 'updated_at'],
+            ['name', 'nip', 'password', 'role', 'email_verified_at', 'created_at', 'updated_at'],
         );
     }
 

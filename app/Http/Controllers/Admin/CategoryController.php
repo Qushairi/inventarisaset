@@ -11,11 +11,13 @@ class CategoryController extends Controller
 {
     public function index(Request $request)
     {
+        $editId = $request->integer('edit');
         $filters = $request->validate([
             'search' => ['nullable', 'string', 'max:100'],
         ]);
 
         $categories = Category::query()
+            ->when($editId, fn ($query, int $id) => $query->whereKey($id))
             ->when($filters['search'] ?? null, function ($query, string $search) {
                 $query->where(function ($query) use ($search) {
                     $query->where('name', 'like', '%'.$search.'%')
@@ -28,10 +30,12 @@ class CategoryController extends Controller
             ->paginate(10)
             ->withQueryString()
             ->through(fn (Category $category) => [
+                'id' => $category->id,
                 'name' => $category->name,
                 'code' => $category->code,
                 'description' => $category->description,
                 'note' => $category->note ?? 'Deskripsi kategori sudah tersedia.',
+                'edit_note' => $category->note,
             ]);
 
         return view('admin.categories.index', [
@@ -43,7 +47,7 @@ class CategoryController extends Controller
 
     public function create()
     {
-        return view('admin.categories.create');
+        return redirect()->route('admin.categories.index', ['create' => 1]);
     }
 
     public function store(Request $request)
@@ -64,9 +68,7 @@ class CategoryController extends Controller
 
     public function edit(Category $category)
     {
-        return view('admin.categories.edit', [
-            'category' => $category,
-        ]);
+        return redirect()->route('admin.categories.index', ['edit' => $category->id]);
     }
 
     public function update(Request $request, Category $category)

@@ -21,11 +21,11 @@
                 <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-3">
                     <div>
                         <h4 class="card-title mb-1">Daftar Peminjaman</h4>
-                        <p class="mb-0 text-muted">Kelola data peminjaman aset dari pegawai.</p>
+                        <p class="mb-0 text-muted">Kelola peminjaman aktif. Data yang sudah dikembalikan tersedia di menu Pengembalian.</p>
                     </div>
-                    <a href="{{ route('admin.loans.create') }}" class="btn btn-primary btn-sm icon icon-left">
+                    <button type="button" class="btn btn-primary btn-sm icon icon-left" data-bs-toggle="modal" data-bs-target="#adminLoanCreateModal">
                         <i class="bi bi-plus-circle"></i><span>Tambah Peminjaman</span>
-                    </a>
+                    </button>
                 </div>
                 <div class="card-body">
                     <form action="{{ route('admin.loans.index') }}" method="GET" class="mb-4">
@@ -94,33 +94,33 @@
                                             <div><small class="text-muted">{{ $loan['status_note'] }}</small></div>
                                         </td>
                                         <td class="text-end">
-                                            @if ($loan['status'] === 'Menunggu')
-                                                <div class="d-inline-flex flex-nowrap gap-2">
-                                                    <form action="{{ route('admin.loans.status', $loan['id']) }}" method="POST" class="d-inline-block">
+                                            <div class="d-inline-flex flex-nowrap gap-2 align-items-center">
+                                                @if ($loan['status'] === 'Menunggu')
+                                                    <form action="{{ route('admin.loans.status', $loan['id']) }}" method="POST" class="d-inline-block" data-swal-confirm data-swal-icon="question" data-swal-title="Terima peminjaman?" data-swal-text="Apakah Anda yakin ingin menyetujui pengajuan peminjaman ini?" data-swal-confirm-text="Ya, terima" data-swal-confirm-color="#198754">
                                                         @csrf
                                                         @method('PUT')
                                                         <input type="hidden" name="status" value="Disetujui">
-                                                        <button type="submit" class="btn btn-sm btn-light-success icon icon-left" onclick="return confirm('Terima pengajuan peminjaman ini?')">
+                                                        <button type="submit" class="btn btn-sm btn-light-success icon icon-left">
                                                             <i class="bi bi-check-circle"></i><span>Terima</span>
                                                         </button>
                                                     </form>
-                                                    <form action="{{ route('admin.loans.status', $loan['id']) }}" method="POST" class="d-inline-block">
+                                                    <form action="{{ route('admin.loans.status', $loan['id']) }}" method="POST" class="d-inline-block" data-swal-confirm data-swal-title="Tolak peminjaman?" data-swal-text="Apakah Anda yakin ingin menolak pengajuan peminjaman ini?" data-swal-confirm-text="Ya, tolak">
                                                         @csrf
                                                         @method('PUT')
                                                         <input type="hidden" name="status" value="Ditolak">
-                                                        <button type="submit" class="btn btn-sm btn-light-danger icon icon-left" onclick="return confirm('Tolak pengajuan peminjaman ini?')">
+                                                        <button type="submit" class="btn btn-sm btn-light-danger icon icon-left">
                                                             <i class="bi bi-x-circle"></i><span>Tolak</span>
                                                         </button>
                                                     </form>
-                                                </div>
-                                            @else
-                                                <span class="text-muted small">Sudah diproses</span>
-                                            @endif
+                                                @else
+                                                    <span class="text-muted small">Sudah diproses</span>
+                                                @endif
+                                            </div>
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="5" class="text-center text-muted">Belum ada data peminjaman.</td>
+                                        <td colspan="5" class="text-center text-muted">Belum ada peminjaman aktif.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -137,4 +137,5 @@
             </div>
         </section>
     </div>
+    @include('admin.partials.create-modal', ['resource' => 'loan'])
 @endsection

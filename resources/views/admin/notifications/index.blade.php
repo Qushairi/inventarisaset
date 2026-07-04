@@ -29,7 +29,7 @@
                         <span class="badge bg-light-primary">{{ $notifications->total() }} notifikasi</span>
                         <span class="badge bg-light-warning">{{ $unreadNotificationCount }} belum dibaca</span>
                         @if ($unreadNotificationCount > 0)
-                            <form method="POST" action="{{ route('admin.notifications.read-all') }}">
+                            <form method="POST" action="{{ route('admin.notifications.read-all') }}" data-swal-confirm data-swal-icon="question" data-swal-title="Tandai semua dibaca?" data-swal-text="Semua notifikasi admin akan ditandai sudah dibaca." data-swal-confirm-text="Ya, tandai" data-swal-confirm-color="#435ebe">
                                 @csrf
                                 @method('PATCH')
                                 <button type="submit" class="btn btn-light-primary btn-sm icon icon-left">

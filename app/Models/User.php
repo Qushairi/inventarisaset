@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
-#[Fillable(['name', 'email', 'password', 'role', 'profile_photo_path', 'signature_path', 'signature_updated_at'])]
+#[Fillable(['name', 'nip', 'email', 'password', 'role', 'profile_photo_path', 'signature_path', 'signature_updated_at'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {

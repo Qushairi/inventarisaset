@@ -28,6 +28,7 @@ class LoanRequestTest extends TestCase
 
         $response = $this->actingAs($pegawai)->post(route('pegawai.loans.store'), [
             'asset_id' => $asset->id,
+            'quantity' => 1,
             'loan_date' => '2026-05-04',
             'planned_return_date' => '2026-05-06',
             'status_note' => 'Digunakan untuk kegiatan operasional.',
@@ -58,6 +59,7 @@ class LoanRequestTest extends TestCase
 
         $response = $this->actingAs($pegawai)->from(route('pegawai.loans.index'))->post(route('pegawai.loans.store'), [
             'asset_id' => $asset->id,
+            'quantity' => 1,
             'loan_date' => '2026-05-04',
             'planned_return_date' => '2026-05-06',
         ]);
@@ -79,6 +81,7 @@ class LoanRequestTest extends TestCase
 
         $pegawai = User::factory()->create([
             'role' => 'pegawai',
+            'nip' => '198801012010011001',
         ]);
 
         $asset = $this->createAsset([
@@ -98,6 +101,7 @@ class LoanRequestTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('SURAT PEMINJAMAN ASET');
+        $response->assertSee('198801012010011001');
         $response->assertSee('Download PDF');
 
         $loan->refresh();

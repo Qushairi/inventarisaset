@@ -21,6 +21,7 @@ class AssetController extends Controller
 
     public function index(Request $request)
     {
+        $editId = $request->integer('edit');
         $filters = $request->validate([
             'search' => ['nullable', 'string', 'max:100'],
             'category_id' => ['nullable', 'exists:categories,id'],
@@ -31,7 +32,8 @@ class AssetController extends Controller
 
         $assets = Asset::query()
             ->with(['category', 'location'])
-            ->where('quantity', '>', 0)
+            ->when(! $editId, fn ($query) => $query->where('quantity', '>', 0))
+            ->when($editId, fn ($query, int $id) => $query->whereKey($id))
             ->when($filters['search'] ?? null, function ($query, string $search) {
                 $query->where(function ($query) use ($search) {
                     $query->where('name', 'like', '%'.$search.'%')
@@ -50,6 +52,7 @@ class AssetController extends Controller
                 $resolvedState = $this->assetStateService->resolveState($asset);
 
                 return [
+                    'id' => $asset->id,
                     'name' => $asset->name,
                     'code' => $asset->code,
                     'note' => $asset->note,
@@ -69,6 +72,13 @@ class AssetController extends Controller
                     'quantity' => $asset->quantity,
                     'price' => 'Rp ' . number_format((float) $asset->acquisition_price, 0, ',', '.'),
                     'acquisition_year' => $asset->acquisition_year ?: optional($asset->acquired_at)->format('Y'),
+                    'category_id' => $asset->category_id,
+                    'location_id' => $asset->location_id,
+                    'edit_condition' => $asset->condition,
+                    'edit_status' => $asset->status,
+                    'acquisition_price' => $asset->acquisition_price,
+                    'has_image' => $asset->hasImage(),
+                    'image_url' => $asset->imageUrl(),
                 ];
             });
 
@@ -85,12 +95,7 @@ class AssetController extends Controller
 
     public function create()
     {
-        return view('admin.assets.create', [
-            'categories' => Category::query()->orderBy('name')->get(),
-            'locations' => Location::query()->orderBy('name')->get(),
-            'conditions' => $this->conditionOptions(),
-            'statuses' => $this->statusOptions(),
-        ]);
+        return redirect()->route('admin.assets.index', ['create' => 1]);
     }
 
     public function store(Request $request)
@@ -111,13 +116,7 @@ class AssetController extends Controller
 
     public function edit(Asset $asset)
     {
-        return view('admin.assets.edit', [
-            'asset' => $asset,
-            'categories' => Category::query()->orderBy('name')->get(),
-            'locations' => Location::query()->orderBy('name')->get(),
-            'conditions' => $this->conditionOptions(),
-            'statuses' => $this->statusOptions(),
-        ]);
+        return redirect()->route('admin.assets.index', ['edit' => $asset->id]);
     }
 
     public function update(Request $request, Asset $asset)
@@ -187,7 +186,7 @@ class AssetController extends Controller
 
     private function statusOptions(): array
     {
-        return ['Tersedia', 'Dipinjam', 'Perbaikan', 'Diverifikasi'];
+        return ['Tersedia', 'Dipinjam', 'Perbaikan'];
     }
 
     private function validateAsset(Request $request, ?Asset $asset = null): array

@@ -217,9 +217,13 @@ class SuratPeminjamanService
         $generatedAt = $suratPeminjaman->pdf_generated_at;
         $pegawaiSignatureUpdatedAt = $loan->user?->signature_updated_at;
         $approverSignatureUpdatedAt = $approver?->signature_updated_at;
+        $pegawaiUpdatedAt = $loan->user?->updated_at;
+        $approverUpdatedAt = $approver?->updated_at;
 
         if (($pegawaiSignatureUpdatedAt && $pegawaiSignatureUpdatedAt->gt($generatedAt))
-            || ($approverSignatureUpdatedAt && $approverSignatureUpdatedAt->gt($generatedAt))) {
+            || ($approverSignatureUpdatedAt && $approverSignatureUpdatedAt->gt($generatedAt))
+            || ($pegawaiUpdatedAt && $pegawaiUpdatedAt->gt($generatedAt))
+            || ($approverUpdatedAt && $approverUpdatedAt->gt($generatedAt))) {
             return true;
         }
 

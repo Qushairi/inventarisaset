@@ -205,7 +205,7 @@
                     </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form action="{{ route('pegawai.loans.store') }}" method="POST">
+                <form action="{{ route('pegawai.loans.store') }}" method="POST" data-swal-confirm data-swal-icon="question" data-swal-title="Kirim pengajuan peminjaman?" data-swal-text="Pastikan aset, jumlah, dan periode peminjaman sudah benar." data-swal-confirm-text="Ya, kirim pengajuan" data-swal-confirm-color="#435ebe">
                     @csrf
                     <div class="modal-body transaction-modal-body">
                         @if ($errors->createLoan->any())

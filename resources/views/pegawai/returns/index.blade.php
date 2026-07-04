@@ -212,7 +212,7 @@
                     </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form action="{{ route('pegawai.returns.store') }}" method="POST">
+                <form action="{{ route('pegawai.returns.store') }}" method="POST" data-swal-confirm data-swal-icon="question" data-swal-title="Kirim pengajuan pengembalian?" data-swal-text="Pastikan data peminjaman dan kondisi aset sudah sesuai." data-swal-confirm-text="Ya, kirim pengajuan" data-swal-confirm-color="#198754">
                     @csrf
                     <div class="modal-body transaction-modal-body">
                         @if ($errors->createReturn->any())

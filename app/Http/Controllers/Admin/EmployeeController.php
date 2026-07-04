@@ -13,15 +13,18 @@ class EmployeeController extends Controller
 {
     public function index(Request $request)
     {
+        $editId = $request->integer('edit');
         $filters = $request->validate([
             'search' => ['nullable', 'string', 'max:100'],
         ]);
 
         $employees = User::query()
             ->where('role', 'pegawai')
+            ->when($editId, fn ($query, int $id) => $query->whereKey($id))
             ->when($filters['search'] ?? null, function ($query, string $search) {
                 $query->where(function ($query) use ($search) {
                     $query->where('name', 'like', '%'.$search.'%')
+                        ->orWhere('nip', 'like', '%'.$search.'%')
                         ->orWhere('email', 'like', '%'.$search.'%');
                 });
             })
@@ -32,6 +35,7 @@ class EmployeeController extends Controller
                 return [
                     'id' => $user->id,
                     'name' => $user->name,
+                    'nip' => $user->nip,
                     'account_id' => '#' . $user->id,
                     'initials' => Str::upper(Str::of($user->name)->explode(' ')->take(2)->map(fn ($part) => Str::substr($part, 0, 1))->join('')),
                     'role' => Str::title($user->role),
@@ -51,19 +55,21 @@ class EmployeeController extends Controller
 
     public function create()
     {
-        return view('admin.employees.create');
+        return redirect()->route('admin.employees.index', ['create' => 1]);
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:100'],
+            'nip' => ['required', 'string', 'max:30', 'regex:/^[0-9]+$/', 'unique:users,nip'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
         User::query()->create([
             'name' => $validated['name'],
+            'nip' => $validated['nip'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'role' => 'pegawai',
@@ -79,9 +85,7 @@ class EmployeeController extends Controller
     {
         abort_if($employee->role !== 'pegawai', 404);
 
-        return view('admin.employees.edit', [
-            'employee' => $employee,
-        ]);
+        return redirect()->route('admin.employees.index', ['edit' => $employee->id]);
     }
 
     public function update(Request $request, User $employee)
@@ -90,12 +94,14 @@ class EmployeeController extends Controller
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:100'],
+            'nip' => ['required', 'string', 'max:30', 'regex:/^[0-9]+$/', Rule::unique('users', 'nip')->ignore($employee->id)],
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($employee->id)],
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
         ]);
 
         $payload = [
             'name' => $validated['name'],
+            'nip' => $validated['nip'],
             'email' => $validated['email'],
         ];
 
@@ -104,6 +110,12 @@ class EmployeeController extends Controller
         }
 
         $employee->update($payload);
+
+        if ($employee->wasChanged(['name', 'nip'])) {
+            $employee->receivedBeritaAcaras()->update([
+                'pdf_generated_at' => null,
+            ]);
+        }
 
         return redirect()
             ->route('admin.employees.index')

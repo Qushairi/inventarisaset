@@ -30,7 +30,7 @@ class ReturnController extends Controller
         ]);
 
         $returns = AssetReturn::query()
-            ->with(['asset', 'user', 'loan'])
+            ->with(['asset', 'user', 'loan.asset', 'loan.user'])
             ->when($filters['search'] ?? null, function ($query, string $search) {
                 $query->where(function ($query) use ($search) {
                     $query->where('verified_note', 'like', '%'.$search.'%')
@@ -52,11 +52,23 @@ class ReturnController extends Controller
             ->paginate(10)
             ->withQueryString()
             ->through(function (AssetReturn $return) {
+                $loan = $return->loan;
+                $loanDate = $loan?->loan_date;
+                $returnedAt = $return->returned_at;
+
                 return [
                     'id' => $return->id,
-                    'asset_name' => $return->asset?->name,
-                    'asset_code' => $return->asset?->code,
-                    'returned_at' => optional($return->returned_at)->format('d/m/Y'),
+                    'asset_name' => $return->asset?->name ?? $loan?->asset?->name,
+                    'asset_code' => $return->asset?->code ?? $loan?->asset?->code,
+                    'employee_name' => $return->user?->name ?? $loan?->user?->name,
+                    'employee_email' => $return->user?->email ?? $loan?->user?->email,
+                    'loan_date' => optional($loanDate)->format('d/m/Y'),
+                    'planned_return_date' => optional($loan?->planned_return_date)->format('d/m/Y'),
+                    'loan_quantity' => max(1, (int) ($loan?->quantity ?? 1)),
+                    'loan_duration' => $loanDate && $returnedAt
+                        ? $loanDate->diffInDays($returnedAt).' hari'
+                        : '-',
+                    'returned_at' => optional($returnedAt)->format('d/m/Y'),
                     'verified_note' => $return->verified_note,
                     'condition' => $return->condition,
                     'condition_variant' => $this->conditionVariant($return->condition),
@@ -72,6 +84,14 @@ class ReturnController extends Controller
             'returns' => $returns,
             'returnTotal' => $returns->total(),
             'conditions' => $this->conditionOptions(),
+            'createAssets' => Asset::query()->orderBy('name')->get(),
+            'createEmployees' => User::query()->where('role', 'pegawai')->orderBy('name')->get(),
+            'createLoans' => Loan::query()
+                ->with(['asset', 'user'])
+                ->where('status', 'Disetujui')
+                ->whereDoesntHave('returnRecord')
+                ->latest('loan_date')
+                ->get(),
             'filters' => $filters,
             'hasActiveFilters' => collect($filters)->filter(fn ($value) => filled($value))->isNotEmpty(),
         ]);

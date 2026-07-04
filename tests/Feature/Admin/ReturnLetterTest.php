@@ -40,6 +40,42 @@ class ReturnLetterTest extends TestCase
         $response->assertSee(route('admin.returns.letter.show', $returnRecord), false);
     }
 
+    public function test_returned_loan_moves_from_admin_loans_to_return_history(): void
+    {
+        $admin = User::factory()->create([
+            'role' => 'admin',
+        ]);
+
+        $pegawai = User::factory()->create([
+            'name' => 'Pegawai Riwayat',
+            'role' => 'pegawai',
+        ]);
+
+        $asset = $this->createAsset([
+            'name' => 'Laptop Riwayat Pengembalian',
+            'code' => 'AST-HISTORY-001',
+        ]);
+        $loan = $this->createLoan($asset, $pegawai, [
+            'quantity' => 2,
+            'status' => 'Selesai',
+        ]);
+        $this->createReturnRecord($asset, $pegawai, $loan);
+
+        $loanResponse = $this->actingAs($admin)->get(route('admin.loans.index'));
+        $returnResponse = $this->actingAs($admin)->get(route('admin.returns.index'));
+
+        $loanResponse->assertOk();
+        $this->assertSame(0, $loanResponse->viewData('loans')->total());
+
+        $returnResponse->assertOk();
+        $returnResponse->assertSee('Riwayat Pengembalian');
+        $returnResponse->assertSee('Laptop Riwayat Pengembalian');
+        $returnResponse->assertSee('Pegawai Riwayat');
+        $returnResponse->assertSee('Pinjam: 04/05/2026');
+        $returnResponse->assertSee('Kembali: 08/05/2026');
+        $returnResponse->assertSee('Jumlah: 2');
+    }
+
     public function test_admin_can_preview_return_letter_from_returns_menu(): void
     {
         $admin = User::factory()->create([
@@ -48,6 +84,7 @@ class ReturnLetterTest extends TestCase
 
         $pegawai = User::factory()->create([
             'role' => 'pegawai',
+            'nip' => '198801012010011002',
         ]);
 
         $asset = $this->createAsset([
@@ -69,6 +106,7 @@ class ReturnLetterTest extends TestCase
         $response->assertOk();
         $response->assertSee('BERITA ACARA SERAH TERIMA ASET');
         $response->assertSee('RET-20260508-0001');
+        $response->assertSee('198801012010011002');
         $response->assertSee('Kelola Verifikasi');
     }
 
