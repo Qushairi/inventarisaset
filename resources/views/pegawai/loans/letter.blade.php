@@ -12,8 +12,8 @@
         @include('pegawai.partials.page-heading', [
             'title' => 'Surat Peminjaman Aset',
             'breadcrumb' => 'Surat Peminjaman',
-            'homeRoute' => 'pegawai.loans.index',
-            'homeLabel' => 'Peminjaman',
+            'homeRoute' => $homeRoute ?? 'pegawai.loans.index',
+            'homeLabel' => $homeLabel ?? 'Peminjaman',
         ])
     </div>
 
@@ -29,7 +29,7 @@
                 <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                     <div>
                         <h4 class="card-title mb-1">{{ $suratPeminjaman->number }}</h4>
-                        <p class="mb-0 text-muted">Dokumen ini tersimpan pada riwayat peminjaman aset Anda.</p>
+                        <p class="mb-0 text-muted">{{ $letterNote ?? 'Dokumen ini tersimpan pada riwayat peminjaman aset Anda.' }}</p>
                     </div>
                     <div class="d-flex flex-wrap gap-2">
                         <a href="{{ $backUrl }}" class="btn btn-light-secondary btn-sm icon icon-left">

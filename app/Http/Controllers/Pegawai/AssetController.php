@@ -14,7 +14,6 @@ class AssetController extends BasePegawaiController
 
         $assets = Asset::query()
             ->with(['category', 'location'])
-            ->where('quantity', '>', 0)
             ->orderBy('name')
             ->paginate($perPage)
             ->withQueryString()

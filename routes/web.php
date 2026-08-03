@@ -104,6 +104,7 @@ Route::middleware(['auth', 'role:pegawai'])->prefix('pegawai')->name('pegawai.')
     Route::get('/profile', [PegawaiProfileController::class, 'index'])->name('profile.index');
     Route::patch('/profile', [PegawaiProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [PegawaiProfileController::class, 'updatePassword'])->name('profile.password.update');
+
 });
 
 require __DIR__.'/auth.php';

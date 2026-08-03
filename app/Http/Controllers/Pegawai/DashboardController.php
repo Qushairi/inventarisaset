@@ -74,8 +74,8 @@ class DashboardController extends BasePegawaiController
                 return [
                     'asset_name' => $loan->asset?->name,
                     'asset_code' => $loan->asset?->code,
-                    'loan_date' => optional($loan->loan_date)->format('d/m/Y'),
-                    'return_plan' => 'Rencana kembali ' . optional($loan->planned_return_date)->format('d/m/Y'),
+                    'loan_date' => optional($loan->loan_date)->translatedFormat('d F Y'),
+                    'return_plan' => 'Rencana kembali ' . optional($loan->planned_return_date)->translatedFormat('d F Y'),
                     'status' => $loan->status,
                     'status_variant' => match ($loan->status) {
                         'Ditolak' => 'danger',
@@ -86,7 +86,48 @@ class DashboardController extends BasePegawaiController
                 ];
             });
 
+        $recentReturns = AssetReturn::query()
+            ->with(['loan.asset', 'asset'])
+            ->where('user_id', $pegawai->id)
+            ->latest('returned_at')
+            ->take(4)
+            ->get()
+            ->map(function (AssetReturn $returnItem) {
+                $asset = $returnItem->asset ?? $returnItem->loan?->asset;
+                return [
+                    'asset_name' => $asset?->name ?? 'Aset Inventaris',
+                    'asset_code' => $asset?->code ?? '-',
+                    'returned_at' => optional($returnItem->returned_at)->translatedFormat('d F Y'),
+                    'condition' => $returnItem->condition ?? 'Baik',
+                    'status' => 'Sudah Dikembalikan',
+                    'status_variant' => 'success',
+                ];
+            });
+
+        $activeLoans = Loan::query()
+            ->with('asset')
+            ->where('user_id', $pegawai->id)
+            ->where('status', 'Disetujui')
+            ->latest('loan_date')
+            ->take(3)
+            ->get()
+            ->map(function (Loan $loan) {
+                return [
+                    'asset_name' => $loan->asset?->name,
+                    'asset_code' => $loan->asset?->code,
+                    'loan_date' => optional($loan->loan_date)->translatedFormat('d F Y'),
+                    'planned_return_date' => optional($loan->planned_return_date)->translatedFormat('d F Y'),
+                    'quantity' => $loan->quantity,
+                ];
+            });
+
+        $statusApproved = Loan::query()->where('user_id', $pegawai->id)->where('status', 'Disetujui')->count();
+        $statusPending = Loan::query()->where('user_id', $pegawai->id)->where('status', 'Menunggu')->count();
+        $statusRejected = Loan::query()->where('user_id', $pegawai->id)->where('status', 'Ditolak')->count();
+
         return view('pegawai.dashboard', $this->layoutData([
+            'pegawaiName' => $pegawai->name,
+            'activeLoans' => $activeLoans,
             'statCards' => [
                 [
                     'label' => 'Total Aset',
@@ -122,8 +163,13 @@ class DashboardController extends BasePegawaiController
                 'loan_series' => $loanTrend,
                 'return_series' => $returnTrend,
             ],
+            'statusChart' => [
+                'labels' => ['Disetujui', 'Menunggu', 'Ditolak'],
+                'series' => [$statusApproved, $statusPending, $statusRejected],
+            ],
             'recentAssets' => $recentAssets,
             'recentLoans' => $recentLoans,
+            'recentReturns' => $recentReturns,
         ]));
     }
 

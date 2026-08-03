@@ -12,18 +12,29 @@ class SuratPeminjamanController extends BasePegawaiController
     ) {
     }
 
-    public function show(Loan $loan)
+    public function show(Loan $loan, \Illuminate\Http\Request $request)
     {
         $loan = $this->authorizedLoan($loan);
         $suratPeminjaman = $this->suratPeminjamanService->ensureForLoan($loan);
 
         abort_if(! $suratPeminjaman, 404);
 
+        $fromReturns = $request->query('from') === 'returns';
+        $backUrl = $fromReturns ? route('pegawai.returns.index') : route('pegawai.loans.index');
+        $homeRoute = $fromReturns ? 'pegawai.returns.index' : 'pegawai.loans.index';
+        $homeLabel = $fromReturns ? 'Pengembalian' : 'Peminjaman';
+        $letterNote = $fromReturns
+            ? 'Dokumen ini tersambung pada riwayat pengembalian aset Anda.'
+            : 'Dokumen ini tersimpan pada riwayat peminjaman aset Anda.';
+
         return view('pegawai.loans.letter', $this->layoutData(array_merge(
             $this->suratPeminjamanService->previewData($suratPeminjaman),
             [
                 'downloadUrl' => route('pegawai.loans.letter.download', $loan),
-                'backUrl' => route('pegawai.loans.index'),
+                'backUrl' => $backUrl,
+                'homeRoute' => $homeRoute,
+                'homeLabel' => $homeLabel,
+                'letterNote' => $letterNote,
             ],
         )));
     }

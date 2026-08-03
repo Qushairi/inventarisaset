@@ -36,13 +36,25 @@ class LoanController extends BasePegawaiController
             ->through(function (Loan $loan) {
                 $suratPeminjaman = $this->suratPeminjamanService->ensureForLoan($loan);
 
+                $itemList = $loan->getItemList();
+                $firstAsset = $itemList->first()['asset'] ?? $loan->asset;
+                $itemCount = $itemList->count();
+
+                $assetName = $itemCount > 1
+                    ? $firstAsset?->name . ' (+' . ($itemCount - 1) . ' barang lainnya)'
+                    : $firstAsset?->name;
+
+                $assetCode = $itemCount > 1
+                    ? $itemCount . ' Jenis Barang (' . $itemList->sum('quantity') . ' Total Unit)'
+                    : $firstAsset?->code;
+
                 return [
                     'id' => $loan->id,
-                    'asset_name' => $loan->asset?->name,
-                    'asset_code' => $loan->asset?->code,
-                    'loan_date' => optional($loan->loan_date)->format('d/m/Y'),
-                    'return_plan' => 'Rencana kembali ' . optional($loan->planned_return_date)->format('d/m/Y'),
-                    'quantity' => $loan->quantity,
+                    'asset_name' => $assetName,
+                    'asset_code' => $assetCode,
+                    'loan_date' => optional($loan->loan_date)->translatedFormat('d F Y'),
+                    'return_plan' => 'Rencana kembali ' . optional($loan->planned_return_date)->translatedFormat('d F Y'),
+                    'quantity' => $itemList->sum('quantity'),
                     'status' => $loan->status,
                     'status_variant' => match ($loan->status) {
                         'Ditolak' => 'danger',
@@ -75,51 +87,60 @@ class LoanController extends BasePegawaiController
         $pegawai = $this->currentPegawai();
 
         $validated = $request->validateWithBag('createLoan', [
-            'asset_id' => ['required', 'exists:assets,id'],
-            'loan_date' => [
-                'required',
-                'date',
-                Rule::unique('loans')->where(fn ($query) => $query
-                    ->where('asset_id', $request->input('asset_id'))
-                    ->where('user_id', $pegawai->id)
-                    ->where('loan_date', $request->input('loan_date'))),
-            ],
+            'loan_date' => ['required', 'date'],
             'planned_return_date' => ['required', 'date', 'after_or_equal:loan_date'],
-            'quantity' => ['required', 'integer', 'min:1'],
             'status_note' => ['nullable', 'string', 'max:255'],
+            'items' => ['nullable', 'array', 'min:1'],
+            'items.*.asset_id' => ['required_with:items', 'exists:assets,id'],
+            'items.*.quantity' => ['required_with:items', 'integer', 'min:1'],
+            'asset_id' => ['nullable', 'exists:assets,id'],
+            'quantity' => ['nullable', 'integer', 'min:1'],
         ]);
 
-        $asset = $this->availableAssetsQuery()
-            ->whereKey($validated['asset_id'])
-            ->first();
-
-        if (! $asset) {
+        $itemList = collect();
+        if (!empty($validated['items'])) {
+            foreach ($validated['items'] as $item) {
+                $itemList->push([
+                    'asset_id' => (int) $item['asset_id'],
+                    'quantity' => (int) $item['quantity'],
+                ]);
+            }
+        } elseif (!empty($validated['asset_id'])) {
+            $itemList->push([
+                'asset_id' => (int) $validated['asset_id'],
+                'quantity' => (int) ($validated['quantity'] ?? 1),
+            ]);
+        } else {
             throw ValidationException::withMessages([
-                'asset_id' => 'Aset yang dipilih sedang tidak tersedia untuk dipinjam.',
+                'items' => 'Pilih minimal satu barang yang akan dipinjam.',
             ])->errorBag('createLoan');
         }
 
-        if ((int) $validated['quantity'] > $asset->quantity) {
-            throw ValidationException::withMessages([
-                'quantity' => 'Jumlah peminjaman melebihi stok aset yang tersedia.',
-            ])->errorBag('createLoan');
-        }
+        $firstItem = $itemList->first();
+        $totalQty = $itemList->sum('quantity');
 
         $loan = Loan::query()->create([
-            'asset_id' => $asset->id,
+            'asset_id' => $firstItem['asset_id'],
             'user_id' => $pegawai->id,
             'loan_date' => $validated['loan_date'],
             'planned_return_date' => $validated['planned_return_date'],
-            'quantity' => $validated['quantity'],
+            'quantity' => $totalQty,
             'status' => 'Menunggu',
             'status_note' => $validated['status_note'] ?: 'Pengajuan peminjaman dari pegawai.',
         ]);
+
+        foreach ($itemList as $itemData) {
+            $loan->items()->create([
+                'asset_id' => $itemData['asset_id'],
+                'quantity' => $itemData['quantity'],
+            ]);
+        }
 
         $this->adminNotificationService->sendLoanRequestNotification($loan);
 
         return redirect()
             ->route('pegawai.loans.index')
-            ->with('success', 'Pengajuan peminjaman berhasil dikirim dan menunggu persetujuan admin.');
+            ->with('success', 'Pengajuan peminjaman multi-item berhasil dikirim dan menunggu persetujuan admin.');
     }
 
     private function availableAssetsQuery()

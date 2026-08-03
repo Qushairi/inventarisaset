@@ -65,37 +65,264 @@ body.pegawai-layout {
     --bs-gutter-y: 1.5rem;
 }
 
+.pegawai-layout .pegawai-stat-card {
+    border-radius: 1rem !important;
+    border: 1px solid #e2e8f0 !important;
+    background: #ffffff !important;
+    box-shadow: 0 4px 18px rgba(15, 23, 42, 0.04) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.pegawai-layout .pegawai-stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08) !important;
+    border-color: #cbd5e1 !important;
+}
+
 .pegawai-layout .pegawai-stat-card .card-body {
     display: flex;
     align-items: center;
-    min-height: 8.5rem;
-    padding: 1.15rem 1.2rem;
+    padding: 1.25rem 1.4rem !important;
+    min-height: 6.8rem !important;
 }
 
 .pegawai-layout .pegawai-stat-layout {
-    display: grid;
-    grid-template-columns: 3.25rem minmax(0, 1fr);
+    display: flex;
+    align-items: center;
     width: 100%;
-    align-items: start;
-    gap: 0.9rem;
+    gap: 1.15rem;
 }
 
 .pegawai-layout .pegawai-stat-card .stats-icon {
     float: none;
-    width: 3.25rem;
-    height: 3.25rem;
-    border-radius: 0.95rem;
+    width: 3.5rem !important;
+    height: 3.5rem !important;
+    border-radius: 1rem !important;
     flex-shrink: 0;
-    box-shadow: 0 14px 24px rgba(67, 94, 190, 0.16);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.3s ease !important;
+}
+
+.pegawai-layout .pegawai-stat-card:hover .stats-icon {
+    transform: scale(1.08);
+}
+
+.pegawai-layout .pegawai-stat-card .stats-icon.purple {
+    background: linear-gradient(135deg, #435ebe 0%, #617bfb 100%) !important;
+    box-shadow: 0 10px 20px rgba(67, 94, 190, 0.22) !important;
+}
+
+.pegawai-layout .pegawai-stat-card .stats-icon.green {
+    background: linear-gradient(135deg, #10b981 0%, #34d399 100%) !important;
+    box-shadow: 0 10px 20px rgba(16, 185, 129, 0.22) !important;
+}
+
+.pegawai-layout .pegawai-stat-card .stats-icon.red {
+    background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%) !important;
+    box-shadow: 0 10px 20px rgba(245, 158, 11, 0.22) !important;
+}
+
+.pegawai-layout .pegawai-stat-card .stats-icon.blue {
+    background: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%) !important;
+    box-shadow: 0 10px 20px rgba(14, 165, 233, 0.22) !important;
 }
 
 .pegawai-layout .pegawai-stat-card .stats-icon i {
-    color: #fff;
-    font-size: 1.3rem;
-    line-height: 1;
+    color: #ffffff !important;
+    font-size: 1.55rem !important;
+    line-height: 1 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.pegawai-layout .pegawai-stat-copy {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.pegawai-layout .pegawai-stat-label {
+    font-size: 0.72rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    color: #64748b !important;
+    margin-bottom: 0.15rem !important;
+    line-height: 1.2 !important;
+}
+
+.pegawai-layout .pegawai-stat-value {
+    font-size: 1.65rem !important;
+    font-weight: 800 !important;
+    color: #0f172a !important;
+    line-height: 1.1 !important;
+}
+
+.pegawai-layout .pegawai-stat-helper {
+    font-size: 0.75rem !important;
+    color: #94a3b8 !important;
+    margin-top: 0.25rem !important;
+    display: block;
+}
+
+/* Sleek Toolbar Wrapper (Search & Filter Side-by-Side) */
+.pegawai-layout .pegawai-toolbar-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+}
+
+.pegawai-layout .pegawai-search-box {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    width: 17.5rem;
+    max-width: 100%;
+}
+
+.pegawai-layout .pegawai-search-icon {
+    position: absolute;
+    left: 0.95rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    font-size: 0.95rem;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.pegawai-layout .pegawai-search-input {
+    padding-left: 2.5rem !important;
+    padding-right: 1rem !important;
+    height: 2.65rem !important;
+    border-radius: 0.75rem !important;
+    border: 1px solid #dfe7f1 !important;
+    background-color: #f8fafc !important;
+    font-size: 0.88rem !important;
+    color: #1e293b !important;
+    transition: all 0.25s ease !important;
+}
+
+.pegawai-layout .pegawai-search-input:focus {
+    background-color: #ffffff !important;
+    border-color: #435ebe !important;
+    box-shadow: 0 4px 14px rgba(67, 94, 190, 0.12) !important;
+}
+
+.pegawai-layout .pegawai-filter-btn {
+    height: 2.65rem !important;
+    padding: 0 1.15rem !important;
+    border-radius: 0.75rem !important;
+    border: 1px solid #dfe7f1 !important;
+    background-color: #f8fafc !important;
+    font-size: 0.88rem !important;
+    font-weight: 600 !important;
+    color: #334155 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.45rem !important;
+    transition: all 0.25s ease !important;
+}
+
+.pegawai-layout .pegawai-filter-btn:hover,
+.pegawai-layout .pegawai-filter-btn:focus,
+.pegawai-layout .pegawai-filter-btn.show {
+    background-color: #ffffff !important;
+    border-color: #435ebe !important;
+    color: #435ebe !important;
+    box-shadow: 0 4px 14px rgba(67, 94, 190, 0.12) !important;
+}
+
+/* Premium Status Badges for Pegawai Pages */
+.pegawai-layout .pegawai-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.85rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border-radius: 50rem;
+    line-height: 1.25;
+    white-space: nowrap;
+}
+
+.pegawai-layout .pegawai-badge-dot {
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+/* Success: Disetujui / Tersedia / Terverifikasi */
+.pegawai-layout .pegawai-badge-success {
+    background-color: #ecfdf5 !important;
+    color: #047857 !important;
+    border: 1px solid #a7f3d0 !important;
+}
+.pegawai-layout .pegawai-badge-success .pegawai-badge-dot {
+    background-color: #10b981;
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25);
+}
+
+/* Warning: Menunggu / Menunggu Verifikasi */
+.pegawai-layout .pegawai-badge-warning {
+    background-color: #fffbeb !important;
+    color: #b45309 !important;
+    border: 1px solid #fde68a !important;
+}
+.pegawai-layout .pegawai-badge-warning .pegawai-badge-dot {
+    background-color: #f59e0b;
+    box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.25);
+}
+
+/* Danger: Ditolak / Rusak Berat */
+.pegawai-layout .pegawai-badge-danger {
+    background-color: #fef2f2 !important;
+    color: #b91c1c !important;
+    border: 1px solid #fecaca !important;
+}
+.pegawai-layout .pegawai-badge-danger .pegawai-badge-dot {
+    background-color: #ef4444;
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.25);
+}
+
+/* Info: Dipinjam / Diverifikasi */
+.pegawai-layout .pegawai-badge-info {
+    background-color: #eff6ff !important;
+    color: #1d4ed8 !important;
+    border: 1px solid #bfdbfe !important;
+}
+.pegawai-layout .pegawai-badge-info .pegawai-badge-dot {
+    background-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+}
+
+/* Sleek Letter Column Styling */
+.pegawai-layout .pegawai-letter-number {
+    display: inline-flex;
+    align-items: center;
+    background-color: #f1f5f9;
+    color: #334155;
+    padding: 0.22rem 0.55rem;
+    border-radius: 0.4rem;
+    border: 1px solid #e2e8f0;
+    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 0.76rem;
+    font-weight: 600;
+}
+
+.pegawai-layout .btn-xs {
+    padding: 0.22rem 0.6rem !important;
+    font-size: 0.78rem !important;
+    border-radius: 0.45rem !important;
+    line-height: 1.25 !important;
+    font-weight: 600 !important;
 }
 
 .pegawai-layout .pegawai-stat-copy {
@@ -497,20 +724,25 @@ body.pegawai-layout {
 }
 
 .pegawai-layout .surat-peminjaman-preview-shell {
-    padding: 1.25rem;
+    padding: 2.5rem 1.5rem;
     border-radius: 1rem;
-    border: 1px solid #edf2f7;
-    background: linear-gradient(180deg, #eef3fb 0%, #f8fbff 100%);
+    border: 1px solid #dfe7f1;
+    background: #e2e8f0;
     overflow-x: auto;
+    display: flex;
+    justify-content: center;
 }
 
 .pegawai-layout .surat-peminjaman-preview-sheet {
-    max-width: 900px;
+    width: 210mm;
+    max-width: 100%;
+    min-height: 297mm;
     margin: 0 auto;
-    padding: 2rem 2.25rem;
-    border-radius: 1rem;
-    background-color: #fff;
-    box-shadow: 0 18px 36px rgba(15, 23, 42, 0.08);
+    padding: 2.5cm 2cm 2cm 2.5cm;
+    border-radius: 2px;
+    background-color: #ffffff;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.06);
+    box-sizing: border-box;
 }
 
 @media (max-width: 767.98px) {
@@ -587,4 +819,70 @@ body.pegawai-layout {
     .pegawai-layout .surat-peminjaman-preview-sheet {
         padding: 1rem;
     }
+}
+
+/* Large Profile Avatar Styles */
+.pegawai-avatar-lg {
+    width: 120px !important;
+    height: 120px !important;
+    border-radius: 50% !important;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 24px rgba(67, 94, 190, 0.15);
+}
+
+.pegawai-avatar-lg img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+}
+
+.pegawai-avatar-lg .avatar-content {
+    font-size: 2.75rem !important;
+    font-weight: 700 !important;
+}
+
+/* Universal Precision Alignment Rules (Penyempurnaan Tombol, Ikon & Tabel) */
+.pegawai-layout .btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    line-height: 1.25 !important;
+    vertical-align: middle !important;
+}
+
+.pegawai-layout .btn.icon {
+    gap: 0.45rem !important;
+}
+
+.pegawai-layout .btn.icon i,
+.pegawai-layout .btn i {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    line-height: 1 !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    vertical-align: middle !important;
+}
+
+.pegawai-layout .btn.icon span,
+.pegawai-layout .btn span {
+    display: inline-block !important;
+    line-height: 1.25 !important;
+    vertical-align: middle !important;
+}
+
+.pegawai-layout .table.align-middle td,
+.pegawai-layout .table.align-middle th {
+    vertical-align: middle !important;
+}
+
+.pegawai-layout .pegawai-badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    vertical-align: middle !important;
 }

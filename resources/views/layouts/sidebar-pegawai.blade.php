@@ -1,4 +1,5 @@
 @php
+    $isFromReturns = request()->query('from') === 'returns';
     $sidebarMenus = [
         [
             'name' => 'Dashboard',
@@ -16,13 +17,13 @@
             'name' => 'Peminjaman',
             'icon' => 'journal-check',
             'route' => 'pegawai.loans.index',
-            'active_patterns' => ['pegawai.loans.*'],
+            'active_patterns' => $isFromReturns ? ['pegawai.loans.index', 'pegawai.loans.create'] : ['pegawai.loans.*'],
         ],
         [
             'name' => 'Pengembalian',
             'icon' => 'arrow-counterclockwise',
             'route' => 'pegawai.returns.index',
-            'active_patterns' => ['pegawai.returns.*'],
+            'active_patterns' => $isFromReturns ? ['pegawai.returns.*', 'pegawai.loans.letter.*'] : ['pegawai.returns.*'],
         ],
     ];
 @endphp

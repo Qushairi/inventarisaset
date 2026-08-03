@@ -42,6 +42,39 @@ class Loan extends Model
         return $this->belongsTo(Asset::class);
     }
 
+    public function items(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(LoanItem::class);
+    }
+
+    public function getItemList(): \Illuminate\Support\Collection
+    {
+        if ($this->relationLoaded('items') && $this->items->count() > 0) {
+            return $this->items->map(function (LoanItem $item) {
+                return [
+                    'asset' => $item->asset,
+                    'quantity' => $item->quantity,
+                ];
+            });
+        }
+
+        if ($this->items()->exists()) {
+            return $this->items()->with('asset')->get()->map(function (LoanItem $item) {
+                return [
+                    'asset' => $item->asset,
+                    'quantity' => $item->quantity,
+                ];
+            });
+        }
+
+        return collect([
+            [
+                'asset' => $this->asset,
+                'quantity' => $this->quantity ?: 1,
+            ],
+        ]);
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

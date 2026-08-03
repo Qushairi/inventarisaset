@@ -27,95 +27,81 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-3">
                     <div>
-                        <h3 class="mb-0">Daftar Pengembalian</h3>
+                        <button
+                            type="button"
+                            class="btn btn-primary icon icon-left"
+                            data-bs-toggle="modal"
+                            data-bs-target="#returnRequestModal"
+                            @disabled($returnableLoans->isEmpty())
+                        >
+                            <i class="bi bi-plus-circle-fill"></i>
+                            <span>Ajukan Pengembalian</span>
+                        </button>
+                    </div>
+
+                    <div class="pegawai-toolbar-wrapper ms-auto">
+                        <!-- Sleek Search Input Box -->
+                        <div class="pegawai-search-box">
+                            <i class="bi bi-search pegawai-search-icon"></i>
+                            <input
+                                type="search"
+                                id="pegawaiReturnSearchInput"
+                                class="form-control pegawai-search-input"
+                                placeholder="Cari aset atau kode aset..."
+                            >
+                        </div>
+
+                        @php
+                            $returnStatusFilters = ['Sudah Dikembalikan'];
+                        @endphp
+
+                        <!-- Floating Filter Dropdown Popover -->
+                        <div class="dropdown">
+                            <button
+                                class="btn pegawai-filter-btn d-inline-flex align-items-center gap-2"
+                                type="button"
+                                id="pegawaiReturnFilterDropdownBtn"
+                                data-bs-toggle="dropdown"
+                                data-bs-auto-close="outside"
+                                aria-expanded="false"
+                                title="Filter Pengembalian"
+                            >
+                                <i class="bi bi-funnel-fill text-primary"></i>
+                                <span class="fw-semibold">Filter</span>
+                            </button>
+
+                            <div class="dropdown-menu dropdown-menu-end p-3 shadow-lg border-0 pegawai-asset-filter-menu" aria-labelledby="pegawaiReturnFilterDropdownBtn">
+                                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                                    <h6 class="mb-0 fw-bold text-dark"><i class="bi bi-sliders me-1 text-primary"></i> Filter Pengembalian</h6>
+                                    <button type="button" id="pegawaiReturnResetFilter" class="btn btn-sm btn-link text-danger p-0 text-decoration-none d-none">
+                                        <i class="bi bi-arrow-counterclockwise me-1"></i>Reset
+                                    </button>
+                                </div>
+
+                                <div class="row g-2">
+                                    <div class="col-12 mb-2">
+                                        <label for="pegawaiReturnConditionFilter" class="form-label text-muted small font-semibold">Kondisi Aset</label>
+                                        <select id="pegawaiReturnConditionFilter" class="form-select form-select-sm">
+                                            <option value="">Semua Kondisi</option>
+                                            @foreach ($conditions as $condition)
+                                                <option value="{{ $condition }}">{{ $condition }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="card-body">
-                    @php
-                        $returnStatusFilters = ['Menunggu Verifikasi', 'Terverifikasi'];
-                    @endphp
-
                     @if ($returnableLoans->isEmpty())
-                        <div class="alert alert-light-warning color-warning">
+                        <div class="alert alert-light-warning color-warning mb-4">
                             <i class="bi bi-exclamation-triangle me-1"></i>Belum ada peminjaman yang siap diajukan untuk pengembalian.
                         </div>
                     @endif
 
-                    <div class="row g-3 align-items-end mb-4">
-                        <div class="col-lg-6 col-12">
-                            <button
-                                type="button"
-                                class="btn btn-primary btn-sm icon icon-left pegawai-toolbar-add"
-                                data-bs-toggle="modal"
-                                data-bs-target="#returnRequestModal"
-                                @disabled($returnableLoans->isEmpty())
-                            >
-                                <i class="bi bi-plus-circle"></i><span>Ajukan Pengembalian</span>
-                            </button>
-                        </div>
-                        <div class="col-lg-6 col-12">
-                            <div class="row g-2 align-items-end justify-content-lg-end">
-                                <div class="col-md-8 col-12">
-                                    <div class="input-group">
-                                        <span class="input-group-text">
-                                            <i class="bi bi-search"></i>
-                                        </span>
-                                        <input
-                                            type="search"
-                                            id="pegawaiReturnSearchInput"
-                                            class="form-control"
-                                            placeholder="Cari aset atau kode aset"
-                                        >
-                                    </div>
-                                </div>
-                                <div class="col-auto">
-                                    <button
-                                        class="btn btn-light-secondary pegawai-filter-toggle"
-                                        type="button"
-                                        id="pegawaiReturnFilterButton"
-                                        aria-expanded="false"
-                                        aria-controls="pegawaiReturnFilterPanel"
-                                        aria-label="Filter pengembalian"
-                                        title="Filter pengembalian"
-                                    >
-                                        <i class="bi bi-funnel"></i>
-                                        <span class="visually-hidden">Filter</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="pegawaiReturnFilterPanel" class="pegawai-filter-panel border rounded p-3 mb-4 d-none">
-                        <div class="row g-3 align-items-end">
-                            <div class="col-lg-5 col-md-6 col-12">
-                                <label for="pegawaiReturnStatusFilter" class="form-label">Status</label>
-                                <select id="pegawaiReturnStatusFilter" class="form-select">
-                                    <option value="">Semua Status</option>
-                                    @foreach ($returnStatusFilters as $returnStatusFilter)
-                                        <option value="{{ $returnStatusFilter }}">{{ $returnStatusFilter }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-lg-5 col-md-6 col-12">
-                                <label for="pegawaiReturnConditionFilter" class="form-label">Kondisi</label>
-                                <select id="pegawaiReturnConditionFilter" class="form-select">
-                                    <option value="">Semua Kondisi</option>
-                                    @foreach ($conditions as $condition)
-                                        <option value="{{ $condition }}">{{ $condition }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-lg-2 col-md-6 col-12">
-                                <button type="button" id="pegawaiReturnResetFilter" class="btn btn-light-secondary icon w-100" aria-label="Reset filter pengembalian">
-                                    <i class="bi bi-arrow-counterclockwise"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
                     <div class="table-responsive">
-                        <table class="table table-hover table-lg mb-0">
+                        <table class="table table-hover align-middle table-lg mb-0">
                             <thead>
                                 <tr>
                                     <th>Aset</th>
@@ -130,17 +116,16 @@
                                 @forelse ($returns as $return)
                                     @php
                                         $conditionBadge = match ($return['condition_variant']) {
-                                            'warning' => 'bg-light-warning',
-                                            'danger' => 'bg-light-danger',
-                                            default => 'bg-light-success',
+                                            'warning' => 'pegawai-badge-warning',
+                                            'danger' => 'pegawai-badge-danger',
+                                            default => 'pegawai-badge-success',
                                         };
-                                        $statusBadge = $return['status_variant'] === 'success' ? 'bg-light-success' : 'bg-light-info';
                                         $searchSource = strtolower(trim(($return['asset_name'] ?? '').' '.($return['asset_code'] ?? '')));
                                     @endphp
                                     <tr
                                         data-pegawai-return-row
                                         data-pegawai-return-search="{{ $searchSource }}"
-                                        data-pegawai-return-status="{{ strtolower($return['status'] ?? '') }}"
+                                        data-pegawai-return-status="sudah dikembalikan"
                                         data-pegawai-return-condition="{{ strtolower($return['condition'] ?? '') }}"
                                     >
                                         <td>
@@ -153,24 +138,29 @@
                                         </td>
                                         <td>
                                             <div>{{ $return['returned_at'] }}</div>
-                                            <small class="text-muted">{{ $return['verified_note'] ?: 'Menunggu catatan verifikasi admin.' }}</small>
+                                            <small class="text-muted">Telah dikembalikan oleh pegawai.</small>
                                         </td>
                                         <td>
-                                            <span class="badge {{ $conditionBadge }}">{{ $return['condition'] }}</span>
+                                            <span class="pegawai-badge {{ $conditionBadge }}">
+                                                <span class="pegawai-badge-dot"></span>
+                                                <span>{{ $return['condition'] }}</span>
+                                            </span>
                                         </td>
                                         <td>
-                                            <span class="badge {{ $statusBadge }}">{{ $return['status'] }}</span>
-                                            <div><small class="text-muted">{{ $return['status_note'] }}</small></div>
+                                            <span class="pegawai-badge pegawai-badge-success">
+                                                <span class="pegawai-badge-dot"></span>
+                                                <span>Sudah Dikembalikan</span>
+                                            </span>
                                         </td>
                                         <td>
                                             @if ($return['letter_url'])
-                                                <div class="fw-semibold">{{ $return['letter_number'] }}</div>
-                                                <div class="d-flex flex-wrap gap-2 mt-2">
-                                                    <a href="{{ $return['letter_url'] }}" class="btn btn-sm btn-light-primary">
-                                                        Lihat Surat
+                                                <div class="fw-semibold text-secondary small mb-1.5">{{ $return['letter_number'] }}</div>
+                                                <div class="d-flex flex-wrap gap-2">
+                                                    <a href="{{ $return['letter_url'] }}" class="btn btn-sm btn-light-primary icon icon-left">
+                                                        <i class="bi bi-file-earmark-text"></i><span>Lihat Surat</span>
                                                     </a>
-                                                    <a href="{{ $return['letter_download_url'] }}" class="btn btn-sm btn-light-secondary">
-                                                        Download PDF
+                                                    <a href="{{ $return['letter_download_url'] }}" class="btn btn-sm btn-light-secondary icon icon-left">
+                                                        <i class="bi bi-download"></i><span>Download PDF</span>
                                                     </a>
                                                 </div>
                                             @else
@@ -238,8 +228,16 @@
                                             <select id="loan_id" name="loan_id" class="form-select @error('loan_id', 'createReturn') is-invalid @enderror" @disabled($returnableLoans->isEmpty())>
                                                 <option value="">Pilih peminjaman yang akan dikembalikan</option>
                                                 @foreach ($returnableLoans as $loan)
+                                                    @php
+                                                        $itemList = $loan->getItemList();
+                                                        $firstAsset = $itemList->first()['asset'] ?? $loan->asset;
+                                                        $itemCount = $itemList->count();
+                                                        $label = $itemCount > 1
+                                                            ? $firstAsset?->name . ' (+' . ($itemCount - 1) . ' barang lainnya, Total: ' . $itemList->sum('quantity') . ' Unit)'
+                                                            : $firstAsset?->name . ' (' . $firstAsset?->code . ')';
+                                                    @endphp
                                                     <option value="{{ $loan->id }}" @selected(old('loan_id') == $loan->id)>
-                                                        {{ $loan->asset?->name }} ({{ $loan->asset?->code }}) - Pinjam {{ optional($loan->loan_date)->format('d/m/Y') }}
+                                                        {{ $label }} - Pinjam {{ optional($loan->loan_date)->translatedFormat('d F Y') }}
                                                     </option>
                                                 @endforeach
                                             </select>
@@ -353,39 +351,46 @@
         document.addEventListener('DOMContentLoaded', function () {
             const modalElement = document.getElementById('returnRequestModal');
             const searchInput = document.getElementById('pegawaiReturnSearchInput');
-            const statusFilter = document.getElementById('pegawaiReturnStatusFilter');
             const conditionFilter = document.getElementById('pegawaiReturnConditionFilter');
-            const filterButton = document.getElementById('pegawaiReturnFilterButton');
-            const filterPanel = document.getElementById('pegawaiReturnFilterPanel');
             const resetFilterButton = document.getElementById('pegawaiReturnResetFilter');
+            const filterCountBadge = document.getElementById('pegawaiReturnFilterCountBadge');
+            const filterMenu = document.querySelector('.pegawai-asset-filter-menu');
             const rows = Array.from(document.querySelectorAll('[data-pegawai-return-row]'));
             const emptyRow = document.getElementById('pegawaiReturnEmptyRow');
 
-            if (filterButton && filterPanel) {
-                filterButton.addEventListener('click', function () {
-                    const isOpening = filterPanel.classList.contains('d-none');
-
-                    filterPanel.classList.toggle('d-none', !isOpening);
-                    filterButton.classList.toggle('btn-primary', isOpening);
-                    filterButton.classList.toggle('btn-light-secondary', !isOpening);
-                    filterButton.setAttribute('aria-expanded', isOpening ? 'true' : 'false');
+            if (filterMenu) {
+                ['click', 'mousedown', 'pointerdown'].forEach((evtType) => {
+                    filterMenu.addEventListener(evtType, function (e) {
+                        e.stopPropagation();
+                    });
                 });
             }
 
-            if (searchInput && statusFilter && conditionFilter && rows.length > 0) {
+            if (searchInput && conditionFilter && rows.length > 0) {
                 const normalize = (value) => (value || '').toString().trim().toLowerCase();
 
                 const applyFilters = () => {
                     const keyword = normalize(searchInput.value);
-                    const status = normalize(statusFilter.value);
                     const condition = normalize(conditionFilter.value);
+
                     let visibleCount = 0;
+                    let activeFilterCount = 0;
+
+                    if (conditionFilter.value) activeFilterCount++;
+
+                    if (filterCountBadge) {
+                        filterCountBadge.textContent = activeFilterCount;
+                        filterCountBadge.classList.toggle('d-none', activeFilterCount === 0);
+                    }
+
+                    if (resetFilterButton) {
+                        resetFilterButton.classList.toggle('d-none', activeFilterCount === 0 && !searchInput.value);
+                    }
 
                     rows.forEach((row) => {
                         const matchesKeyword = row.dataset.pegawaiReturnSearch.includes(keyword);
-                        const matchesStatus = !status || row.dataset.pegawaiReturnStatus === status;
                         const matchesCondition = !condition || row.dataset.pegawaiReturnCondition === condition;
-                        const isVisible = matchesKeyword && matchesStatus && matchesCondition;
+                        const isVisible = matchesKeyword && matchesCondition;
 
                         row.classList.toggle('d-none', !isVisible);
 
@@ -400,13 +405,12 @@
                 };
 
                 searchInput.addEventListener('input', applyFilters);
-                statusFilter.addEventListener('change', applyFilters);
                 conditionFilter.addEventListener('change', applyFilters);
 
                 if (resetFilterButton) {
-                    resetFilterButton.addEventListener('click', function () {
+                    resetFilterButton.addEventListener('click', function (e) {
+                        e.stopPropagation();
                         searchInput.value = '';
-                        statusFilter.value = '';
                         conditionFilter.value = '';
                         applyFilters();
                     });

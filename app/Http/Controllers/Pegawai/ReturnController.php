@@ -42,11 +42,23 @@ class ReturnController extends BasePegawaiController
                     ? $this->suratPeminjamanService->ensureForLoan($loan)
                     : null;
 
+                $itemList = $loan ? $loan->getItemList() : collect();
+                $firstAsset = $itemList->first()['asset'] ?? ($return->asset ?? $loan?->asset);
+                $itemCount = $itemList->count();
+
+                $assetName = $itemCount > 1
+                    ? $firstAsset?->name . ' (+' . ($itemCount - 1) . ' barang lainnya)'
+                    : ($firstAsset?->name ?? 'Aset Inventaris');
+
+                $assetCode = $itemCount > 1
+                    ? $itemCount . ' Jenis Barang (' . $itemList->sum('quantity') . ' Total Unit)'
+                    : ($firstAsset?->code ?? '-');
+
                 return [
-                    'asset_name' => $return->asset?->name,
-                    'asset_code' => $return->asset?->code,
-                    'loan_date' => optional($loan?->loan_date)->format('d/m/Y'),
-                    'returned_at' => optional($return->returned_at)->format('d/m/Y'),
+                    'asset_name' => $assetName,
+                    'asset_code' => $assetCode,
+                    'loan_date' => optional($loan?->loan_date)->translatedFormat('d F Y'),
+                    'returned_at' => optional($return->returned_at)->translatedFormat('d F Y'),
                     'verified_note' => $return->verified_note,
                     'condition' => $return->condition,
                     'condition_variant' => match ($return->condition) {
@@ -61,7 +73,7 @@ class ReturnController extends BasePegawaiController
                     'report_note' => $return->report_note,
                     'letter_number' => $suratPeminjaman?->number,
                     'letter_url' => $suratPeminjaman && $loan
-                        ? route('pegawai.loans.letter.show', $loan)
+                        ? route('pegawai.loans.letter.show', ['loan' => $loan, 'from' => 'returns'])
                         : null,
                     'letter_download_url' => $suratPeminjaman && $loan
                         ? route('pegawai.loans.letter.download', $loan)

@@ -27,94 +27,81 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-3">
                     <div>
-                        <h3 class="mb-0">Daftar Peminjaman</h3>
+                        <button
+                            type="button"
+                            class="btn btn-primary icon icon-left"
+                            data-bs-toggle="modal"
+                            data-bs-target="#loanRequestModal"
+                            @disabled($availableAssets->isEmpty())
+                        >
+                            <i class="bi bi-plus-circle-fill"></i>
+                            <span>Ajukan Peminjaman</span>
+                        </button>
+                    </div>
+
+                    <div class="pegawai-toolbar-wrapper ms-auto">
+                        <!-- Sleek Search Input Box -->
+                        <div class="pegawai-search-box">
+                            <i class="bi bi-search pegawai-search-icon"></i>
+                            <input
+                                type="search"
+                                id="pegawaiLoanSearchInput"
+                                class="form-control pegawai-search-input"
+                                placeholder="Cari aset atau kode aset..."
+                            >
+                        </div>
+
+                        @php
+                            $loanStatusFilters = ['Menunggu', 'Disetujui', 'Ditolak'];
+                        @endphp
+
+                        <!-- Floating Filter Dropdown Popover -->
+                        <div class="dropdown">
+                            <button
+                                class="btn pegawai-filter-btn d-inline-flex align-items-center gap-2"
+                                type="button"
+                                id="pegawaiLoanFilterDropdownBtn"
+                                data-bs-toggle="dropdown"
+                                data-bs-auto-close="outside"
+                                aria-expanded="false"
+                                title="Filter Peminjaman"
+                            >
+                                <i class="bi bi-funnel-fill text-primary"></i>
+                                <span class="fw-semibold">Filter</span>
+                            </button>
+
+                            <div class="dropdown-menu dropdown-menu-end p-3 shadow-lg border-0 pegawai-asset-filter-menu" aria-labelledby="pegawaiLoanFilterDropdownBtn">
+                                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                                    <h6 class="mb-0 fw-bold text-dark"><i class="bi bi-sliders me-1 text-primary"></i> Filter Peminjaman</h6>
+                                    <button type="button" id="pegawaiLoanResetFilter" class="btn btn-sm btn-link text-danger p-0 text-decoration-none d-none">
+                                        <i class="bi bi-arrow-counterclockwise me-1"></i>Reset
+                                    </button>
+                                </div>
+
+                                <div class="row g-2">
+                                    <div class="col-12">
+                                        <label for="pegawaiLoanStatusFilter" class="form-label text-muted small font-semibold">Status Peminjaman</label>
+                                        <select id="pegawaiLoanStatusFilter" class="form-select form-select-sm">
+                                            <option value="">Semua Status</option>
+                                            @foreach ($loanStatusFilters as $loanStatusFilter)
+                                                <option value="{{ $loanStatusFilter }}">{{ $loanStatusFilter }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="card-body">
-                    @php
-                        $loanStatusFilters = ['Menunggu', 'Disetujui', 'Ditolak'];
-                    @endphp
-
                     @if ($availableAssets->isEmpty())
-                        <div class="alert alert-light-warning color-warning">
+                        <div class="alert alert-light-warning color-warning mb-4">
                             <i class="bi bi-exclamation-triangle me-1"></i>Belum ada aset yang tersedia untuk diajukan saat ini.
                         </div>
                     @endif
 
-                    <div class="row g-3 align-items-end mb-4">
-                        <div class="col-lg-6 col-12">
-                            <button
-                                type="button"
-                                class="btn btn-primary btn-sm icon icon-left pegawai-toolbar-add"
-                                data-bs-toggle="modal"
-                                data-bs-target="#loanRequestModal"
-                                @disabled($availableAssets->isEmpty())
-                            >
-                                <i class="bi bi-plus-circle"></i><span>Ajukan Peminjaman</span>
-                            </button>
-                        </div>
-                        <div class="col-lg-6 col-12">
-                            <div class="row g-2 align-items-end justify-content-lg-end">
-                                <div class="col-md-8 col-12">
-                                    <div class="input-group">
-                                        <span class="input-group-text">
-                                            <i class="bi bi-search"></i>
-                                        </span>
-                                        <input
-                                            type="search"
-                                            id="pegawaiLoanSearchInput"
-                                            class="form-control"
-                                            placeholder="Cari aset atau kode aset"
-                                        >
-                                    </div>
-                                </div>
-                                <div class="col-auto">
-                                    <button
-                                        class="btn btn-light-secondary pegawai-filter-toggle"
-                                        type="button"
-                                        id="pegawaiLoanFilterButton"
-                                        aria-expanded="false"
-                                        aria-controls="pegawaiLoanFilterPanel"
-                                        aria-label="Filter peminjaman"
-                                        title="Filter peminjaman"
-                                    >
-                                        <i class="bi bi-funnel"></i>
-                                        <span class="visually-hidden">Filter</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="pegawaiLoanFilterPanel" class="pegawai-filter-panel border rounded p-3 mb-4 d-none">
-                        <div class="row g-3 align-items-end">
-                            <div class="col-lg-5 col-md-6 col-12">
-                                <label for="pegawaiLoanStatusFilter" class="form-label">Status</label>
-                                <select id="pegawaiLoanStatusFilter" class="form-select">
-                                    <option value="">Semua Status</option>
-                                    @foreach ($loanStatusFilters as $loanStatusFilter)
-                                        <option value="{{ $loanStatusFilter }}">{{ $loanStatusFilter }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-lg-5 col-md-6 col-12">
-                                <label for="pegawaiLoanLetterFilter" class="form-label">Surat</label>
-                                <select id="pegawaiLoanLetterFilter" class="form-select">
-                                    <option value="">Semua Surat</option>
-                                    <option value="tersedia">Surat tersedia</option>
-                                    <option value="belum tersedia">Belum tersedia</option>
-                                </select>
-                            </div>
-                            <div class="col-lg-2 col-md-6 col-12">
-                                <button type="button" id="pegawaiLoanResetFilter" class="btn btn-light-secondary icon w-100" aria-label="Reset filter peminjaman">
-                                    <i class="bi bi-arrow-counterclockwise"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
                     <div class="table-responsive">
-                        <table class="table table-hover table-lg mb-0">
+                        <table class="table table-hover align-middle table-lg mb-0">
                             <thead>
                                 <tr>
                                     <th>Aset</th>
@@ -128,9 +115,9 @@
                                 @forelse ($loans as $loan)
                                     @php
                                         $loanBadge = match ($loan['status_variant']) {
-                                            'danger' => 'bg-light-danger',
-                                            'warning' => 'bg-light-warning',
-                                            default => 'bg-light-success',
+                                            'danger' => 'pegawai-badge-danger',
+                                            'warning' => 'pegawai-badge-warning',
+                                            default => 'pegawai-badge-success',
                                         };
                                         $searchSource = strtolower(trim(($loan['asset_name'] ?? '').' '.($loan['asset_code'] ?? '').' '.($loan['letter_number'] ?? '')));
                                         $statusValue = strtolower($loan['status'] ?? '');
@@ -152,13 +139,16 @@
                                             <small class="text-muted">{{ $loan['return_plan'] }}</small>
                                         </td>
                                         <td>
-                                            <span class="badge {{ $loanBadge }}">{{ $loan['status'] }}</span>
+                                            <span class="pegawai-badge {{ $loanBadge }}">
+                                                <span class="pegawai-badge-dot"></span>
+                                                <span>{{ $loan['status'] }}</span>
+                                            </span>
                                         </td>
                                         <td><small class="text-muted">{{ $loan['status_note'] }}</small></td>
                                         <td>
                                             @if ($loan['letter_url'])
-                                                <div class="fw-semibold">{{ $loan['letter_number'] }}</div>
-                                                <div class="d-flex flex-wrap gap-2 mt-2">
+                                                <div class="fw-semibold text-secondary small mb-1.5">{{ $loan['letter_number'] }}</div>
+                                                <div class="d-flex flex-wrap gap-2">
                                                     <a href="{{ $loan['letter_url'] }}" class="btn btn-sm btn-light-primary icon icon-left">
                                                         <i class="bi bi-file-earmark-text"></i><span>Lihat Surat</span>
                                                     </a>
@@ -215,60 +205,56 @@
                         @endif
 
                         <div class="transaction-form-section">
-                            <div class="transaction-section-heading">
-                                <span><i class="bi bi-clipboard-data"></i></span>
-                                <div>
-                                    <h5>Data Pengajuan</h5>
-                                    <small>Aset dan status pengajuan</small>
+                            <div class="transaction-section-heading d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span><i class="bi bi-boxes"></i></span>
+                                    <div>
+                                        <h5 class="mb-0">Daftar Barang yang Dipinjam</h5>
+                                        <small class="text-muted">Tambahkan satu atau lebih barang dalam transaksi ini</small>
+                                    </div>
                                 </div>
+                                <button type="button" id="btnAddLoanItem" class="btn btn-sm btn-light-primary icon icon-left" @disabled($availableAssets->isEmpty())>
+                                    <i class="bi bi-plus-circle"></i><span>Tambah Barang</span>
+                                </button>
                             </div>
-                            <div class="row g-3">
-                                <div class="col-md-6 col-12">
-                                    <div class="form-group transaction-field">
-                                        <label for="asset_id">Aset</label>
-                                        <div class="transaction-input-shell">
-                                            <span class="transaction-input-icon"><i class="bi bi-archive"></i></span>
-                                            <select id="asset_id" name="asset_id" class="form-select @error('asset_id', 'createLoan') is-invalid @enderror" @disabled($availableAssets->isEmpty())>
-                                                <option value="">Pilih aset yang tersedia</option>
-                                                @foreach ($availableAssets as $asset)
-                                                    <option value="{{ $asset->id }}" @selected(old('asset_id') == $asset->id)>
-                                                        {{ $asset->name }} ({{ $asset->code }}) - Stok {{ $asset->quantity }} - {{ $asset->location?->name }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
+
+                            <div id="loanItemsContainer" class="d-flex flex-column gap-3 mt-3">
+                                <div class="loan-item-row border rounded-3 p-3 bg-light position-relative">
+                                    <div class="row g-3 align-items-end">
+                                        <div class="col-md-7 col-12">
+                                            <label class="form-label font-semibold small mb-1">Pilih Barang Aset</label>
+                                            <div class="transaction-input-shell">
+                                                <span class="transaction-input-icon"><i class="bi bi-archive"></i></span>
+                                                <select name="items[0][asset_id]" class="form-select loan-asset-select" @disabled($availableAssets->isEmpty()) required>
+                                                    <option value="">Pilih barang aset yang tersedia...</option>
+                                                    @foreach ($availableAssets as $asset)
+                                                        <option value="{{ $asset->id }}">
+                                                            {{ $asset->name }} ({{ $asset->code }}) - Stok {{ $asset->quantity }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
                                         </div>
-                                        @error('asset_id', 'createLoan')
-                                            <div class="invalid-feedback d-block">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-                                </div>
-                                <div class="col-md-3 col-12">
-                                    <div class="form-group transaction-field">
-                                        <label for="quantity">Jumlah</label>
-                                        <div class="transaction-input-shell">
-                                            <span class="transaction-input-icon"><i class="bi bi-123"></i></span>
-                                            <input
-                                                type="number"
-                                                min="1"
-                                                step="1"
-                                                id="quantity"
-                                                name="quantity"
-                                                class="form-control @error('quantity', 'createLoan') is-invalid @enderror"
-                                                value="{{ old('quantity', 1) }}"
-                                                @disabled($availableAssets->isEmpty())
-                                            >
+                                        <div class="col-md-3 col-8">
+                                            <label class="form-label font-semibold small mb-1">Jumlah</label>
+                                            <div class="transaction-input-shell">
+                                                <span class="transaction-input-icon"><i class="bi bi-123"></i></span>
+                                                <input
+                                                    type="number"
+                                                    min="1"
+                                                    step="1"
+                                                    name="items[0][quantity]"
+                                                    class="form-control loan-quantity-input"
+                                                    value="1"
+                                                    @disabled($availableAssets->isEmpty())
+                                                    required
+                                                >
+                                            </div>
                                         </div>
-                                        @error('quantity', 'createLoan')
-                                            <div class="invalid-feedback d-block">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-                                </div>
-                                <div class="col-md-3 col-12">
-                                    <div class="form-group transaction-field">
-                                        <label for="status_info">Status Pengajuan</label>
-                                        <div class="transaction-input-shell">
-                                            <span class="transaction-input-icon"><i class="bi bi-hourglass-split"></i></span>
-                                            <input type="text" id="status_info" class="form-control" value="Menunggu persetujuan admin" readonly>
+                                        <div class="col-md-2 col-4 text-end">
+                                            <button type="button" class="btn btn-light-danger icon btn-remove-item w-100" title="Hapus Barang" disabled>
+                                                <i class="bi bi-trash"></i>
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -373,20 +359,17 @@
             const searchInput = document.getElementById('pegawaiLoanSearchInput');
             const statusFilter = document.getElementById('pegawaiLoanStatusFilter');
             const letterFilter = document.getElementById('pegawaiLoanLetterFilter');
-            const filterButton = document.getElementById('pegawaiLoanFilterButton');
-            const filterPanel = document.getElementById('pegawaiLoanFilterPanel');
             const resetFilterButton = document.getElementById('pegawaiLoanResetFilter');
+            const filterCountBadge = document.getElementById('pegawaiLoanFilterCountBadge');
+            const filterMenu = document.querySelector('.pegawai-asset-filter-menu');
             const rows = Array.from(document.querySelectorAll('[data-pegawai-loan-row]'));
             const emptyRow = document.getElementById('pegawaiLoanEmptyRow');
 
-            if (filterButton && filterPanel) {
-                filterButton.addEventListener('click', function () {
-                    const isOpening = filterPanel.classList.contains('d-none');
-
-                    filterPanel.classList.toggle('d-none', !isOpening);
-                    filterButton.classList.toggle('btn-primary', isOpening);
-                    filterButton.classList.toggle('btn-light-secondary', !isOpening);
-                    filterButton.setAttribute('aria-expanded', isOpening ? 'true' : 'false');
+            if (filterMenu) {
+                ['click', 'mousedown', 'pointerdown'].forEach((evtType) => {
+                    filterMenu.addEventListener(evtType, function (e) {
+                        e.stopPropagation();
+                    });
                 });
             }
 
@@ -399,20 +382,89 @@
                 loanDateInput.addEventListener('change', syncReturnDateMin);
             }
 
-            if (searchInput && statusFilter && letterFilter && rows.length > 0) {
+            // Dynamic Multi-Item Loan Builder Script
+            let itemRowIndex = 1;
+            const btnAddLoanItem = document.getElementById('btnAddLoanItem');
+            const loanItemsContainer = document.getElementById('loanItemsContainer');
+
+            if (btnAddLoanItem && loanItemsContainer) {
+                const updateRemoveButtons = () => {
+                    const rows = loanItemsContainer.querySelectorAll('.loan-item-row');
+                    rows.forEach(r => {
+                        const btnRemove = r.querySelector('.btn-remove-item');
+                        if (btnRemove) {
+                            btnRemove.disabled = rows.length <= 1;
+                        }
+                    });
+                };
+
+                btnAddLoanItem.addEventListener('click', function () {
+                    const firstRow = loanItemsContainer.querySelector('.loan-item-row');
+                    if (!firstRow) return;
+
+                    const newRow = firstRow.cloneNode(true);
+                    
+                    const select = newRow.querySelector('.loan-asset-select');
+                    const qtyInput = newRow.querySelector('.loan-quantity-input');
+                    const removeBtn = newRow.querySelector('.btn-remove-item');
+
+                    if (select) {
+                        select.name = `items[${itemRowIndex}][asset_id]`;
+                        select.value = '';
+                    }
+                    if (qtyInput) {
+                        qtyInput.name = `items[${itemRowIndex}][quantity]`;
+                        qtyInput.value = '1';
+                    }
+                    if (removeBtn) {
+                        removeBtn.disabled = false;
+                        removeBtn.addEventListener('click', function () {
+                            newRow.remove();
+                            updateRemoveButtons();
+                        });
+                    }
+
+                    loanItemsContainer.appendChild(newRow);
+                    itemRowIndex++;
+                    updateRemoveButtons();
+                });
+
+                loanItemsContainer.querySelectorAll('.btn-remove-item').forEach(btn => {
+                    btn.addEventListener('click', function () {
+                        const row = btn.closest('.loan-item-row');
+                        if (row && loanItemsContainer.querySelectorAll('.loan-item-row').length > 1) {
+                            row.remove();
+                            updateRemoveButtons();
+                        }
+                    });
+                });
+            }
+
+            if (searchInput && statusFilter && rows.length > 0) {
                 const normalize = (value) => (value || '').toString().trim().toLowerCase();
 
                 const applyFilters = () => {
                     const keyword = normalize(searchInput.value);
                     const status = normalize(statusFilter.value);
-                    const letter = normalize(letterFilter.value);
+
                     let visibleCount = 0;
+                    let activeFilterCount = 0;
+
+                    if (statusFilter.value) activeFilterCount++;
+
+                    if (filterCountBadge) {
+                        filterCountBadge.textContent = activeFilterCount;
+                        filterCountBadge.classList.toggle('d-none', activeFilterCount === 0);
+                    }
+
+                    if (resetFilterButton) {
+                        resetFilterButton.classList.toggle('d-none', activeFilterCount === 0 && !searchInput.value);
+                    }
 
                     rows.forEach((row) => {
                         const matchesKeyword = row.dataset.pegawaiLoanSearch.includes(keyword);
                         const matchesStatus = !status || row.dataset.pegawaiLoanStatus === status;
-                        const matchesLetter = !letter || row.dataset.pegawaiLoanLetter === letter;
-                        const isVisible = matchesKeyword && matchesStatus && matchesLetter;
+                        const isVisible = matchesKeyword && matchesStatus;
 
                         row.classList.toggle('d-none', !isVisible);
 
@@ -431,7 +483,8 @@
                 letterFilter.addEventListener('change', applyFilters);
 
                 if (resetFilterButton) {
-                    resetFilterButton.addEventListener('click', function () {
+                    resetFilterButton.addEventListener('click', function (e) {
+                        e.stopPropagation();
                         searchInput.value = '';
                         statusFilter.value = '';
                         letterFilter.value = '';
