@@ -53,6 +53,14 @@
         return 'Rp ' . number_format((float) $nominal, 0, ',', '.');
     };
 
+    $originLabel = function ($acquiredAt) {
+        if (! $acquiredAt) {
+            return 'Pembelian APBD';
+        }
+
+        return 'Pengadaan ' . optional($acquiredAt)->format('Y');
+    };
+
     $assetName = strtoupper($asset?->name ?? 'ASET INVENTARIS');
     $assetType = $asset?->note ?: ($asset?->code ?: '-');
     $assetPrice = $rupiah($asset?->acquisition_price);
@@ -116,14 +124,23 @@
             </tr>
         </thead>
         <tbody>
-            <tr>
-                <td class="center">1</td>
-                <td>{{ $assetName }}</td>
-                <td>{{ $assetType }}</td>
-                <td>{{ $asalPengadaan }}</td>
-                <td>{{ $assetPrice }}</td>
-                <td class="center">1 Unit</td>
-            </tr>
+            @php
+                $itemsToRender = isset($itemList) && count($itemList) > 0 ? $itemList : collect([['asset' => $asset, 'quantity' => $loan->quantity ?? 1]]);
+            @endphp
+            @foreach ($itemsToRender as $index => $itemRow)
+                @php
+                    $itemAsset = is_array($itemRow) ? ($itemRow['asset'] ?? null) : ($itemRow->asset ?? null);
+                    $qty = is_array($itemRow) ? ($itemRow['quantity'] ?? 1) : ($itemRow->quantity ?? 1);
+                @endphp
+                <tr>
+                    <td class="center">{{ $index + 1 }}</td>
+                    <td>{{ strtoupper($itemAsset?->name ?? $assetName) }}</td>
+                    <td>{{ $itemAsset?->note ?: ($itemAsset?->code ?: '-') }}</td>
+                    <td>{{ $originLabel($itemAsset?->acquired_at) }}</td>
+                    <td>{{ $rupiah($itemAsset?->acquisition_price) }}</td>
+                    <td class="center">{{ $qty }} Unit</td>
+                </tr>
+            @endforeach
         </tbody>
     </table>
 

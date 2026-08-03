@@ -13,107 +13,81 @@
     <div class="page-content">
         <section class="section">
             @if (session('success'))
-                <div class="alert alert-light-success color-success">
+                <div class="alert alert-light-success color-success mb-4">
                     <i class="bi bi-check-circle me-1"></i>{{ session('success') }}
                 </div>
             @endif
 
-            <div class="card pegawai-panel">
+            <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-3">
                     <div>
-                        <h4 class="card-title mb-1">Pusat Notifikasi</h4>
-                        <p class="mb-0 text-muted">Semua notifikasi untuk akun pegawai Anda ditampilkan di sini.</p>
+                        <h4 class="mb-0">Daftar Notifikasi</h4>
                     </div>
-                    <div class="d-flex align-items-center flex-wrap gap-2">
-                        <span class="badge bg-light-primary">{{ $notifications->total() }} notifikasi</span>
-                        <span class="badge bg-light-warning">{{ $unreadNotificationCount }} belum dibaca</span>
-                        @if ($unreadNotificationCount > 0)
-                            <form method="POST" action="{{ route('pegawai.notifications.read-all') }}" data-swal-confirm data-swal-icon="question" data-swal-title="Tandai semua dibaca?" data-swal-text="Semua notifikasi pegawai akan ditandai sudah dibaca." data-swal-confirm-text="Ya, tandai" data-swal-confirm-color="#435ebe">
+                    @if ($unreadNotificationCount > 0)
+                        <div>
+                            <form method="POST" action="{{ route('pegawai.notifications.read-all') }}" data-swal-confirm data-swal-icon="question" data-swal-title="Tandai semua dibaca?" data-swal-text="Semua notifikasi akan ditandai sudah dibaca." data-swal-confirm-text="Ya, tandai" data-swal-confirm-color="#435ebe">
                                 @csrf
                                 @method('PATCH')
-                                <button type="submit" class="btn btn-light-primary btn-sm icon icon-left">
+                                <button type="submit" class="btn btn-sm btn-light-primary icon icon-left">
                                     <i class="bi bi-check2-all"></i><span>Tandai Semua Dibaca</span>
                                 </button>
                             </form>
-                        @endif
-                    </div>
+                        </div>
+                    @endif
                 </div>
-                <div class="card-body">
-                    @forelse ($notifications as $notification)
-                        @php
-                            $variant = $notification->data['variant'] ?? 'primary';
-                            $icon = $notification->data['icon'] ?? 'bell';
-                            $isUnread = is_null($notification->read_at);
-                            $actionLabel = $notification->data['action_label'] ?? 'Buka';
-                            $meta = $notification->data['meta'] ?? [];
-                            $occurredAt = filled($notification->data['occurred_at'] ?? null)
-                                ? \Illuminate\Support\Carbon::parse($notification->data['occurred_at'])
-                                : $notification->created_at;
-                        @endphp
-                        <div class="notification-list-item border rounded-3 p-3 {{ $loop->last ? '' : 'mb-3' }} {{ $isUnread ? 'bg-light' : 'bg-white' }}">
-                            <div class="d-flex align-items-start gap-3 flex-wrap flex-md-nowrap">
-                                <div class="avatar avatar-lg notification-icon bg-light-{{ $variant }}">
-                                    <span class="avatar-content">
-                                        <i class="bi bi-{{ $icon }}"></i>
-                                    </span>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2">
-                                        <div>
-                                            <div class="d-flex align-items-center flex-wrap gap-2">
-                                                <h5 class="mb-0">{{ $notification->data['title'] ?? 'Notifikasi baru' }}</h5>
-                                                @if ($isUnread)
-                                                    <span class="badge bg-primary">Baru</span>
-                                                @endif
-                                            </div>
-                                            <small class="text-muted">
-                                                {{ $occurredAt->translatedFormat('d M Y H:i') }} WIB
-                                                <span class="mx-1">•</span>{{ $notification->created_at->diffForHumans() }}
-                                            </small>
+
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        @forelse ($notifications as $notification)
+                            @php
+                                $variant = $notification->data['variant'] ?? 'primary';
+                                $isUnread = is_null($notification->read_at);
+                                $actionLabel = $notification->data['action_label'] ?? 'Lihat Detail';
+
+                                $iconClass = match ($variant) {
+                                    'success' => 'check-circle-fill text-success',
+                                    'warning' => 'exclamation-triangle-fill text-warning',
+                                    'danger' => 'x-circle-fill text-danger',
+                                    default => 'info-circle-fill text-primary',
+                                };
+
+                                $bgClass = $isUnread ? 'bg-light-subtle' : '';
+                            @endphp
+                            <div class="list-group-item p-3 p-md-4 {{ $bgClass }}">
+                                <div class="d-flex align-items-start justify-content-between flex-wrap gap-3">
+                                    <div class="d-flex align-items-start gap-3 flex-grow-1">
+                                        <div class="fs-4 flex-shrink-0 mt-1">
+                                            <i class="bi bi-{{ $iconClass }}"></i>
                                         </div>
-                                        <a href="{{ route('pegawai.notifications.show', $notification) }}" class="btn btn-light-primary btn-sm icon icon-left">
-                                            <i class="bi bi-arrow-right-circle"></i><span>{{ $actionLabel }}</span>
+                                        <div>
+                                            <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+                                                <h6 class="mb-0 fw-bold">{{ $notification->data['title'] ?? 'Notifikasi Baru' }}</h6>
+                                                @if ($isUnread)
+                                                    <span class="badge bg-primary rounded-pill">Baru</span>
+                                                @endif
+                                                <small class="text-muted">• {{ $notification->created_at->locale('id')->diffForHumans() }}</small>
+                                            </div>
+                                            <p class="text-muted mb-0">{{ $notification->data['message'] ?? '-' }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex-shrink-0 ms-auto">
+                                        <a href="{{ route('pegawai.notifications.show', $notification) }}" class="btn btn-sm btn-light-primary icon icon-left">
+                                            <i class="bi bi-eye"></i><span>{{ $actionLabel }}</span>
                                         </a>
                                     </div>
-
-                                    <p class="mb-2">{{ $notification->data['message'] ?? '-' }}</p>
-
-                                    @if (!empty($meta))
-                                        <div class="d-flex align-items-center flex-wrap gap-2">
-                                            @if (!empty($meta['asset_name']))
-                                                <span class="badge bg-light-secondary">{{ $meta['asset_name'] }}</span>
-                                            @endif
-                                            @if (!empty($meta['asset_code']))
-                                                <span class="badge bg-light-secondary">{{ $meta['asset_code'] }}</span>
-                                            @endif
-                                            @if (!empty($meta['planned_return_date']))
-                                                <span class="badge bg-light-warning">Jatuh tempo {{ $meta['planned_return_date'] }}</span>
-                                            @endif
-                                            @if (!empty($meta['report_number']))
-                                                <span class="badge bg-light-info">{{ $meta['report_number'] }}</span>
-                                            @endif
-                                            @if (!empty($meta['overdue_days']))
-                                                <span class="badge bg-light-danger">Terlambat {{ $meta['overdue_days'] }} hari</span>
-                                            @endif
-                                        </div>
-                                    @endif
                                 </div>
                             </div>
-                        </div>
-                    @empty
-                        <div class="text-center py-5">
-                            <div class="avatar avatar-xl bg-light-primary mb-3">
-                                <span class="avatar-content">
-                                    <i class="bi bi-bell"></i>
-                                </span>
+                        @empty
+                            <div class="text-center py-5 px-3">
+                                <i class="bi bi-bell fs-1 text-muted d-block mb-3"></i>
+                                <h6 class="fw-bold text-muted mb-1">Belum Ada Notifikasi</h6>
+                                <small class="text-muted">Pemberitahuan terkait peminjaman dan pengembalian aset Anda akan muncul di sini.</small>
                             </div>
-                            <h5 class="mb-2">Belum ada notifikasi</h5>
-                            <p class="text-muted mb-0">Notifikasi persetujuan, pengembalian, dan pengingat akan muncul di halaman ini.</p>
-                        </div>
-                    @endforelse
+                        @endforelse
+                    </div>
 
                     @if ($notifications->hasPages())
-                        <div class="mt-4">
+                        <div class="p-3 border-top">
                             {{ $notifications->links('pagination::bootstrap-5') }}
                         </div>
                     @endif
@@ -122,3 +96,36 @@
         </section>
     </div>
 @endsection
+
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const pills = document.querySelectorAll('[data-notif-filter]');
+            const items = document.querySelectorAll('.pegawai-notif-item');
+
+            pills.forEach((pill) => {
+                pill.addEventListener('click', function () {
+                    const filter = this.dataset.notifFilter;
+
+                    pills.forEach((p) => p.classList.remove('active'));
+                    this.classList.add('active');
+
+                    items.forEach((item) => {
+                        const notifType = item.dataset.notifType;
+                        const notifRead = item.dataset.notifRead;
+
+                        if (filter === 'all') {
+                            item.classList.remove('d-none');
+                        } else if (filter === 'unread') {
+                            item.classList.toggle('d-none', notifRead !== 'unread');
+                        } else if (filter === 'success') {
+                            item.classList.toggle('d-none', notifType !== 'success');
+                        } else if (filter === 'warning') {
+                            item.classList.toggle('d-none', notifType !== 'warning' && notifType !== 'danger');
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+@endpush

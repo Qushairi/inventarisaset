@@ -187,11 +187,13 @@ class SuratPeminjamanService
         $loan = $suratPeminjaman->loan;
         $approver = $suratPeminjaman->firstParty;
         $pegawai = $suratPeminjaman->secondParty;
+        $itemList = $loan ? $loan->getItemList() : collect();
 
         return [
             'suratPeminjaman' => $suratPeminjaman,
             'beritaAcara' => $suratPeminjaman,
             'asset' => $asset,
+            'itemList' => $itemList,
             'loan' => $loan,
             'approver' => $approver,
             'pegawai' => $pegawai,

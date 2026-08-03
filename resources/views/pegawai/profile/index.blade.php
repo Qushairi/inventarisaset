@@ -16,213 +16,272 @@
     </div>
 
     <div class="page-content">
-        <section class="section">
-            @if (session('success'))
-                <div class="alert alert-light-success color-success">
-                    <i class="bi bi-check-circle me-1"></i>{{ session('success') }}
-                </div>
-            @endif
+        <section class="row g-4">
+            <div class="col-12">
+                @if (session('success'))
+                    <div class="alert alert-light-success color-success mb-0">
+                        <i class="bi bi-check-circle me-1"></i>{{ session('success') }}
+                    </div>
+                @endif
+            </div>
 
-            <div class="card pegawai-panel pegawai-profile-hero">
-                <div class="card-body">
-                    <div class="d-flex align-items-center flex-wrap gap-4">
-                        <div class="pegawai-profile-photo">
+            <!-- Left Column: User Summary Card -->
+            <div class="col-12 col-xl-4">
+                <div class="card h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="avatar pegawai-avatar-lg {{ $profilePhotoUrl ? '' : 'bg-light-primary' }} mb-3 mx-auto">
                             @if ($profilePhotoUrl)
                                 <img src="{{ $profilePhotoUrl }}" alt="Foto profil {{ $pegawaiUser->name }}">
                             @else
-                                <div class="avatar avatar-xl bg-light-primary">
-                                    <span class="avatar-content">{{ $pegawaiInitials }}</span>
-                                </div>
+                                <span class="avatar-content">{{ $pegawaiInitials }}</span>
                             @endif
                         </div>
-                        <div class="pegawai-profile-identity">
-                            <h3 class="mb-2 text-uppercase">{{ $pegawaiUser->name }}</h3>
-                            <div class="d-flex align-items-center flex-wrap gap-3 text-muted">
-                                <span><i class="bi bi-person-badge me-1"></i>#{{ $pegawaiUser->id }}</span>
-                                <span><i class="bi bi-shield-check me-1"></i>{{ ucfirst($pegawaiUser->role) }}</span>
-                                <span><i class="bi bi-envelope-fill me-1"></i>{{ $pegawaiUser->email }}</span>
+                        <h4 class="mb-1 fw-bold text-dark text-capitalize">{{ $pegawaiUser->name }}</h4>
+                        <p class="text-muted mb-2 font-14">{{ $pegawaiUser->email }}</p>
+                        <span class="badge bg-light-primary px-3 py-1.5 fw-semibold">Pegawai</span>
+
+                        <hr class="my-4">
+
+                        <div class="text-start">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="text-muted small">ID Akun</span>
+                                <span class="fw-bold text-dark">#{{ $pegawaiUser->id }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="text-muted small">Status Email</span>
+                                <span class="fw-semibold text-dark">{{ $pegawaiUser->email_verified_at ? 'Terverifikasi' : 'Belum Terverifikasi' }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="text-muted small">NIP</span>
+                                <span class="fw-semibold text-dark">{{ $pegawaiUser->nip ?? '-' }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-muted small">Terdaftar</span>
+                                <span class="fw-semibold text-dark">{{ optional($pegawaiUser->created_at)->translatedFormat('d F Y') }}</span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="card pegawai-panel">
-                <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-3">
-                    <h4 class="card-title mb-0">Detail Profil</h4>
-                    <span class="badge bg-light-primary">
-                        {{ $pegawaiUser->email_verified_at ? 'Email terverifikasi' : 'Email belum terverifikasi' }}
-                    </span>
-                </div>
-                <div class="card-body">
-                    <div class="row g-4">
-                        <div class="col-md-4 col-12">
-                            <small class="text-muted d-block mb-1">Nama Lengkap</small>
-                            <strong class="text-primary text-uppercase">{{ $pegawaiUser->name }}</strong>
-                        </div>
-                        <div class="col-md-4 col-12">
-                            <small class="text-muted d-block mb-1">Email</small>
-                            <strong class="text-primary">{{ $pegawaiUser->email }}</strong>
-                        </div>
-                        <div class="col-md-4 col-12">
-                            <small class="text-muted d-block mb-1">Role</small>
-                            <strong>{{ ucfirst($pegawaiUser->role) }}</strong>
-                        </div>
-                        <div class="col-md-4 col-12">
-                            <small class="text-muted d-block mb-1">ID Akun</small>
-                            <strong>#{{ $pegawaiUser->id }}</strong>
-                        </div>
-                        <div class="col-md-4 col-12">
-                            <small class="text-muted d-block mb-1">Terdaftar</small>
-                            <strong>{{ optional($pegawaiUser->created_at)->format('d/m/Y') }}</strong>
-                        </div>
-                        <div class="col-md-4 col-12">
-                            <small class="text-muted d-block mb-1">Tanda Tangan</small>
-                            <strong>{{ $pegawaiUser->hasSignature() ? 'Sudah diunggah' : 'Belum diunggah' }}</strong>
-                        </div>
+            <!-- Right Column: Tabbed Profile Card -->
+            <div class="col-12 col-xl-8">
+                <div class="card h-100">
+                    <div class="card-header border-bottom">
+                        <ul class="nav nav-pills card-header-pills flex-wrap gap-2" id="profileTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active fw-semibold px-3 py-2" id="detail-tab" data-bs-toggle="pill" data-bs-target="#detail-pane" type="button" role="tab" aria-controls="detail-pane" aria-selected="true">
+                                    <i class="bi bi-person-vcard me-2"></i>Detail Informasi
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link fw-semibold px-3 py-2" id="photo-tab" data-bs-toggle="pill" data-bs-target="#photo-pane" type="button" role="tab" aria-controls="photo-pane" aria-selected="false">
+                                    <i class="bi bi-image me-2"></i>Foto Profil
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link fw-semibold px-3 py-2" id="signature-tab" data-bs-toggle="pill" data-bs-target="#signature-pane" type="button" role="tab" aria-controls="signature-pane" aria-selected="false">
+                                    <i class="bi bi-pen me-2"></i>Tanda Tangan
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link fw-semibold px-3 py-2" id="password-tab" data-bs-toggle="pill" data-bs-target="#password-pane" type="button" role="tab" aria-controls="password-pane" aria-selected="false">
+                                    <i class="bi bi-shield-lock me-2"></i>Ubah Password
+                                </button>
+                            </li>
+                        </ul>
                     </div>
-                </div>
-            </div>
 
-            <div class="row g-4 align-items-start">
-                <div class="col-12 col-xl-4">
-                    <div class="card pegawai-panel">
-                        <div class="card-header">
-                            <h4 class="card-title mb-0">Upload Foto</h4>
-                        </div>
-                        <div class="card-body">
-                            @if ($errors->updatePhoto->any())
-                                <div class="alert alert-light-danger color-danger">
-                                    <i class="bi bi-exclamation-circle me-1"></i>{{ $errors->updatePhoto->first() }}
+                    <div class="card-body pt-4">
+                        <div class="tab-content" id="profileTabsContent">
+                            <!-- Tab 1: Detail Informasi -->
+                            <div class="tab-pane fade show active" id="detail-pane" role="tabpanel" aria-labelledby="detail-tab">
+                                <h5 class="fw-bold mb-3 text-dark"><i class="bi bi-card-heading text-primary me-2"></i>Informasi Akun Pegawai</h5>
+                                <div class="row g-3">
+                                    <div class="col-md-6 col-12">
+                                        <div class="p-3 border rounded-3 bg-light-subtle">
+                                            <small class="text-muted d-block mb-1">Nama Lengkap</small>
+                                            <strong class="text-primary text-uppercase fs-6">{{ $pegawaiUser->name }}</strong>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 col-12">
+                                        <div class="p-3 border rounded-3 bg-light-subtle">
+                                            <small class="text-muted d-block mb-1">Alamat Email</small>
+                                            <strong class="text-primary fs-6">{{ $pegawaiUser->email }}</strong>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 col-12">
+                                        <div class="p-3 border rounded-3 bg-light-subtle">
+                                            <small class="text-muted d-block mb-1">NIP (Nomor Induk Pegawai)</small>
+                                            <strong class="text-dark fs-6">{{ $pegawaiUser->nip ?? '-' }}</strong>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 col-12">
+                                        <div class="p-3 border rounded-3 bg-light-subtle">
+                                            <small class="text-muted d-block mb-1">Role / Peran</small>
+                                            <strong class="text-dark fs-6">{{ ucfirst($pegawaiUser->role) }}</strong>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 col-12">
+                                        <div class="p-3 border rounded-3 bg-light-subtle">
+                                            <small class="text-muted d-block mb-1">ID Pengguna</small>
+                                            <strong class="text-dark fs-6">#{{ $pegawaiUser->id }}</strong>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 col-12">
+                                        <div class="p-3 border rounded-3 bg-light-subtle">
+                                            <small class="text-muted d-block mb-1">Waktu Pendaftaran</small>
+                                            <strong class="text-dark fs-6">{{ optional($pegawaiUser->created_at)->format('d F Y, H:i') }} WIB</strong>
+                                        </div>
+                                    </div>
                                 </div>
-                            @endif
+                            </div>
 
-                            <div class="pegawai-profile-preview border rounded p-3 mb-3 bg-light text-center">
-                                <small class="text-muted d-block mb-2">Foto saat ini</small>
-                                @if ($profilePhotoUrl)
-                                    <img src="{{ $profilePhotoUrl }}" alt="Foto profil {{ $pegawaiUser->name }}" class="pegawai-profile-preview-photo">
-                                @else
-                                    <div class="avatar avatar-xl bg-light-primary mx-auto">
-                                        <span class="avatar-content">{{ $pegawaiInitials }}</span>
+                            <!-- Tab 2: Foto Profil -->
+                            <div class="tab-pane fade" id="photo-pane" role="tabpanel" aria-labelledby="photo-tab">
+                                <h5 class="fw-bold mb-3 text-dark"><i class="bi bi-person-circle text-primary me-2"></i>Foto Profil Akun</h5>
+                                <p class="text-muted small mb-4">Gunakan foto profil resmi untuk mempermudah identifikasi akun pegawai Anda.</p>
+
+                                @if ($errors->updatePhoto->any())
+                                    <div class="alert alert-light-danger color-danger mb-3">
+                                        <i class="bi bi-exclamation-circle me-1"></i>{{ $errors->updatePhoto->first() }}
                                     </div>
                                 @endif
+
+                                <div class="row align-items-center g-4 mb-4">
+                                    <div class="col-auto">
+                                        <div class="avatar pegawai-avatar-lg {{ $profilePhotoUrl ? '' : 'bg-light-primary' }} border">
+                                            @if ($profilePhotoUrl)
+                                                <img src="{{ $profilePhotoUrl }}" alt="Foto profil {{ $pegawaiUser->name }}">
+                                            @else
+                                                <span class="avatar-content">{{ $pegawaiInitials }}</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <h6 class="mb-1 text-dark fw-bold">Pratinjau Foto Saat Ini</h6>
+                                        <small class="text-muted d-block">{{ $pegawaiUser->hasProfilePhoto() ? 'Foto profil kustom aktif.' : 'Menggunakan avatar inisial nama.' }}</small>
+                                    </div>
+                                </div>
+
+                                <form action="{{ route('pegawai.profile.update') }}" method="POST" enctype="multipart/form-data">
+                                    @csrf
+                                    @method('PATCH')
+                                    <div class="form-group mb-3">
+                                        <label for="profile_photo" class="form-label fw-semibold">Pilih Foto Profil Baru</label>
+                                        <input type="file" id="profile_photo" name="profile_photo" class="form-control @error('profile_photo', 'updatePhoto') is-invalid @enderror" accept=".jpg,.jpeg,.jfif,.png,.webp">
+                                        <small class="text-muted d-block mt-1">Format gambar: JPG, PNG, WEBP, atau JFIF (Maksimal 2 MB).</small>
+                                        @error('profile_photo', 'updatePhoto')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2 pt-2">
+                                        <button type="submit" class="btn btn-primary icon icon-left">
+                                            <i class="bi bi-upload"></i><span>Simpan Foto Profil</span>
+                                        </button>
+                                        @if ($pegawaiUser->hasProfilePhoto())
+                                            <button type="submit" name="remove_profile_photo" value="1" class="btn btn-light-danger icon icon-left">
+                                                <i class="bi bi-trash"></i><span>Hapus Foto</span>
+                                            </button>
+                                        @endif
+                                    </div>
+                                </form>
                             </div>
 
-                            <form action="{{ route('pegawai.profile.update') }}" method="POST" enctype="multipart/form-data" data-swal-confirm data-swal-icon="question" data-swal-title="Simpan foto profil?" data-swal-text="Foto profil akun akan diperbarui." data-swal-confirm-text="Ya, simpan" data-swal-confirm-color="#435ebe">
-                                @csrf
-                                @method('PATCH')
-                                <div class="form-group">
-                                    <label for="profile_photo">Pilih Foto</label>
-                                    <input type="file" id="profile_photo" name="profile_photo" class="form-control @error('profile_photo', 'updatePhoto') is-invalid @enderror" accept=".jpg,.jpeg,.jfif,.png,.webp">
-                                    <small class="text-muted d-block mt-2">Format JPG, JFIF, PNG, atau WEBP. Maksimal 2 MB.</small>
-                                    @error('profile_photo', 'updatePhoto')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                                <div class="d-flex flex-wrap gap-2 pt-2">
-                                    <button type="submit" class="btn btn-primary icon icon-left">
-                                        <i class="bi bi-upload"></i><span>Simpan Foto</span>
-                                    </button>
-                                    @if ($pegawaiUser->hasProfilePhoto())
-                                        <button type="submit" name="remove_profile_photo" value="1" class="btn btn-light-danger icon icon-left" data-swal-confirm data-swal-icon="warning" data-swal-title="Hapus foto profil?" data-swal-text="Foto profil saat ini akan dihapus dari akun." data-swal-confirm-text="Ya, hapus" data-swal-confirm-color="#dc3545">
-                                            <i class="bi bi-trash"></i><span>Hapus</span>
-                                        </button>
-                                    @endif
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
+                            <!-- Tab 3: Tanda Tangan Digital -->
+                            <div class="tab-pane fade" id="signature-pane" role="tabpanel" aria-labelledby="signature-tab">
+                                <h5 class="fw-bold mb-3 text-dark"><i class="bi bi-pen text-primary me-2"></i>Tanda Tangan Digital</h5>
+                                <p class="text-muted small mb-4">Tanda tangan digital ini akan digunakan secara otomatis pada dokumen/surat peminjaman Anda.</p>
 
-                <div class="col-12 col-xl-4">
-                    <div class="card pegawai-panel">
-                        <div class="card-header">
-                            <h4 class="card-title mb-0">Upload TTD</h4>
-                        </div>
-                        <div class="card-body">
-                            @if ($errors->updateSignature->any())
-                                <div class="alert alert-light-danger color-danger">
-                                    <i class="bi bi-exclamation-circle me-1"></i>{{ $errors->updateSignature->first() }}
-                                </div>
-                            @endif
-
-                            <div class="pegawai-profile-preview border rounded p-3 mb-3 bg-light text-center">
-                                <small class="text-muted d-block mb-2">Preview tanda tangan</small>
-                                @if ($signatureUrl)
-                                    <img src="{{ $signatureUrl }}" alt="Tanda tangan {{ $pegawaiUser->name }}" class="pegawai-signature-preview">
-                                @else
-                                    <span class="text-muted">Belum ada tanda tangan.</span>
+                                @if ($errors->updateSignature->any())
+                                    <div class="alert alert-light-danger color-danger mb-3">
+                                        <i class="bi bi-exclamation-circle me-1"></i>{{ $errors->updateSignature->first() }}
+                                    </div>
                                 @endif
+
+                                <div class="row align-items-center g-4 mb-4">
+                                    <div class="col-auto">
+                                        <div class="border rounded-3 p-3 bg-light d-inline-flex align-items-center justify-content-center shadow-sm" style="min-width: 180px; min-height: 90px; max-width: 240px;">
+                                            @if ($signatureUrl)
+                                                <img src="{{ $signatureUrl }}" alt="Tanda tangan {{ $pegawaiUser->name }}" style="max-width: 200px; max-height: 75px; width: auto; height: auto;">
+                                            @else
+                                                <span class="text-muted small">Belum ada tanda tangan</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <h6 class="mb-1 text-dark fw-bold">Pratinjau Tanda Tangan Saat Ini</h6>
+                                        <small class="text-muted d-block">{{ $pegawaiUser->hasSignature() ? 'Tanda tangan digital aktif.' : 'Tanda tangan belum diunggah.' }}</small>
+                                    </div>
+                                </div>
+
+                                <form action="{{ route('pegawai.profile.update') }}" method="POST" enctype="multipart/form-data">
+                                    @csrf
+                                    @method('PATCH')
+                                    <div class="form-group mb-3">
+                                        <label for="signature_file" class="form-label fw-semibold">Pilih File Tanda Tangan Baru</label>
+                                        <input type="file" id="signature_file" name="signature_file" class="form-control @error('signature_file', 'updateSignature') is-invalid @enderror" accept=".jpg,.jpeg,.jfif,.png,.webp">
+                                        <small class="text-muted d-block mt-1">Format gambar: PNG Transparan disarankan (Maksimal 2 MB).</small>
+                                        @error('signature_file', 'updateSignature')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2 pt-2">
+                                        <button type="submit" class="btn btn-primary icon icon-left">
+                                            <i class="bi bi-pen"></i><span>Simpan Tanda Tangan</span>
+                                        </button>
+                                        @if ($pegawaiUser->hasSignature())
+                                            <button type="submit" name="remove_signature" value="1" class="btn btn-light-danger icon icon-left">
+                                                <i class="bi bi-trash"></i><span>Hapus TTD</span>
+                                            </button>
+                                        @endif
+                                    </div>
+                                </form>
                             </div>
 
-                            <form action="{{ route('pegawai.profile.update') }}" method="POST" enctype="multipart/form-data" data-swal-confirm data-swal-icon="question" data-swal-title="Simpan tanda tangan?" data-swal-text="Tanda tangan akun akan diperbarui." data-swal-confirm-text="Ya, simpan" data-swal-confirm-color="#435ebe">
-                                @csrf
-                                @method('PATCH')
-                                <div class="form-group">
-                                    <label for="signature_file">Pilih Tanda Tangan</label>
-                                    <input type="file" id="signature_file" name="signature_file" class="form-control @error('signature_file', 'updateSignature') is-invalid @enderror" accept=".jpg,.jpeg,.jfif,.png,.webp">
-                                    <small class="text-muted d-block mt-2">Format JPG, JFIF, PNG, atau WEBP. Maksimal 2 MB.</small>
-                                    @error('signature_file', 'updateSignature')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                                <div class="d-flex flex-wrap gap-2 pt-2">
-                                    <button type="submit" class="btn btn-primary icon icon-left">
-                                        <i class="bi bi-pen"></i><span>Simpan TTD</span>
-                                    </button>
-                                    @if ($pegawaiUser->hasSignature())
-                                        <button type="submit" name="remove_signature" value="1" class="btn btn-light-danger icon icon-left" data-swal-confirm data-swal-icon="warning" data-swal-title="Hapus tanda tangan?" data-swal-text="Tanda tangan saat ini akan dihapus dari akun." data-swal-confirm-text="Ya, hapus" data-swal-confirm-color="#dc3545">
-                                            <i class="bi bi-trash"></i><span>Hapus</span>
-                                        </button>
-                                    @endif
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
+                            <!-- Tab 4: Ubah Password -->
+                            <div class="tab-pane fade" id="password-pane" role="tabpanel" aria-labelledby="password-tab">
+                                <h5 class="fw-bold mb-3 text-dark"><i class="bi bi-shield-lock text-primary me-2"></i>Keamanan & Ubah Password</h5>
+                                <p class="text-muted small mb-4">Pastikan Anda menggunakan password yang kuat dan tidak membagikannya ke orang lain.</p>
 
-                <div class="col-12 col-xl-4">
-                    <div class="card pegawai-panel">
-                        <div class="card-header">
-                            <h4 class="card-title mb-0">Ubah Password</h4>
-                        </div>
-                        <div class="card-body">
-                            @if ($errors->updatePassword->any())
-                                <div class="alert alert-light-danger color-danger">
-                                    <i class="bi bi-exclamation-circle me-1"></i>{{ $errors->updatePassword->first() }}
-                                </div>
-                            @endif
+                                @if ($errors->updatePassword->any())
+                                    <div class="alert alert-light-danger color-danger mb-3">
+                                        <i class="bi bi-exclamation-circle me-1"></i>{{ $errors->updatePassword->first() }}
+                                    </div>
+                                @endif
 
-                            <form action="{{ route('pegawai.profile.password.update') }}" method="POST" data-swal-confirm data-swal-icon="question" data-swal-title="Ubah password akun?" data-swal-text="Pastikan password baru dan konfirmasinya sudah benar." data-swal-confirm-text="Ya, ubah password" data-swal-confirm-color="#435ebe">
-                                @csrf
-                                @method('PUT')
-                                <div class="form-group">
-                                    <label for="current_password">Password Saat Ini</label>
-                                    <input type="password" id="current_password" name="current_password" class="form-control @error('current_password', 'updatePassword') is-invalid @enderror" autocomplete="current-password">
-                                    @error('current_password', 'updatePassword')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                                <div class="form-group">
-                                    <label for="password">Password Baru</label>
-                                    <input type="password" id="password" name="password" class="form-control @error('password', 'updatePassword') is-invalid @enderror" autocomplete="new-password">
-                                    @error('password', 'updatePassword')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                                <div class="form-group">
-                                    <label for="password_confirmation">Konfirmasi Password Baru</label>
-                                    <input type="password" id="password_confirmation" name="password_confirmation" class="form-control @error('password_confirmation', 'updatePassword') is-invalid @enderror" autocomplete="new-password">
-                                    @error('password_confirmation', 'updatePassword')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                                <div class="d-grid pt-2">
-                                    <button type="submit" class="btn btn-primary icon icon-left">
-                                        <i class="bi bi-shield-lock"></i><span>Simpan Password</span>
+                                <form action="{{ route('pegawai.profile.password.update') }}" method="POST">
+                                    @csrf
+                                    @method('PUT')
+                                    <div class="form-group mb-3">
+                                        <label for="current_password" class="form-label fw-semibold">Password Saat Ini</label>
+                                        <input type="password" id="current_password" name="current_password" class="form-control @error('current_password', 'updatePassword') is-invalid @enderror" autocomplete="current-password">
+                                        @error('current_password', 'updatePassword')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 col-12 mb-3">
+                                            <div class="form-group">
+                                                <label for="password" class="form-label fw-semibold">Password Baru</label>
+                                                <input type="password" id="password" name="password" class="form-control @error('password', 'updatePassword') is-invalid @enderror" autocomplete="new-password">
+                                                @error('password', 'updatePassword')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 col-12 mb-3">
+                                            <div class="form-group">
+                                                <label for="password_confirmation" class="form-label fw-semibold">Konfirmasi Password Baru</label>
+                                                <input type="password" id="password_confirmation" name="password_confirmation" class="form-control" autocomplete="new-password">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary icon icon-left mt-2">
+                                        <i class="bi bi-shield-lock"></i><span>Simpan Password Baru</span>
                                     </button>
-                                </div>
-                            </form>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -230,3 +289,26 @@
         </section>
     </div>
 @endsection
+
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            @if ($errors->updatePhoto->any())
+                const photoTab = document.getElementById('photo-tab');
+                if (photoTab) {
+                    new bootstrap.Tab(photoTab).show();
+                }
+            @elseif ($errors->updateSignature->any())
+                const signatureTab = document.getElementById('signature-tab');
+                if (signatureTab) {
+                    new bootstrap.Tab(signatureTab).show();
+                }
+            @elseif ($errors->updatePassword->any())
+                const passwordTab = document.getElementById('password-tab');
+                if (passwordTab) {
+                    new bootstrap.Tab(passwordTab).show();
+                }
+            @endif
+        });
+    </script>
+@endpush
