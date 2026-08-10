@@ -12,18 +12,6 @@
 
     <div class="page-content">
         <section class="section">
-            @if (session('success'))
-                <div class="alert alert-light-success color-success">
-                    <i class="bi bi-check-circle me-1"></i>{{ session('success') }}
-                </div>
-            @endif
-
-            @if (session('error'))
-                <div class="alert alert-light-danger color-danger">
-                    <i class="bi bi-exclamation-circle me-1"></i>{{ session('error') }}
-                </div>
-            @endif
-
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-3">
                     <div>
@@ -105,8 +93,8 @@
                             <thead>
                                 <tr>
                                     <th>Aset</th>
-                                    <th>Tanggal Peminjaman</th>
-                                    <th>Tanggal Pengembalian</th>
+                                    <th>Jumlah</th>
+                                    <th>Periode</th>
                                     <th>Kondisi</th>
                                     <th>Status</th>
                                     <th>Surat Peminjaman</th>
@@ -116,40 +104,94 @@
                                 @forelse ($returns as $return)
                                     @php
                                         $conditionBadge = match ($return['condition_variant']) {
-                                            'warning' => 'pegawai-badge-warning',
                                             'danger' => 'pegawai-badge-danger',
+                                            'warning' => 'pegawai-badge-warning',
                                             default => 'pegawai-badge-success',
                                         };
-                                        $searchSource = strtolower(trim(($return['asset_name'] ?? '').' '.($return['asset_code'] ?? '')));
+                                        $statusBadge = match ($return['status_variant']) {
+                                            'danger' => 'pegawai-badge-danger',
+                                            'success' => 'pegawai-badge-success',
+                                            default => 'pegawai-badge-warning',
+                                        };
+                                        $statusText = match ($return['status']) {
+                                            'Terverifikasi', 'Disetujui' => 'Sudah Terverifikasi',
+                                            'Ditolak' => 'Pengembalian Ditolak',
+                                            default => 'Menunggu Verifikasi',
+                                        };
+                                        $searchSource = strtolower(trim(($return['asset_name'] ?? '').' '.($return['asset_code'] ?? '').' '.($return['letter_number'] ?? '')));
+                                        $conditionValue = strtolower($return['condition'] ?? '');
+                                        $statusValue = strtolower($return['status'] ?? '');
+                                        $letterValue = $return['letter_url'] ? 'tersedia' : 'belum tersedia';
                                     @endphp
                                     <tr
                                         data-pegawai-return-row
                                         data-pegawai-return-search="{{ $searchSource }}"
-                                        data-pegawai-return-status="sudah dikembalikan"
-                                        data-pegawai-return-condition="{{ strtolower($return['condition'] ?? '') }}"
+                                        data-pegawai-return-condition="{{ $conditionValue }}"
+                                        data-pegawai-return-status="{{ $statusValue }}"
+                                        data-pegawai-return-letter="{{ $letterValue }}"
                                     >
                                         <td>
-                                            <div>{{ $return['asset_name'] }}</div>
-                                            <small class="text-muted">{{ $return['asset_code'] }}</small>
+                                            @if (!empty($return['items_list']) && count($return['items_list']) > 1)
+                                                <div class="d-flex flex-column gap-3 py-1">
+                                                    @foreach ($return['items_list'] as $it)
+                                                        <div>
+                                                            <div class="fw-bold text-dark font-13">{{ $it['name'] }}</div>
+                                                            <small class="text-muted font-11 d-block">{{ $it['code'] }}</small>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            @else
+                                                <div class="fw-bold text-dark font-13">{{ $return['asset_name'] }}</div>
+                                                <small class="text-muted font-11 d-block">{{ $return['asset_code'] }}</small>
+                                            @endif
                                         </td>
                                         <td>
-                                            <div>{{ $return['loan_date'] ?: '-' }}</div>
-                                            <small class="text-muted">Tanggal aset dipinjam.</small>
+                                            @if (!empty($return['items_list']) && count($return['items_list']) > 1)
+                                                <div class="d-flex flex-column gap-3 py-1">
+                                                    @foreach ($return['items_list'] as $it)
+                                                        <div class="d-flex align-items-center" style="height: 38px;">
+                                                            <span class="badge bg-light-primary text-primary font-11 font-semibold">{{ $it['quantity'] }} unit</span>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            @else
+                                                <span class="badge bg-light-primary text-primary font-12 font-semibold">{{ $return['quantity'] }} unit</span>
+                                            @endif
                                         </td>
                                         <td>
-                                            <div>{{ $return['returned_at'] }}</div>
-                                            <small class="text-muted">Telah dikembalikan oleh pegawai.</small>
+                                            <div>Pinjam: {{ $return['loan_date'] ?: '-' }}</div>
+                                            <small class="text-muted">Kembali: {{ $return['returned_at'] }}</small>
                                         </td>
                                         <td>
-                                            <span class="pegawai-badge {{ $conditionBadge }}">
+                                            @if (!empty($return['items_list']) && count($return['items_list']) > 1)
+                                                <div class="d-flex flex-column gap-3 py-1">
+                                                    @foreach ($return['items_list'] as $it)
+                                                        @php
+                                                            $itemCondBadge = match ($it['condition_variant'] ?? 'success') {
+                                                                'warning' => 'pegawai-badge-warning',
+                                                                'danger' => 'pegawai-badge-danger',
+                                                                default => 'pegawai-badge-success',
+                                                            };
+                                                        @endphp
+                                                        <div class="d-flex align-items-center" style="height: 38px;">
+                                                            <span class="pegawai-badge {{ $itemCondBadge }}">
+                                                                <span class="pegawai-badge-dot"></span>
+                                                                <span>{{ $it['condition'] }}</span>
+                                                            </span>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            @else
+                                                <span class="pegawai-badge {{ $conditionBadge }}">
+                                                    <span class="pegawai-badge-dot"></span>
+                                                    <span>{{ $return['condition'] }}</span>
+                                                </span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            <span class="pegawai-badge {{ $statusBadge }}">
                                                 <span class="pegawai-badge-dot"></span>
-                                                <span>{{ $return['condition'] }}</span>
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <span class="pegawai-badge pegawai-badge-success">
-                                                <span class="pegawai-badge-dot"></span>
-                                                <span>Sudah Dikembalikan</span>
+                                                <span>{{ $statusText }}</span>
                                             </span>
                                         </td>
                                         <td>
@@ -230,14 +272,29 @@
                                                 @foreach ($returnableLoans as $loan)
                                                     @php
                                                         $itemList = $loan->getItemList();
+                                                        $itemsData = $itemList->map(function ($it) {
+                                                            return [
+                                                                'name' => $it['asset']?->name ?? 'Aset Inventaris',
+                                                                'code' => $it['asset']?->code ?? '-',
+                                                                'quantity' => $it['quantity'],
+                                                            ];
+                                                        })->values()->all();
                                                         $firstAsset = $itemList->first()['asset'] ?? $loan->asset;
                                                         $itemCount = $itemList->count();
+                                                        $totalQty = $itemList->sum('quantity');
                                                         $label = $itemCount > 1
-                                                            ? $firstAsset?->name . ' (+' . ($itemCount - 1) . ' barang lainnya, Total: ' . $itemList->sum('quantity') . ' Unit)'
-                                                            : $firstAsset?->name . ' (' . $firstAsset?->code . ')';
+                                                            ? $firstAsset?->name . ' (+' . ($itemCount - 1) . ' barang lainnya)'
+                                                            : $firstAsset?->name;
                                                     @endphp
-                                                    <option value="{{ $loan->id }}" @selected(old('loan_id') == $loan->id)>
-                                                        {{ $label }} - Pinjam {{ optional($loan->loan_date)->translatedFormat('d F Y') }}
+                                                    <option
+                                                        value="{{ $loan->id }}"
+                                                        data-items="{{ json_encode($itemsData) }}"
+                                                        data-date="{{ optional($loan->loan_date)->translatedFormat('d F Y') }}"
+                                                        data-loan-date-ymd="{{ optional($loan->loan_date)->format('Y-m-d') }}"
+                                                        data-summary="{{ $itemCount }} Jenis Barang ({{ $totalQty }} Unit)"
+                                                        @selected(old('loan_id') == $loan->id)
+                                                    >
+                                                        {{ $label }} • {{ $itemCount }} Jenis ({{ $totalQty }} Unit) - Tgl Pinjam {{ optional($loan->loan_date)->translatedFormat('d F Y') }}
                                                     </option>
                                                 @endforeach
                                             </select>
@@ -257,18 +314,34 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- Dynamic Items Breakdown & Per-Item Condition Card -->
+                            <div id="loanDetailsPreview" class="mt-3">
+                                <div class="border rounded-3 p-3 bg-light-subtle d-none" id="loanDetailsContent">
+                                    <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
+                                        <div class="fw-bold text-dark font-13" id="loanSummaryTitle">
+                                            <i class="bi bi-boxes text-primary me-1"></i>Rincian Barang & Kondisi Pengembalian
+                                        </div>
+                                        <small class="text-muted font-11" id="loanDateSubtitle"></small>
+                                    </div>
+                                    <div class="d-flex flex-column gap-2.5" id="loanItemsList"></div>
+                                </div>
+                                <div class="text-muted font-12 bg-white rounded-3 p-3 text-center border shadow-2xs" id="loanDetailsPlaceholder">
+                                    <i class="bi bi-info-circle me-1 text-primary"></i>Pilih transaksi peminjaman di atas untuk melihat rincian barang dan menentukan kondisinya.
+                                </div>
+                            </div>
                         </div>
 
                         <div class="transaction-form-section">
                             <div class="transaction-section-heading">
-                                <span><i class="bi bi-clipboard-check"></i></span>
+                                <span><i class="bi bi-calendar-check"></i></span>
                                 <div>
-                                    <h5>Pemeriksaan</h5>
-                                    <small>Tanggal kembali dan kondisi aset</small>
+                                    <h5>Tanggal Pengembalian</h5>
+                                    <small>Tanggal aset dikembalikan</small>
                                 </div>
                             </div>
                             <div class="row g-3">
-                                <div class="col-md-6 col-12">
+                                <div class="col-12">
                                     <div class="form-group transaction-field">
                                         <label for="returned_at">Tanggal Kembali</label>
                                         <div class="transaction-input-shell">
@@ -283,23 +356,6 @@
                                             >
                                         </div>
                                         @error('returned_at', 'createReturn')
-                                            <div class="invalid-feedback d-block">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-                                </div>
-                                <div class="col-md-6 col-12">
-                                    <div class="form-group transaction-field">
-                                        <label for="condition">Kondisi Aset</label>
-                                        <div class="transaction-input-shell">
-                                            <span class="transaction-input-icon"><i class="bi bi-tools"></i></span>
-                                            <select id="condition" name="condition" class="form-select @error('condition', 'createReturn') is-invalid @enderror" @disabled($returnableLoans->isEmpty())>
-                                                <option value="">Pilih kondisi aset</option>
-                                                @foreach ($conditions as $condition)
-                                                    <option value="{{ $condition }}" @selected(old('condition') === $condition)>{{ $condition }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                        @error('condition', 'createReturn')
                                             <div class="invalid-feedback d-block">{{ $message }}</div>
                                         @enderror
                                     </div>
@@ -415,6 +471,143 @@
                         applyFilters();
                     });
                 }
+            }
+
+            // Dynamic Loan Items Breakdown Preview & Date Restriction in Return Modal
+            const loanSelect = document.getElementById('loan_id');
+            const returnedAtInput = document.getElementById('returned_at');
+            const loanDetailsContent = document.getElementById('loanDetailsContent');
+            const loanDetailsPlaceholder = document.getElementById('loanDetailsPlaceholder');
+            const loanSummaryTitle = document.getElementById('loanSummaryTitle');
+            const loanDateSubtitle = document.getElementById('loanDateSubtitle');
+            const loanItemsList = document.getElementById('loanItemsList');
+
+            function updateLoanPreview() {
+                if (!loanSelect) return;
+                const selectedOption = loanSelect.options[loanSelect.selectedIndex];
+
+                let loanDateYmd = null;
+                if (selectedOption && selectedOption.value) {
+                    loanDateYmd = selectedOption.getAttribute('data-loan-date-ymd') || selectedOption.dataset.loanDateYmd;
+                }
+
+                if (returnedAtInput) {
+                    if (loanDateYmd) {
+                        returnedAtInput.setAttribute('min', loanDateYmd);
+                        if (!returnedAtInput.value || returnedAtInput.value < loanDateYmd) {
+                            returnedAtInput.value = loanDateYmd;
+                        }
+                    } else {
+                        const todayYmd = new Date().toISOString().split('T')[0];
+                        returnedAtInput.setAttribute('min', todayYmd);
+                        if (!returnedAtInput.value || returnedAtInput.value < todayYmd) {
+                            returnedAtInput.value = todayYmd;
+                        }
+                    }
+                }
+
+                if (!selectedOption || !selectedOption.value) {
+                    if (loanDetailsContent) loanDetailsContent.classList.add('d-none');
+                    if (loanDetailsPlaceholder) loanDetailsPlaceholder.classList.remove('d-none');
+                    return;
+                }
+
+                const itemsRaw = selectedOption.getAttribute('data-items') || selectedOption.dataset.items;
+                const dateStr = selectedOption.getAttribute('data-date') || selectedOption.dataset.date || '';
+                const summaryStr = selectedOption.getAttribute('data-summary') || selectedOption.dataset.summary || '';
+
+                if (!itemsRaw) return;
+
+                try {
+                    const items = JSON.parse(itemsRaw);
+                    if (!items || items.length === 0) return;
+
+                    if (loanSummaryTitle) {
+                        loanSummaryTitle.innerHTML = `<i class="bi bi-boxes text-primary me-1"></i>Rincian Barang (${summaryStr})`;
+                    }
+                    if (loanDateSubtitle) {
+                        loanDateSubtitle.textContent = `Pinjam: ${dateStr}`;
+                    }
+
+                    if (loanItemsList) {
+                        loanItemsList.innerHTML = items.map((it, idx) => `
+                            <div class="border rounded-3 p-3 bg-white shadow-2xs d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold text-dark font-13">${it.name}</div>
+                                    <small class="text-muted font-11">Kode: ${it.code}</small>
+                                    <span class="badge bg-light-primary text-primary font-10 rounded-pill ms-2">
+                                        <i class="bi bi-box-seam me-1"></i>${it.quantity} unit
+                                    </span>
+                                </div>
+                                <div class="flex-shrink-0" style="min-width: 175px;">
+                                    <label class="form-label font-10 text-muted mb-1 d-block fw-semibold"><i class="bi bi-tools me-1 text-primary"></i>Kondisi Barang</label>
+                                    <select name="item_conditions[${it.id || idx}]" class="form-select form-select-sm border-primary-subtle" required>
+                                        <option value="Baik" selected>Baik</option>
+                                        <option value="Rusak Ringan">Rusak Ringan</option>
+                                        <option value="Rusak Berat">Rusak Berat</option>
+                                    </select>
+                                </div>
+                            </div>
+                        `).join('');
+                    }
+
+                    if (loanDetailsPlaceholder) loanDetailsPlaceholder.classList.add('d-none');
+                    if (loanDetailsContent) loanDetailsContent.classList.remove('d-none');
+                } catch (e) {
+                    console.error('Failed to parse loan preview items', e);
+                }
+            }
+
+            if (returnedAtInput) {
+                const enforceMinDate = function () {
+                    const minVal = returnedAtInput.getAttribute('min');
+                    if (minVal && returnedAtInput.value && returnedAtInput.value < minVal) {
+                        returnedAtInput.value = minVal;
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Tanggal Tidak Valid',
+                                text: 'Tanggal pengembalian tidak boleh lebih awal dari tanggal peminjaman.',
+                                confirmButtonColor: '#435ebe'
+                            });
+                        }
+                    }
+                };
+                ['change', 'input', 'blur'].forEach(evtName => {
+                    returnedAtInput.addEventListener(evtName, enforceMinDate);
+                });
+            }
+
+            if (modalElement) {
+                modalElement.addEventListener('shown.bs.modal', function () {
+                    updateLoanPreview();
+                });
+
+                const returnForm = modalElement.querySelector('form');
+                if (returnForm) {
+                    returnForm.addEventListener('submit', function (e) {
+                        const minVal = returnedAtInput ? returnedAtInput.getAttribute('min') : null;
+                        if (minVal && returnedAtInput && returnedAtInput.value && returnedAtInput.value < minVal) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            returnedAtInput.value = minVal;
+                            if (typeof Swal !== 'undefined') {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Tanggal Tidak Valid',
+                                    text: 'Tanggal kembali tidak boleh lebih awal dari tanggal peminjaman.',
+                                    confirmButtonColor: '#435ebe'
+                                });
+                            }
+                            return false;
+                        }
+                    });
+                }
+            }
+
+            if (loanSelect) {
+                loanSelect.addEventListener('change', updateLoanPreview);
+                updateLoanPreview();
             }
 
             @if ($errors->createReturn->any())

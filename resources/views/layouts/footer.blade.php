@@ -2,19 +2,26 @@
     $isPegawaiPage = request()->routeIs('pegawai.*');
 @endphp
 
-<footer>
-    @if ($isPegawaiPage)
-        <div class="footer clearfix mb-0 text-muted text-center">
-            <p class="mb-0">&copy; 2025 Sistem Inventaris Aset - Dinas Pendidikan Kabupaten Bengkalis</p>
-        </div>
-    @else
-        <div class="footer clearfix mb-0 text-muted">
-            <div class="float-start">
-                <p class="mb-0">{{ now()->year }} &copy; {{ config('app.name', 'Inventaris Aset') }}</p>
+<footer class="app-footer mt-auto py-3 border-top">
+    <div class="container-fluid px-4">
+        @if ($isPegawaiPage)
+            <div class="d-flex flex-column flex-md-row align-items-center justify-content-between text-muted small font-12 gap-2">
+                <div>
+                    &copy; {{ now()->year }} <strong>Dinas Pendidikan Kabupaten Bengkalis</strong>. Hak Cipta Dilindungi.
+                </div>
+                <div class="text-muted">
+                    Sistem Informasi Inventaris & Manajemen Aset
+                </div>
             </div>
-            <div class="float-end">
-                <p class="mb-0">{{ $footerLabel ?? 'Panel admin inventaris aset.' }}</p>
+        @else
+            <div class="d-flex flex-column flex-md-row align-items-center justify-content-between text-muted small font-12 gap-2">
+                <div>
+                    &copy; {{ now()->year }} <strong>{{ config('app.name', 'Inventaris Aset') }}</strong> — Dinas Pendidikan Kabupaten Bengkalis
+                </div>
+                <div>
+                    {{ $footerLabel ?? 'Panel Admin Inventaris Aset' }}
+                </div>
             </div>
-        </div>
-    @endif
+        @endif
+    </div>
 </footer>

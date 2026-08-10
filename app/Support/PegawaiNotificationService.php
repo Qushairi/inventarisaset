@@ -26,6 +26,22 @@ class PegawaiNotificationService
         $assetLabel = $this->assetLabel($loan->asset?->name, $loan->asset?->code);
         $isApproved = $loan->status === 'Disetujui';
 
+        if ($isApproved && $loan->user?->email) {
+            try {
+                $suratPeminjamanService = app(\App\Support\SuratPeminjamanService::class);
+                $suratPeminjaman = $suratPeminjamanService->ensureForLoan($loan);
+                $pdfBinary = $suratPeminjamanService->pdfBinary($loan);
+
+                \Illuminate\Support\Facades\Mail::to($loan->user->email)->send(
+                    new \App\Mail\LoanApprovedMail($loan, $suratPeminjaman, $pdfBinary)
+                );
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Gagal mengirim email persetujuan peminjaman: ' . $e->getMessage(), [
+                    'loan_id' => $loan->id,
+                ]);
+            }
+        }
+
         return $this->notifyIfMissing($loan->user, [
             'dedupe_key' => 'loan-status-'.$loan->id.'-'.$loan->status,
             'type_key' => $isApproved ? 'loan_approved' : 'loan_rejected',

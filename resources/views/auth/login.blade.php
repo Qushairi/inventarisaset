@@ -167,9 +167,14 @@
 
             @if ($errors->any())
                 <div class="alert alert-danger mb-4">
-                    @foreach ($errors->all() as $error)
-                        <p>{{ $error }}</p>
-                    @endforeach
+                    <i class="bi bi-exclamation-circle me-2"></i>
+                    @if ($errors->has('email'))
+                        {{ $errors->first('email') }}
+                    @elseif ($errors->has('password'))
+                        {{ $errors->first('password') }}
+                    @else
+                        {{ $errors->first() }}
+                    @endif
                 </div>
             @endif
 
@@ -196,6 +201,9 @@
                             autocomplete="username"
                         >
                     </div>
+                    @error('email')
+                        <div class="invalid-feedback d-block mt-1">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div class="form-group mb-4">
@@ -227,6 +235,9 @@
                             </svg>
                         </button>
                     </div>
+                    @error('password')
+                        <div class="invalid-feedback d-block mt-1">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div class="d-flex align-items-center mb-4">

@@ -35,70 +35,75 @@
                             @endif
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end notification-dropdown-menu">
-                            <li class="px-3 pt-2 pb-1 d-flex justify-content-between align-items-center gap-3">
+                            <li class="px-3 py-2 bg-light border-bottom d-flex justify-content-between align-items-center gap-3">
                                 <div>
-                                    <h6 class="dropdown-header px-0 mb-0">Notifikasi</h6>
-                                    <small class="text-muted">{{ $navbarUnreadNotificationCount ?? 0 }} belum dibaca</small>
+                                    <h6 class="dropdown-header px-0 mb-0 font-13 fw-bold text-dark">Notifikasi</h6>
+                                    <small class="text-muted font-11">{{ $navbarUnreadNotificationCount ?? 0 }} belum dibaca</small>
                                 </div>
                                 @if (!empty($notificationMarkAllUrl) && ($navbarUnreadNotificationCount ?? 0) > 0)
                                     <form method="POST" action="{{ $notificationMarkAllUrl }}" data-swal-confirm data-swal-icon="question" data-swal-title="Tandai notifikasi dibaca?" data-swal-text="Semua notifikasi {{ $user?->role === 'pegawai' ? 'pegawai' : 'admin' }} akan ditandai sudah dibaca." data-swal-confirm-text="Ya, tandai" data-swal-confirm-color="#435ebe">
                                         @csrf
                                         @method('PATCH')
-                                        <button type="submit" class="btn btn-sm btn-light-primary">Tandai dibaca</button>
+                                        <button type="submit" class="btn btn-sm btn-light-primary px-2 py-0.5 font-11">Tandai dibaca</button>
                                     </form>
                                 @endif
                             </li>
 
-                            @forelse (($navbarNotifications ?? collect()) as $notification)
-                                @php
-                                    $variant = $notification->data['variant'] ?? 'primary';
-                                    $icon = $notification->data['icon'] ?? 'bell';
-                                    $isUnread = is_null($notification->read_at);
-                                @endphp
-                                <li>
-                                    @if (!empty($notificationShowRouteName))
-                                        <a class="dropdown-item notification-dropdown-item {{ $isUnread ? 'notification-unread' : '' }}" href="{{ route($notificationShowRouteName, $notification) }}">
-                                            <div class="d-flex align-items-start gap-3">
-                                                <div class="avatar avatar-md notification-icon bg-light-{{ $variant }}">
-                                                    <span class="avatar-content">
-                                                        <i class="bi bi-{{ $icon }}"></i>
-                                                    </span>
-                                                </div>
-                                                <div class="flex-grow-1">
-                                                    <div class="d-flex justify-content-between align-items-start gap-2">
-                                                        <strong class="d-block">{{ $notification->data['title'] ?? 'Notifikasi baru' }}</strong>
-                                                        @if ($isUnread)
-                                                            <span class="badge bg-primary">Baru</span>
-                                                        @endif
+                            <div class="notification-dropdown-body">
+                                @forelse (($navbarNotifications ?? collect()) as $notification)
+                                    @php
+                                        $variant = $notification->data['variant'] ?? 'primary';
+                                        $icon = $notification->data['icon'] ?? 'bell';
+                                        $isUnread = is_null($notification->read_at);
+                                    @endphp
+                                    <li>
+                                        @if (!empty($notificationShowRouteName))
+                                            <a class="dropdown-item notification-dropdown-item border-bottom {{ $isUnread ? 'notification-unread' : '' }}" href="{{ route($notificationShowRouteName, $notification) }}">
+                                                <div class="d-flex align-items-start gap-2.5">
+                                                    <div class="avatar avatar-md notification-icon bg-light-{{ $variant }} flex-shrink-0">
+                                                        <span class="avatar-content">
+                                                            <i class="bi bi-{{ $icon }}"></i>
+                                                        </span>
                                                     </div>
-                                                    <small class="d-block text-muted">{{ $notification->data['message'] ?? '-' }}</small>
-                                                    <small class="d-block text-muted mt-1">{{ $notification->created_at->diffForHumans() }}</small>
+                                                    <div class="flex-grow-1 min-w-0">
+                                                        <div class="d-flex justify-content-between align-items-start gap-1">
+                                                            <strong class="d-block text-truncate font-12 text-dark mb-0.5" style="max-width: 170px;">{{ $notification->data['title'] ?? 'Notifikasi baru' }}</strong>
+                                                            @if ($isUnread)
+                                                                <span class="badge bg-primary font-9 px-1.5 py-0.5 flex-shrink-0">Baru</span>
+                                                            @endif
+                                                        </div>
+                                                        <small class="d-block text-muted font-11 lh-sm text-wrap">{{ $notification->data['message'] ?? '-' }}</small>
+                                                        <small class="d-block text-muted font-10 mt-1"><i class="bi bi-clock me-1"></i>{{ $notification->created_at->diffForHumans() }}</small>
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        @else
+                                            <div class="dropdown-item border-bottom">
+                                                <div class="d-flex align-items-start gap-2.5">
+                                                    <div class="avatar avatar-md notification-icon bg-light-{{ $variant }} flex-shrink-0">
+                                                        <span class="avatar-content">
+                                                            <i class="bi bi-{{ $icon }}"></i>
+                                                        </span>
+                                                    </div>
+                                                    <div class="flex-grow-1 min-w-0">
+                                                        <strong class="d-block text-truncate font-12 text-dark mb-0.5">{{ $notification->data['title'] ?? 'Notifikasi baru' }}</strong>
+                                                        <small class="d-block text-muted font-11 lh-sm text-wrap">{{ $notification->data['message'] ?? '-' }}</small>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </a>
-                                    @else
-                                        <div class="dropdown-item">
-                                            <div class="d-flex align-items-start gap-3">
-                                                <div class="avatar avatar-md notification-icon bg-light-{{ $variant }}">
-                                                    <span class="avatar-content">
-                                                        <i class="bi bi-{{ $icon }}"></i>
-                                                    </span>
-                                                </div>
-                                                <div class="flex-grow-1">
-                                                    <strong class="d-block">{{ $notification->data['title'] ?? 'Notifikasi baru' }}</strong>
-                                                    <small class="d-block text-muted">{{ $notification->data['message'] ?? '-' }}</small>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    @endif
-                                </li>
-                            @empty
-                                <li><span class="dropdown-item text-muted">Belum ada notifikasi</span></li>
-                            @endforelse
+                                        @endif
+                                    </li>
+                                @empty
+                                    <li><span class="dropdown-item text-muted text-center py-3 font-12">Belum ada notifikasi</span></li>
+                                @endforelse
+                            </div>
 
                             @if (!empty($notificationIndexUrl))
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item text-center text-primary fw-semibold" href="{{ $notificationIndexUrl }}">Lihat semua notifikasi</a></li>
+                                <li class="bg-light p-2 text-center border-top">
+                                    <a class="dropdown-item text-center text-primary font-12 fw-bold py-1 text-decoration-none" href="{{ $notificationIndexUrl }}">
+                                        Lihat semua notifikasi <i class="bi bi-arrow-right ms-1"></i>
+                                    </a>
+                                </li>
                             @endif
                         </ul>
                     </li>

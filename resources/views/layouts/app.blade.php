@@ -34,8 +34,10 @@
         <div id="main" class="layout-navbar">
             @include('layouts.navbar')
 
-            <div id="main-content">
-                @yield('content')
+            <div id="main-content" class="d-flex flex-column min-vh-100 pb-0">
+                <div class="flex-grow-1">
+                    @yield('content')
+                </div>
                 @include('layouts.footer')
             </div>
         </div>

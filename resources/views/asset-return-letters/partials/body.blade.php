@@ -194,24 +194,22 @@
     <table class="asset-table">
         <thead>
             <tr>
-                <th style="width: 50px;">No</th>
-                <th>Nama Barang</th>
-                <th>Merk / Type</th>
+                <th style="width: 35px;">No</th>
+                <th>Kode Barang</th>
+                <th>Nama & Jenis Barang</th>
                 <th>Kategori</th>
-                <th>Asal Pengadaan</th>
-                <th>Harga</th>
-                <th style="width: 90px;">Kondisi</th>
+                <th style="width: 75px;">Jumlah</th>
+                <th style="width: 110px;">Kondisi Dikembalikan</th>
             </tr>
         </thead>
         <tbody>
             <tr>
                 <td class="center">1</td>
+                <td class="bold center">{{ $asset?->code ?: '-' }}</td>
                 <td>{{ $assetName }}</td>
-                <td>{{ $assetType }}</td>
                 <td>{{ strtoupper($asset?->category?->name ?? '-') }}</td>
-                <td>{{ $asalPengadaan }}</td>
-                <td>{{ $assetPrice }}</td>
-                <td class="center">{{ strtoupper($returnRecord->condition) }}</td>
+                <td class="center bold">{{ $returnRecord->quantity ?? $loan?->quantity ?? 1 }} Unit</td>
+                <td class="center bold">{{ strtoupper($returnRecord->condition) }}</td>
             </tr>
         </tbody>
     </table>

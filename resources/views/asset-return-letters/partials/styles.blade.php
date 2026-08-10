@@ -1,11 +1,13 @@
 <style>
     @page {
-        margin: 3cm 2cm 2cm 3cm;
+        size: A4 portrait;
+        margin: 2.5cm 2cm 2cm 2.5cm;
     }
 
     .asset-return-letter-document {
-        font-size: 11pt;
-        line-height: 1.5;
+        font-family: 'Times New Roman', Times, serif;
+        font-size: 12pt;
+        line-height: 1.45;
     }
 
     .asset-return-letter-document .header {
