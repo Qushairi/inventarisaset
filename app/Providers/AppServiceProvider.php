@@ -38,7 +38,7 @@ class AppServiceProvider extends ServiceProvider
             $unreadNotificationCount = 0;
 
             if ($user instanceof User && Schema::hasTable('notifications')) {
-                $notifications = $user->notifications()->latest()->limit(6)->get();
+                $notifications = $user->notifications()->latest()->limit(4)->get();
                 $unreadNotificationCount = $user->unreadNotifications()->count();
 
                 if ($user->role === 'admin') {

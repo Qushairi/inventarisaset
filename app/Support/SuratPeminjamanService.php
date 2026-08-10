@@ -35,7 +35,10 @@ class SuratPeminjamanService
         }
 
         $issuedAt = now();
-        $suratPeminjaman = $loan->suratPeminjaman ?? $loan->beritaAcara ?? new BeritaAcara();
+        $suratPeminjaman = $loan->suratPeminjaman 
+            ?? $loan->beritaAcara 
+            ?? BeritaAcara::query()->where('loan_id', $loan->id)->first() 
+            ?? new BeritaAcara();
         $isNewRecord = ! $suratPeminjaman->exists;
 
         $suratPeminjaman->fill([

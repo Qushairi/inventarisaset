@@ -1,8 +1,13 @@
 <style>
+    @page {
+        size: A4 portrait;
+        margin: 2.5cm 2cm 2cm 2.5cm;
+    }
+
     .surat-peminjaman-document {
-        font-family: 'Times New Roman', serif;
+        font-family: 'Times New Roman', Times, serif;
         font-size: 12pt;
-        color: #111;
+        color: #111111;
         line-height: 1.45;
     }
 

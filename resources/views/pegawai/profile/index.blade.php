@@ -17,13 +17,7 @@
 
     <div class="page-content">
         <section class="row g-4">
-            <div class="col-12">
-                @if (session('success'))
-                    <div class="alert alert-light-success color-success mb-0">
-                        <i class="bi bi-check-circle me-1"></i>{{ session('success') }}
-                    </div>
-                @endif
-            </div>
+
 
             <!-- Left Column: User Summary Card -->
             <div class="col-12 col-xl-4">
@@ -70,23 +64,23 @@
                     <div class="card-header border-bottom">
                         <ul class="nav nav-pills card-header-pills flex-wrap gap-2" id="profileTabs" role="tablist">
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link active fw-semibold px-3 py-2" id="detail-tab" data-bs-toggle="pill" data-bs-target="#detail-pane" type="button" role="tab" aria-controls="detail-pane" aria-selected="true">
-                                    <i class="bi bi-person-vcard me-2"></i>Detail Informasi
+                                <button class="nav-link active profile-tab-btn fw-semibold px-3 py-2" id="detail-tab" data-bs-toggle="pill" data-bs-target="#detail-pane" type="button" role="tab" aria-controls="detail-pane" aria-selected="true">
+                                    <i class="bi bi-person-badge"></i><span>Detail Informasi</span>
                                 </button>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link fw-semibold px-3 py-2" id="photo-tab" data-bs-toggle="pill" data-bs-target="#photo-pane" type="button" role="tab" aria-controls="photo-pane" aria-selected="false">
-                                    <i class="bi bi-image me-2"></i>Foto Profil
+                                <button class="nav-link profile-tab-btn fw-semibold px-3 py-2" id="photo-tab" data-bs-toggle="pill" data-bs-target="#photo-pane" type="button" role="tab" aria-controls="photo-pane" aria-selected="false">
+                                    <i class="bi bi-image"></i><span>Foto Profil</span>
                                 </button>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link fw-semibold px-3 py-2" id="signature-tab" data-bs-toggle="pill" data-bs-target="#signature-pane" type="button" role="tab" aria-controls="signature-pane" aria-selected="false">
-                                    <i class="bi bi-pen me-2"></i>Tanda Tangan
+                                <button class="nav-link profile-tab-btn fw-semibold px-3 py-2" id="signature-tab" data-bs-toggle="pill" data-bs-target="#signature-pane" type="button" role="tab" aria-controls="signature-pane" aria-selected="false">
+                                    <i class="bi bi-pen"></i><span>Tanda Tangan</span>
                                 </button>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link fw-semibold px-3 py-2" id="password-tab" data-bs-toggle="pill" data-bs-target="#password-pane" type="button" role="tab" aria-controls="password-pane" aria-selected="false">
-                                    <i class="bi bi-shield-lock me-2"></i>Ubah Password
+                                <button class="nav-link profile-tab-btn fw-semibold px-3 py-2" id="password-tab" data-bs-toggle="pill" data-bs-target="#password-pane" type="button" role="tab" aria-controls="password-pane" aria-selected="false">
+                                    <i class="bi bi-shield-lock"></i><span>Ubah Password</span>
                                 </button>
                             </li>
                         </ul>
@@ -96,7 +90,7 @@
                         <div class="tab-content" id="profileTabsContent">
                             <!-- Tab 1: Detail Informasi -->
                             <div class="tab-pane fade show active" id="detail-pane" role="tabpanel" aria-labelledby="detail-tab">
-                                <h5 class="fw-bold mb-3 text-dark"><i class="bi bi-card-heading text-primary me-2"></i>Informasi Akun Pegawai</h5>
+                                <h5 class="fw-bold mb-3 text-dark profile-pane-heading"><i class="bi bi-card-heading text-primary"></i><span>Informasi Akun Pegawai</span></h5>
                                 <div class="row g-3">
                                     <div class="col-md-6 col-12">
                                         <div class="p-3 border rounded-3 bg-light-subtle">
@@ -139,8 +133,7 @@
 
                             <!-- Tab 2: Foto Profil -->
                             <div class="tab-pane fade" id="photo-pane" role="tabpanel" aria-labelledby="photo-tab">
-                                <h5 class="fw-bold mb-3 text-dark"><i class="bi bi-person-circle text-primary me-2"></i>Foto Profil Akun</h5>
-                                <p class="text-muted small mb-4">Gunakan foto profil resmi untuk mempermudah identifikasi akun pegawai Anda.</p>
+                                <h5 class="fw-bold mb-3 text-dark profile-pane-heading"><i class="bi bi-person-circle text-primary"></i><span>Foto Profil Akun</span></h5>
 
                                 @if ($errors->updatePhoto->any())
                                     <div class="alert alert-light-danger color-danger mb-3">
@@ -190,8 +183,7 @@
 
                             <!-- Tab 3: Tanda Tangan Digital -->
                             <div class="tab-pane fade" id="signature-pane" role="tabpanel" aria-labelledby="signature-tab">
-                                <h5 class="fw-bold mb-3 text-dark"><i class="bi bi-pen text-primary me-2"></i>Tanda Tangan Digital</h5>
-                                <p class="text-muted small mb-4">Tanda tangan digital ini akan digunakan secara otomatis pada dokumen/surat peminjaman Anda.</p>
+                                <h5 class="fw-bold mb-3 text-dark profile-pane-heading"><i class="bi bi-pen text-primary"></i><span>Tanda Tangan Digital</span></h5>
 
                                 @if ($errors->updateSignature->any())
                                     <div class="alert alert-light-danger color-danger mb-3">
@@ -232,7 +224,7 @@
                                         </button>
                                         @if ($pegawaiUser->hasSignature())
                                             <button type="submit" name="remove_signature" value="1" class="btn btn-light-danger icon icon-left">
-                                                <i class="bi bi-trash"></i><span>Hapus TTD</span>
+                                                <i class="bi bi-trash"></i><span>Hapus Tanda Tangan</span>
                                             </button>
                                         @endif
                                     </div>
@@ -241,8 +233,7 @@
 
                             <!-- Tab 4: Ubah Password -->
                             <div class="tab-pane fade" id="password-pane" role="tabpanel" aria-labelledby="password-tab">
-                                <h5 class="fw-bold mb-3 text-dark"><i class="bi bi-shield-lock text-primary me-2"></i>Keamanan & Ubah Password</h5>
-                                <p class="text-muted small mb-4">Pastikan Anda menggunakan password yang kuat dan tidak membagikannya ke orang lain.</p>
+                                <h5 class="fw-bold mb-3 text-dark profile-pane-heading"><i class="bi bi-shield-lock text-primary"></i><span>Keamanan & Ubah Password</span></h5>
 
                                 @if ($errors->updatePassword->any())
                                     <div class="alert alert-light-danger color-danger mb-3">

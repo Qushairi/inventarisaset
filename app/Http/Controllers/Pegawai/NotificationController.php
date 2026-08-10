@@ -42,6 +42,30 @@ class NotificationController extends BasePegawaiController
             ->with('success', 'Semua notifikasi berhasil ditandai sudah dibaca.');
     }
 
+    public function destroy(DatabaseNotification $notification): RedirectResponse
+    {
+        $pegawai = $this->currentPegawai();
+
+        $this->ensureNotificationOwnership($notification, $pegawai);
+
+        $notification->delete();
+
+        return redirect()
+            ->route('pegawai.notifications.index')
+            ->with('success', 'Notifikasi berhasil dihapus.');
+    }
+
+    public function destroyAll(): RedirectResponse
+    {
+        $pegawai = $this->currentPegawai();
+
+        $pegawai->notifications()->delete();
+
+        return redirect()
+            ->route('pegawai.notifications.index')
+            ->with('success', 'Semua riwayat notifikasi berhasil dibersihkan.');
+    }
+
     private function ensureNotificationOwnership(DatabaseNotification $notification, User $pegawai): void
     {
         abort_if(

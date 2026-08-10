@@ -1,30 +1,23 @@
 @extends('layouts.app')
 
-@section('title', 'Notifikasi Pegawai')
+@section('title', 'Notifikasi')
 
 @section('content')
     <div class="page-heading">
         @include('pegawai.partials.page-heading', [
-            'title' => 'Notifikasi Pegawai',
+            'title' => 'Notifikasi',
             'breadcrumb' => 'Notifikasi',
         ])
     </div>
 
     <div class="page-content">
         <section class="section">
-            @if (session('success'))
-                <div class="alert alert-light-success color-success mb-4">
-                    <i class="bi bi-check-circle me-1"></i>{{ session('success') }}
-                </div>
-            @endif
+
 
             <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-3">
-                    <div>
-                        <h4 class="mb-0">Daftar Notifikasi</h4>
-                    </div>
-                    @if ($unreadNotificationCount > 0)
-                        <div>
+                @if ($notifications->count() > 0)
+                    <div class="card-header d-flex justify-content-end align-items-center flex-wrap gap-2">
+                        @if ($unreadNotificationCount > 0)
                             <form method="POST" action="{{ route('pegawai.notifications.read-all') }}" data-swal-confirm data-swal-icon="question" data-swal-title="Tandai semua dibaca?" data-swal-text="Semua notifikasi akan ditandai sudah dibaca." data-swal-confirm-text="Ya, tandai" data-swal-confirm-color="#435ebe">
                                 @csrf
                                 @method('PATCH')
@@ -32,9 +25,17 @@
                                     <i class="bi bi-check2-all"></i><span>Tandai Semua Dibaca</span>
                                 </button>
                             </form>
-                        </div>
-                    @endif
-                </div>
+                        @endif
+
+                        <form method="POST" action="{{ route('pegawai.notifications.destroy-all') }}" data-swal-confirm data-swal-icon="warning" data-swal-title="Bersihkan semua notifikasi?" data-swal-text="Seluruh riwayat notifikasi Anda akan dihapus secara permanen." data-swal-confirm-text="Ya, bersihkan" data-swal-confirm-color="#dc3545">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-sm btn-light-danger icon icon-left">
+                                <i class="bi bi-trash"></i><span>Bersihkan Semua</span>
+                            </button>
+                        </form>
+                    </div>
+                @endif
 
                 <div class="card-body p-0">
                     <div class="list-group list-group-flush">
@@ -70,10 +71,18 @@
                                             <p class="text-muted mb-0">{{ $notification->data['message'] ?? '-' }}</p>
                                         </div>
                                     </div>
-                                    <div class="flex-shrink-0 ms-auto">
-                                        <a href="{{ route('pegawai.notifications.show', $notification) }}" class="btn btn-sm btn-light-primary icon icon-left">
-                                            <i class="bi bi-eye"></i><span>{{ $actionLabel }}</span>
+                                    <div class="flex-shrink-0 ms-auto d-flex align-items-center gap-2">
+                                        <a href="{{ route('pegawai.notifications.show', $notification) }}" class="btn btn-sm btn-light-primary icon icon-left text-center justify-content-center" style="min-width: 175px;">
+                                            <i class="bi bi-eye me-1"></i><span>{{ $actionLabel }}</span>
                                         </a>
+
+                                        <form method="POST" action="{{ route('pegawai.notifications.destroy', $notification) }}" data-swal-confirm data-swal-icon="warning" data-swal-title="Hapus notifikasi ini?" data-swal-text="Notifikasi ini akan dihapus dari riwayat Anda." data-swal-confirm-text="Ya, hapus" data-swal-confirm-color="#dc3545">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-light-danger icon" title="Hapus Notifikasi">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
                                     </div>
                                 </div>
                             </div>

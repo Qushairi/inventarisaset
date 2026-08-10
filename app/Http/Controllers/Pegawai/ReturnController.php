@@ -54,9 +54,43 @@ class ReturnController extends BasePegawaiController
                     ? $itemCount . ' Jenis Barang (' . $itemList->sum('quantity') . ' Total Unit)'
                     : ($firstAsset?->code ?? '-');
 
+                $itemConditionsMap = [];
+                if ($return->report_note && str_contains($return->report_note, 'Kondisi per barang:')) {
+                    $parts = explode('Kondisi per barang:', $return->report_note);
+                    $conditionStr = explode('—', $parts[1] ?? '')[0] ?? '';
+                    $itemParts = explode('|', $conditionStr);
+                    foreach ($itemParts as $ip) {
+                        if (preg_match('/^(.*)\((.*)\)$/u', trim($ip), $matches)) {
+                            $name = trim($matches[1]);
+                            $cond = trim($matches[2]);
+                            $itemConditionsMap[$name] = $cond;
+                        }
+                    }
+                }
+
+                $itemsList = $itemList->map(function ($item) use ($itemConditionsMap, $return) {
+                    $name = $item['asset']?->name ?? 'Aset Inventaris';
+                    $itemCond = $itemConditionsMap[$name] ?? ($return->condition ?? 'Baik');
+                    $variant = match ($itemCond) {
+                        'Rusak Ringan' => 'warning',
+                        'Rusak Berat' => 'danger',
+                        default => 'success',
+                    };
+
+                    return [
+                        'name' => $name,
+                        'code' => $item['asset']?->code ?? '-',
+                        'quantity' => $item['quantity'],
+                        'condition' => $itemCond,
+                        'condition_variant' => $variant,
+                    ];
+                })->values()->all();
+
                 return [
                     'asset_name' => $assetName,
                     'asset_code' => $assetCode,
+                    'items_list' => $itemsList,
+                    'quantity' => $itemList->sum('quantity') ?: 1,
                     'loan_date' => optional($loan?->loan_date)->translatedFormat('d F Y'),
                     'returned_at' => optional($return->returned_at)->translatedFormat('d F Y'),
                     'verified_note' => $return->verified_note,
@@ -67,7 +101,11 @@ class ReturnController extends BasePegawaiController
                         default => 'success',
                     },
                     'status' => $return->status,
-                    'status_variant' => $return->status === 'Terverifikasi' ? 'success' : 'info',
+                    'status_variant' => match ($return->status) {
+                        'Ditolak' => 'danger',
+                        'Terverifikasi' => 'success',
+                        default => 'warning',
+                    },
                     'status_note' => $return->status_note,
                     'report_number' => $return->report_number,
                     'report_note' => $return->report_note,
@@ -96,7 +134,8 @@ class ReturnController extends BasePegawaiController
         $validated = $request->validateWithBag('createReturn', [
             'loan_id' => ['required', 'exists:loans,id'],
             'returned_at' => ['required', 'date'],
-            'condition' => ['required', Rule::in($this->conditionOptions())],
+            'condition' => ['nullable', 'string'],
+            'item_conditions' => ['nullable', 'array'],
             'report_note' => ['nullable', 'string', 'max:255'],
         ]);
 
@@ -116,29 +155,59 @@ class ReturnController extends BasePegawaiController
             ])->errorBag('createReturn');
         }
 
+        $itemConditions = $request->input('item_conditions', []);
+        $formattedConditions = [];
+        $uniqueConditions = [];
+
+        if (is_array($itemConditions) && count($itemConditions) > 0) {
+            $itemList = $loan->getItemList();
+            foreach ($itemList as $it) {
+                $assetObj = $it['asset'];
+                $assetId = $assetObj?->id;
+                $cond = $itemConditions[$assetId] ?? 'Baik';
+                if (! in_array($cond, $this->conditionOptions(), true)) {
+                    $cond = 'Baik';
+                }
+                $formattedConditions[] = ($assetObj?->name ?? 'Aset').' ('.$cond.')';
+                $uniqueConditions[] = $cond;
+            }
+        }
+
+        $uniqueConditions = array_values(array_unique($uniqueConditions));
+
+        if (count($uniqueConditions) === 1) {
+            $finalCondition = $uniqueConditions[0];
+        } elseif (count($uniqueConditions) > 1) {
+            $finalCondition = 'Kondisi Bervariasi (' . implode(', ', $uniqueConditions) . ')';
+        } else {
+            $finalCondition = $validated['condition'] ?? 'Baik';
+        }
+
+        $conditionSummary = count($formattedConditions) > 0
+            ? 'Kondisi per barang: ' . implode(' | ', $formattedConditions)
+            : null;
+
+        $userNote = $validated['report_note'] ?? null;
+        $fullReportNote = trim(($conditionSummary ? $conditionSummary . ($userNote ? ' — ' : '') : '') . ($userNote ?? ''));
+
         $return = AssetReturn::query()->create([
             'loan_id' => $loan->id,
             'asset_id' => $loan->asset_id,
             'user_id' => $pegawai->id,
             'returned_at' => $validated['returned_at'],
-            'verified_note' => 'Terverifikasi otomatis oleh sistem.',
-            'condition' => $validated['condition'],
-            'status' => 'Terverifikasi',
-            'status_note' => 'Pengembalian otomatis terverifikasi.',
+            'verified_note' => 'Menunggu pengecekan fisik barang oleh admin.',
+            'condition' => $finalCondition,
+            'status' => 'Menunggu',
+            'status_note' => 'Pengajuan pengembalian telah dikirim dan menunggu verifikasi admin.',
             'report_number' => $this->generateReportNumber(),
-            'report_note' => $validated['report_note'] ?: null,
+            'report_note' => $fullReportNote ?: null,
         ]);
 
-        $this->assetStateService->applyReturnStock($return);
-        $this->assetStateService->syncLoanById($return->loan_id);
-        $return->refresh();
-        $this->assetStateService->syncAssetIds([$return->asset_id, $return->stock_asset_id], true);
         $this->adminNotificationService->sendReturnRequestNotification($return);
-        $this->pegawaiNotificationService->sendReturnVerifiedNotification($return);
 
         return redirect()
             ->route('pegawai.returns.index')
-            ->with('success', 'Pengembalian berhasil dikirim dan otomatis terverifikasi.');
+            ->with('success', 'Pengajuan pengembalian berhasil dikirim. Menunggu pengecekan fisik barang dan verifikasi oleh Admin.');
     }
 
     private function conditionOptions(): array

@@ -82,8 +82,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/laporan', [ReportController::class, 'index'])->name('reports.index');
     Route::get('/laporan/{type}/download', [ReportController::class, 'download'])->name('reports.download');
     Route::get('/notifikasi', [AdminNotificationController::class, 'index'])->name('notifications.index');
+    Route::delete('/notifikasi/bersihkan-semua', [AdminNotificationController::class, 'destroyAll'])->name('notifications.destroy-all');
     Route::get('/notifikasi/{notification}', [AdminNotificationController::class, 'show'])->name('notifications.show');
     Route::patch('/notifikasi', [AdminNotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
+    Route::delete('/notifikasi/{notification}', [AdminNotificationController::class, 'destroy'])->name('notifications.destroy');
     Route::get('/profile', [AdminProfileController::class, 'index'])->name('profile.index');
     Route::patch('/profile', [AdminProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [AdminProfileController::class, 'updatePassword'])->name('profile.password.update');
@@ -99,8 +101,10 @@ Route::middleware(['auth', 'role:pegawai'])->prefix('pegawai')->name('pegawai.')
     Route::get('/pengembalian', [PegawaiReturnController::class, 'index'])->name('returns.index');
     Route::post('/pengembalian', [PegawaiReturnController::class, 'store'])->name('returns.store');
     Route::get('/notifikasi', [PegawaiNotificationController::class, 'index'])->name('notifications.index');
+    Route::delete('/notifikasi/bersihkan-semua', [PegawaiNotificationController::class, 'destroyAll'])->name('notifications.destroy-all');
     Route::get('/notifikasi/{notification}', [PegawaiNotificationController::class, 'show'])->name('notifications.show');
     Route::patch('/notifikasi', [PegawaiNotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
+    Route::delete('/notifikasi/{notification}', [PegawaiNotificationController::class, 'destroy'])->name('notifications.destroy');
     Route::get('/profile', [PegawaiProfileController::class, 'index'])->name('profile.index');
     Route::patch('/profile', [PegawaiProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [PegawaiProfileController::class, 'updatePassword'])->name('profile.password.update');

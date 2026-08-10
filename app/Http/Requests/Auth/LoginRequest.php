@@ -42,11 +42,20 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
+        $email = $this->input('email');
+        $user = \App\Models\User::where('email', $email)->first();
+
+        if (! $user) {
+            RateLimiter::hit($this->throttleKey());
+            throw ValidationException::withMessages([
+                'email' => 'Alamat email yang Anda masukkan tidak terdaftar.',
+            ]);
+        }
+
         if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
-
             throw ValidationException::withMessages([
-                'email' => trans('auth.failed'),
+                'password' => 'Password yang Anda masukkan salah.',
             ]);
         }
 
