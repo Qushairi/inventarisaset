@@ -73,6 +73,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/pengembalian', [ReturnController::class, 'index'])->name('returns.index');
     Route::get('/pengembalian/create', [ReturnController::class, 'create'])->name('returns.create');
     Route::post('/pengembalian', [ReturnController::class, 'store'])->name('returns.store');
+    Route::put('/pengembalian/{return}/status', [ReturnController::class, 'updateStatus'])->name('returns.status');
     Route::get('/pengembalian/{return}/edit', [ReturnController::class, 'edit'])->name('returns.edit');
     Route::put('/pengembalian/{return}', [ReturnController::class, 'update'])->name('returns.update');
     Route::delete('/pengembalian/{return}', [ReturnController::class, 'destroy'])->name('returns.destroy');
@@ -108,7 +109,7 @@ Route::middleware(['auth', 'role:pegawai'])->prefix('pegawai')->name('pegawai.')
     Route::get('/profile', [PegawaiProfileController::class, 'index'])->name('profile.index');
     Route::patch('/profile', [PegawaiProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [PegawaiProfileController::class, 'updatePassword'])->name('profile.password.update');
-
+    Route::get('/log-aktivitas', [\App\Http\Controllers\Pegawai\ActivityLogController::class, 'index'])->name('activity-logs.index');
 });
 
 require __DIR__.'/auth.php';

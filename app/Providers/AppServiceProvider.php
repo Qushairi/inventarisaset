@@ -5,6 +5,10 @@ namespace App\Providers;
 use App\Models\User;
 use App\Support\DashboardRedirector;
 use Illuminate\Auth\Middleware\RedirectIfAuthenticated;
+use App\Listeners\LogAuthenticationEventListener;
+use Illuminate\Auth\Events\Login;
+use Illuminate\Auth\Events\Logout;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -25,6 +29,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Event::listen(Login::class, [LogAuthenticationEventListener::class, 'handleLogin']);
+        Event::listen(Logout::class, [LogAuthenticationEventListener::class, 'handleLogout']);
+
         RedirectIfAuthenticated::redirectUsing(
             fn () => DashboardRedirector::pathFor(auth()->user()),
         );

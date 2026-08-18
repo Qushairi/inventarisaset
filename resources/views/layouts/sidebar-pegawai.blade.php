@@ -25,6 +25,12 @@
             'route' => 'pegawai.returns.index',
             'active_patterns' => $isFromReturns ? ['pegawai.returns.*', 'pegawai.loans.letter.*'] : ['pegawai.returns.*'],
         ],
+        [
+            'name' => 'Log Aktivitas',
+            'icon' => 'clock-history',
+            'route' => 'pegawai.activity-logs.index',
+            'active_patterns' => ['pegawai.activity-logs.*'],
+        ],
     ];
 @endphp
 

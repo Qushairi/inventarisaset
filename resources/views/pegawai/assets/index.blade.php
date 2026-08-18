@@ -119,15 +119,15 @@
                                 @forelse ($assets as $asset)
                                     @php
                                         $conditionBadge = match ($asset['condition_variant']) {
-                                            'warning' => 'pegawai-badge-warning',
-                                            'danger' => 'pegawai-badge-danger',
-                                            default => 'pegawai-badge-success',
+                                            'warning' => 'bg-light-warning text-warning',
+                                            'danger' => 'bg-light-danger text-danger',
+                                            default => 'bg-light-success text-success',
                                         };
                                         $statusBadge = match ($asset['status_variant']) {
-                                            'warning' => 'pegawai-badge-warning',
-                                            'danger' => 'pegawai-badge-danger',
-                                            'info' => 'pegawai-badge-info',
-                                            default => 'pegawai-badge-success',
+                                            'warning' => 'bg-light-warning text-warning',
+                                            'danger' => 'bg-light-danger text-danger',
+                                            'info' => 'bg-light-info text-info',
+                                            default => 'bg-light-success text-success',
                                         };
                                     @endphp
                                     <tr>
@@ -180,10 +180,10 @@
                                             </span>
                                         </td>
                                         <td>
-                                            <span class="pegawai-badge {{ $conditionBadge }}">{{ $asset['condition'] ?: '-' }}</span>
+                                            <span class="badge {{ $conditionBadge }} px-2.5 py-1.5 font-12 font-semibold">{{ $asset['condition'] ?: '-' }}</span>
                                         </td>
                                         <td>
-                                            <span class="pegawai-badge {{ $statusBadge }}">{{ $asset['status'] ?: '-' }}</span>
+                                            <span class="badge {{ $statusBadge }} px-2.5 py-1.5 font-12 font-semibold">{{ $asset['status'] ?: '-' }}</span>
                                         </td>
                                     </tr>
                                 @empty

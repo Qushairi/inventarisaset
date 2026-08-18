@@ -80,12 +80,12 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @forelse ($recentLoans as $loan)
+                                     @forelse ($recentLoans as $loan)
                                         @php
                                             $loanBadge = match ($loan['status_variant']) {
-                                                'danger' => 'pegawai-badge-danger',
-                                                'warning' => 'pegawai-badge-warning',
-                                                default => 'pegawai-badge-success',
+                                                'danger' => 'bg-light-danger text-danger',
+                                                'warning' => 'bg-light-warning text-warning',
+                                                default => 'bg-light-success text-success',
                                             };
                                         @endphp
                                         <tr>
@@ -98,10 +98,7 @@
                                                 <small class="text-muted">{{ $loan['return_plan'] }}</small>
                                             </td>
                                             <td>
-                                                <span class="pegawai-badge {{ $loanBadge }}">
-                                                    <span class="pegawai-badge-dot"></span>
-                                                    <span>{{ $loan['status'] }}</span>
-                                                </span>
+                                                <span class="badge {{ $loanBadge }} px-2.5 py-1.5 font-12 font-semibold">{{ $loan['status'] }}</span>
                                             </td>
                                         </tr>
                                     @empty
@@ -143,11 +140,15 @@
                                                 <div class="small fw-semibold">{{ $returnItem['returned_at'] }}</div>
                                                 <small class="text-muted">Kondisi: {{ $returnItem['condition'] }}</small>
                                             </td>
+                                            @php
+                                                $returnBadgeClass = match ($returnItem['status_variant']) {
+                                                    'danger' => 'bg-light-danger text-danger',
+                                                    'success' => 'bg-light-success text-success',
+                                                    default => 'bg-light-warning text-warning',
+                                                };
+                                            @endphp
                                             <td>
-                                                <span class="pegawai-badge pegawai-badge-success">
-                                                    <span class="pegawai-badge-dot"></span>
-                                                    <span>{{ $returnItem['status'] }}</span>
-                                                </span>
+                                                <span class="badge {{ $returnBadgeClass }} px-2.5 py-1.5 font-12 font-semibold">{{ $returnItem['status'] }}</span>
                                             </td>
                                         </tr>
                                     @empty
@@ -183,10 +184,10 @@
                                     @forelse ($recentAssets as $asset)
                                         @php
                                             $statusBadge = match ($asset['status_variant']) {
-                                                'warning' => 'pegawai-badge-warning',
-                                                'danger' => 'pegawai-badge-danger',
-                                                'info' => 'pegawai-badge-info',
-                                                default => 'pegawai-badge-success',
+                                                'warning' => 'bg-light-warning text-warning',
+                                                'danger' => 'bg-light-danger text-danger',
+                                                'info' => 'bg-light-info text-info',
+                                                default => 'bg-light-success text-success',
                                             };
                                         @endphp
                                         <tr>
@@ -214,10 +215,7 @@
                                                 <small class="text-muted">{{ $asset['location_note'] }}</small>
                                             </td>
                                             <td>
-                                                <span class="pegawai-badge {{ $statusBadge }}">
-                                                    <span class="pegawai-badge-dot"></span>
-                                                    <span>{{ $asset['status'] }}</span>
-                                                </span>
+                                                <span class="badge {{ $statusBadge }} px-2.5 py-1.5 font-12 font-semibold">{{ $asset['status'] }}</span>
                                             </td>
                                         </tr>
                                     @empty
