@@ -72,11 +72,16 @@
                                 @forelse ($returns as $return)
                                     @php
                                         $conditionBadge = match ($return['condition_variant']) {
-                                            'warning' => 'bg-light-warning',
-                                            'danger' => 'bg-light-danger',
-                                            default => 'bg-light-success',
+                                            'warning' => 'bg-light-warning text-warning',
+                                            'danger' => 'bg-light-danger text-danger',
+                                            default => 'bg-light-success text-success',
                                         };
-                                        $statusBadge = $return['status_variant'] === 'success' ? 'bg-light-success' : 'bg-light-info';
+                                        $statusBadge = match ($return['status_variant']) {
+                                            'danger' => 'bg-light-danger text-danger',
+                                            'success' => 'bg-light-success text-success',
+                                            default => 'bg-light-warning text-warning',
+                                        };
+                                        $isPending = in_array($return['status'], ['Menunggu', 'Menunggu Verifikasi']);
                                     @endphp
                                     <tr>
                                         <td>
@@ -104,10 +109,36 @@
                                             <div>{{ $return['report_number'] }}</div>
                                             <small class="text-muted">{{ $return['report_note'] }}</small>
                                         </td>
-                                        <td class="text-end">
-                                            <a href="{{ route('admin.returns.letter.show', $return['id']) }}" class="btn btn-sm btn-light-primary icon icon-left">
-                                                <i class="bi bi-file-earmark-pdf"></i><span>Lihat Surat</span>
-                                            </a>
+                                        <td class="text-end text-nowrap">
+                                            <div class="d-inline-flex align-items-center gap-1 justify-content-end">
+                                                @if ($isPending)
+                                                    <form action="{{ route('admin.returns.status', $return['id']) }}" method="POST" class="d-inline-block" data-swal-confirm data-swal-title="Setujui pengembalian?" data-swal-text="Apakah Anda yakin barang ini sudah dikembalikan dan ingin menyetujui pengembalian ini?" data-swal-confirm-text="Ya, setujui">
+                                                        @csrf
+                                                        @method('PUT')
+                                                        <input type="hidden" name="status" value="Terverifikasi">
+                                                        <button type="submit" class="btn btn-sm btn-light-success icon icon-left">
+                                                            <i class="bi bi-check-circle"></i><span>Terima</span>
+                                                        </button>
+                                                    </form>
+
+                                                    <form action="{{ route('admin.returns.status', $return['id']) }}" method="POST" class="d-inline-block" data-swal-confirm data-swal-title="Tolak pengembalian?" data-swal-text="Apakah Anda yakin ingin menolak pengajuan pengembalian ini?" data-swal-confirm-text="Ya, tolak">
+                                                        @csrf
+                                                        @method('PUT')
+                                                        <input type="hidden" name="status" value="Ditolak">
+                                                        <button type="submit" class="btn btn-sm btn-light-danger icon icon-left">
+                                                            <i class="bi bi-x-circle"></i><span>Tolak</span>
+                                                        </button>
+                                                    </form>
+                                                @else
+                                                    @if ($return['status'] === 'Terverifikasi')
+                                                        <a href="{{ route('admin.returns.letter.show', $return['id']) }}" class="btn btn-sm btn-light-primary icon icon-left">
+                                                            <i class="bi bi-file-earmark-pdf"></i><span>Lihat Surat</span>
+                                                        </a>
+                                                    @else
+                                                        <span class="text-danger small font-semibold">Pengembalian Ditolak</span>
+                                                    @endif
+                                                @endif
+                                            </div>
                                         </td>
                                     </tr>
                                 @empty

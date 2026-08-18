@@ -104,9 +104,9 @@
                                 @forelse ($loans as $loan)
                                     @php
                                         $loanBadge = match ($loan['status_variant']) {
-                                            'danger' => 'pegawai-badge-danger',
-                                            'warning' => 'pegawai-badge-warning',
-                                            default => 'pegawai-badge-success',
+                                            'danger' => 'bg-light-danger text-danger',
+                                            'warning' => 'bg-light-warning text-warning',
+                                            default => 'bg-light-success text-success',
                                         };
                                         $searchSource = strtolower(trim(($loan['asset_name'] ?? '').' '.($loan['asset_code'] ?? '').' '.($loan['letter_number'] ?? '')));
                                         $statusValue = strtolower($loan['status'] ?? '');
@@ -152,10 +152,7 @@
                                             <small class="text-muted">{{ $loan['return_plan'] }}</small>
                                         </td>
                                         <td>
-                                            <span class="pegawai-badge {{ $loanBadge }}">
-                                                <span class="pegawai-badge-dot"></span>
-                                                <span>{{ $loan['status'] }}</span>
-                                            </span>
+                                            <span class="badge {{ $loanBadge }} px-2.5 py-1.5 font-12 font-semibold">{{ $loan['status'] }}</span>
                                         </td>
                                         <td><small class="text-muted">{{ $loan['status_note'] }}</small></td>
                                         <td>

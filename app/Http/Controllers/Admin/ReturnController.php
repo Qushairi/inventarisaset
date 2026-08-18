@@ -73,7 +73,11 @@ class ReturnController extends Controller
                     'condition' => $return->condition,
                     'condition_variant' => $this->conditionVariant($return->condition),
                     'status' => $return->status,
-                    'status_variant' => $return->status === 'Terverifikasi' ? 'success' : 'info',
+                    'status_variant' => match ($return->status) {
+                        'Terverifikasi', 'Disetujui' => 'success',
+                        'Ditolak' => 'danger',
+                        default => 'warning',
+                    },
                     'status_note' => $return->status_note,
                     'report_number' => $return->report_number,
                     'report_note' => $return->report_note,
@@ -122,6 +126,44 @@ class ReturnController extends Controller
         return redirect()
             ->route('admin.returns.index')
             ->with('success', 'Data pengembalian berhasil disimpan.');
+    }
+
+    public function updateStatus(Request $request, AssetReturn $return)
+    {
+        $validated = $request->validate([
+            'status' => ['required', Rule::in(['Terverifikasi', 'Ditolak'])],
+        ]);
+
+        $status = $validated['status'];
+
+        if ($status === 'Terverifikasi') {
+            $return->update([
+                'status' => 'Terverifikasi',
+                'verified_note' => 'Pengembalian aset telah diverifikasi dan disetujui admin.',
+            ]);
+
+            $this->assetStateService->applyReturnStock($return);
+            $this->assetStateService->syncLoanById($return->loan_id);
+            $return->refresh();
+            $this->assetStateService->syncAssetIds([$return->asset_id, $return->stock_asset_id], true);
+
+            $this->pegawaiNotificationService->sendReturnVerifiedNotification($return);
+
+            $message = 'Pengembalian aset berhasil diverifikasi dan disetujui.';
+        } else {
+            $return->update([
+                'status' => 'Ditolak',
+                'verified_note' => 'Pengembalian aset ditolak admin.',
+            ]);
+
+            $this->assetStateService->syncLoanById($return->loan_id);
+
+            $message = 'Pengembalian aset telah ditolak.';
+        }
+
+        return redirect()
+            ->route('admin.returns.index')
+            ->with('success', $message);
     }
 
     public function edit(AssetReturn $return)

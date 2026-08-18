@@ -75,6 +75,12 @@ class ProfileController extends BasePegawaiController
             'profile_photo_path' => $path,
         ]);
 
+        \App\Support\ActivityLogger::log(
+            'profile_updated',
+            'Pembaruan Foto Profil',
+            'Mengunggah dan memperbarui foto profil akun.'
+        );
+
         return redirect()
             ->route('pegawai.profile.index')
             ->with('success', 'Foto profil berhasil diperbarui.');
@@ -92,6 +98,12 @@ class ProfileController extends BasePegawaiController
         $pegawai->update([
             'password' => Hash::make($validated['password']),
         ]);
+
+        \App\Support\ActivityLogger::log(
+            'password_changed',
+            'Pembaruan Password',
+            'Mengubah password akun pegawai.'
+        );
 
         return redirect()
             ->route('pegawai.profile.index')

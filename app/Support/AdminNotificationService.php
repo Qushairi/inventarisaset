@@ -24,6 +24,21 @@ class AdminNotificationService
 
         $assetLabel = $this->assetLabel($loan->asset?->name, $loan->asset?->code);
 
+        // Send email notification to Admin
+        User::query()
+            ->where('role', 'admin')
+            ->orderBy('id')
+            ->get()
+            ->each(function (User $admin) use ($loan): void {
+                if (filled($admin->email)) {
+                    try {
+                        \Illuminate\Support\Facades\Mail::to($admin->email)->send(new \App\Mail\LoanRequestAdminMail($loan));
+                    } catch (\Throwable $e) {
+                        report($e);
+                    }
+                }
+            });
+
         return $this->notifyAdmins([
             'dedupe_key' => 'admin-loan-request-'.$loan->id,
             'type_key' => 'admin_loan_request',
@@ -57,12 +72,29 @@ class AdminNotificationService
             return 0;
         }
 
-        if (! in_array($return->status, ['Menunggu Verifikasi', 'Terverifikasi'], true)) {
+        if (! in_array($return->status, ['Menunggu', 'Menunggu Verifikasi', 'Terverifikasi'], true)) {
             return 0;
         }
 
         $assetLabel = $this->assetLabel($return->asset?->name, $return->asset?->code);
         $isVerified = $return->status === 'Terverifikasi';
+
+        // Send email notification to Admin when a new return is requested
+        if (! $isVerified) {
+            User::query()
+                ->where('role', 'admin')
+                ->orderBy('id')
+                ->get()
+                ->each(function (User $admin) use ($return): void {
+                    if (filled($admin->email)) {
+                        try {
+                            \Illuminate\Support\Facades\Mail::to($admin->email)->send(new \App\Mail\ReturnRequestAdminMail($return));
+                        } catch (\Throwable $e) {
+                            report($e);
+                        }
+                    }
+                });
+        }
 
         return $this->notifyAdmins([
             'dedupe_key' => 'admin-return-request-'.$return->id,

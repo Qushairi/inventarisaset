@@ -104,14 +104,14 @@
                                 @forelse ($returns as $return)
                                     @php
                                         $conditionBadge = match ($return['condition_variant']) {
-                                            'danger' => 'pegawai-badge-danger',
-                                            'warning' => 'pegawai-badge-warning',
-                                            default => 'pegawai-badge-success',
+                                            'danger' => 'bg-light-danger text-danger',
+                                            'warning' => 'bg-light-warning text-warning',
+                                            default => 'bg-light-success text-success',
                                         };
                                         $statusBadge = match ($return['status_variant']) {
-                                            'danger' => 'pegawai-badge-danger',
-                                            'success' => 'pegawai-badge-success',
-                                            default => 'pegawai-badge-warning',
+                                            'danger' => 'bg-light-danger text-danger',
+                                            'success' => 'bg-light-success text-success',
+                                            default => 'bg-light-warning text-warning',
                                         };
                                         $statusText = match ($return['status']) {
                                             'Terverifikasi', 'Disetujui' => 'Sudah Terverifikasi',
@@ -168,31 +168,22 @@
                                                     @foreach ($return['items_list'] as $it)
                                                         @php
                                                             $itemCondBadge = match ($it['condition_variant'] ?? 'success') {
-                                                                'warning' => 'pegawai-badge-warning',
-                                                                'danger' => 'pegawai-badge-danger',
-                                                                default => 'pegawai-badge-success',
+                                                                'warning' => 'bg-light-warning text-warning',
+                                                                'danger' => 'bg-light-danger text-danger',
+                                                                default => 'bg-light-success text-success',
                                                             };
                                                         @endphp
                                                         <div class="d-flex align-items-center" style="height: 38px;">
-                                                            <span class="pegawai-badge {{ $itemCondBadge }}">
-                                                                <span class="pegawai-badge-dot"></span>
-                                                                <span>{{ $it['condition'] }}</span>
-                                                            </span>
+                                                            <span class="badge {{ $itemCondBadge }} px-2.5 py-1.5 font-12 font-semibold">{{ $it['condition'] }}</span>
                                                         </div>
                                                     @endforeach
                                                 </div>
                                             @else
-                                                <span class="pegawai-badge {{ $conditionBadge }}">
-                                                    <span class="pegawai-badge-dot"></span>
-                                                    <span>{{ $return['condition'] }}</span>
-                                                </span>
+                                                <span class="badge {{ $conditionBadge }} px-2.5 py-1.5 font-12 font-semibold">{{ $return['condition'] }}</span>
                                             @endif
                                         </td>
                                         <td>
-                                            <span class="pegawai-badge {{ $statusBadge }}">
-                                                <span class="pegawai-badge-dot"></span>
-                                                <span>{{ $statusText }}</span>
-                                            </span>
+                                            <span class="badge {{ $statusBadge }} px-2.5 py-1.5 font-12 font-semibold">{{ $statusText }}</span>
                                         </td>
                                         <td>
                                             @if ($return['letter_url'])

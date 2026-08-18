@@ -83,6 +83,15 @@ class PegawaiNotificationService
 
         $assetLabel = $this->assetLabel($return->asset?->name, $return->asset?->code);
 
+        // Send email notification to Pegawai when return is verified
+        if (filled($return->user->email)) {
+            try {
+                \Illuminate\Support\Facades\Mail::to($return->user->email)->send(new \App\Mail\ReturnVerifiedPegawaiMail($return));
+            } catch (\Throwable $e) {
+                report($e);
+            }
+        }
+
         return $this->notifyIfMissing($return->user, [
             'dedupe_key' => 'return-verified-'.$return->id,
             'type_key' => 'return_verified',

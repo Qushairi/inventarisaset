@@ -30,7 +30,8 @@ class LoanController extends BasePegawaiController
             ->with('asset')
             ->where('user_id', $pegawai->id)
             ->whereDoesntHave('returnRecord')
-            ->latest('loan_date')
+            ->latest('created_at')
+            ->latest('id')
             ->paginate($perPage)
             ->withQueryString()
             ->through(function (Loan $loan) {
@@ -186,6 +187,19 @@ class LoanController extends BasePegawaiController
         }
 
         $this->adminNotificationService->sendLoanRequestNotification($loan);
+
+        $firstItemAsset = Asset::find($firstItem['asset_id']);
+        $assetSummary = $firstItemAsset?->name ?? 'Aset';
+        $itemCount = count($itemList);
+        if ($itemCount > 1) {
+            $assetSummary .= ' (+' . ($itemCount - 1) . ' barang lainnya)';
+        }
+
+        \App\Support\ActivityLogger::log(
+            'loan_created',
+            'Pengajuan Peminjaman Aset',
+            "Mengajukan peminjaman aset {$assetSummary} sebanyak {$totalQty} unit."
+        );
 
         return redirect()
             ->route('pegawai.loans.index')

@@ -67,7 +67,8 @@ class DashboardController extends BasePegawaiController
         $recentLoans = Loan::query()
             ->with('asset')
             ->where('user_id', $pegawai->id)
-            ->latest('loan_date')
+            ->latest('created_at')
+            ->latest('id')
             ->take(4)
             ->get()
             ->map(function (Loan $loan) {
@@ -89,18 +90,30 @@ class DashboardController extends BasePegawaiController
         $recentReturns = AssetReturn::query()
             ->with(['loan.asset', 'asset'])
             ->where('user_id', $pegawai->id)
-            ->latest('returned_at')
+            ->latest('created_at')
+            ->latest('id')
             ->take(4)
             ->get()
             ->map(function (AssetReturn $returnItem) {
                 $asset = $returnItem->asset ?? $returnItem->loan?->asset;
+                $statusText = match ($returnItem->status) {
+                    'Terverifikasi', 'Disetujui' => 'Sudah Terverifikasi',
+                    'Ditolak' => 'Pengembalian Ditolak',
+                    default => 'Menunggu Verifikasi',
+                };
+                $statusVariant = match ($returnItem->status) {
+                    'Terverifikasi', 'Disetujui' => 'success',
+                    'Ditolak' => 'danger',
+                    default => 'warning',
+                };
+
                 return [
                     'asset_name' => $asset?->name ?? 'Aset Inventaris',
                     'asset_code' => $asset?->code ?? '-',
                     'returned_at' => optional($returnItem->returned_at)->translatedFormat('d F Y'),
                     'condition' => $returnItem->condition ?? 'Baik',
-                    'status' => 'Sudah Dikembalikan',
-                    'status_variant' => 'success',
+                    'status' => $statusText,
+                    'status_variant' => $statusVariant,
                 ];
             });
 

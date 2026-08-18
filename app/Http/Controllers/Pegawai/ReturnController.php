@@ -33,7 +33,8 @@ class ReturnController extends BasePegawaiController
         $returns = AssetReturn::query()
             ->with(['asset', 'loan.asset.category', 'loan.user', 'loan.approvedBy', 'loan.suratPeminjaman'])
             ->where('user_id', $pegawai->id)
-            ->latest('returned_at')
+            ->latest('created_at')
+            ->latest('id')
             ->paginate($perPage)
             ->withQueryString()
             ->through(function (AssetReturn $return) {
@@ -204,6 +205,14 @@ class ReturnController extends BasePegawaiController
         ]);
 
         $this->adminNotificationService->sendReturnRequestNotification($return);
+
+        $assetName = $loan->asset?->name ?? 'Aset';
+
+        \App\Support\ActivityLogger::log(
+            'return_created',
+            'Pengajuan Pengembalian Aset',
+            "Mengajukan pengembalian aset {$assetName} dengan kondisi {$finalCondition}."
+        );
 
         return redirect()
             ->route('pegawai.returns.index')
