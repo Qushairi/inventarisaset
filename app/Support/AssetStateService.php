@@ -11,6 +11,68 @@ use Illuminate\Validation\ValidationException;
 
 class AssetStateService
 {
+    /** @var array<int, string> */
+    private const MERGE_IDENTITY_FIELDS = [
+        'category_id',
+        'location_id',
+        'name',
+        'code',
+        'brand_model',
+        'note',
+        'image_path',
+        'serial_number',
+        'size',
+        'material',
+        'condition',
+        'status',
+        'acquisition_price',
+        'acquisition_year',
+        'acquired_at',
+    ];
+
+    /**
+     * Menyimpan aset baru atau menambahkan jumlahnya ke baris identik yang sudah ada.
+     *
+     * @param  array<string, mixed>  $attributes
+     * @return array{asset: Asset, merged: bool}
+     */
+    public function addOrMergeAsset(array $attributes): array
+    {
+        $identity = $this->assetMergeIdentity($attributes);
+        $quantity = max(1, (int) ($attributes['quantity'] ?? 1));
+
+        return DB::transaction(function () use ($attributes, $identity, $quantity): array {
+            $existingAsset = Asset::query()
+                ->where('category_id', $attributes['category_id'])
+                ->where('location_id', $attributes['location_id'])
+                ->lockForUpdate()
+                ->get()
+                ->first(fn (Asset $asset): bool => $this->assetMergeIdentity($asset->getAttributes()) === $identity);
+
+            if (! $existingAsset) {
+                return [
+                    'asset' => Asset::query()->create($attributes),
+                    'merged' => false,
+                ];
+            }
+
+            $updates = [
+                'quantity' => $existingAsset->quantity + $quantity,
+            ];
+
+            if (blank($existingAsset->image_path) && filled($attributes['image_path'] ?? null)) {
+                $updates['image_path'] = $attributes['image_path'];
+            }
+
+            $existingAsset->forceFill($updates)->save();
+
+            return [
+                'asset' => $existingAsset->refresh(),
+                'merged' => true,
+            ];
+        });
+    }
+
     public function resolveState(Asset $asset, bool $preferLatestReturn = false): array
     {
         $resolvedCondition = $this->resolvedCondition($asset, $preferLatestReturn);
@@ -318,7 +380,8 @@ class AssetStateService
             'category_id' => $sourceAsset->category_id,
             'location_id' => $sourceAsset->location_id,
             'name' => $sourceAsset->name,
-            'code' => $this->uniqueSplitCode($sourceAsset->code, $condition),
+            'code' => $sourceAsset->code,
+            'brand_model' => $sourceAsset->brand_model,
             'note' => $sourceAsset->note,
             'image_path' => $sourceAsset->image_path,
             'serial_number' => $sourceAsset->serial_number,
@@ -339,6 +402,8 @@ class AssetStateService
             ->where('category_id', $asset->category_id)
             ->where('location_id', $asset->location_id)
             ->where('name', $asset->name)
+            ->where('code', $asset->code)
+            ->where('brand_model', $asset->brand_model)
             ->where('note', $asset->note)
             ->where('image_path', $asset->image_path)
             ->where('serial_number', $asset->serial_number)
@@ -354,22 +419,41 @@ class AssetStateService
             ->where('condition', $condition);
     }
 
-    private function uniqueSplitCode(string $baseCode, string $condition): string
+    /**
+     * @param  array<string, mixed>  $attributes
+     * @return array<string, int|string|null>
+     */
+    private function assetMergeIdentity(array $attributes): array
     {
-        $suffix = match ($condition) {
-            'Rusak Ringan' => 'RR',
-            'Rusak Berat' => 'RB',
-            default => 'B',
-        };
+        $identity = [];
 
-        $base = Str::limit($baseCode, 45, '');
-        $index = 1;
+        foreach (self::MERGE_IDENTITY_FIELDS as $field) {
+            $identity[$field] = $this->normalizeMergeIdentityValue($field, $attributes[$field] ?? null);
+        }
 
-        do {
-            $code = "{$base}-{$suffix}{$index}";
-            $index++;
-        } while (Asset::query()->where('code', $code)->exists());
+        return $identity;
+    }
 
-        return $code;
+    private function normalizeMergeIdentityValue(string $field, mixed $value): int|string|null
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        if (in_array($field, ['category_id', 'location_id', 'acquisition_year'], true)) {
+            return (int) $value;
+        }
+
+        if ($field === 'acquisition_price') {
+            return number_format((float) $value, 2, '.', '');
+        }
+
+        if ($field === 'acquired_at') {
+            return $value instanceof \DateTimeInterface
+                ? $value->format('Y-m-d')
+                : substr((string) $value, 0, 10);
+        }
+
+        return Str::lower(Str::squish((string) $value));
     }
 }

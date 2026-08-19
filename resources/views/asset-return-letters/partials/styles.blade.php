@@ -52,8 +52,8 @@
     }
 
     .asset-return-letter-document .signature-date {
-        margin-top: 2cm;
-        margin-bottom: 6px;
+        margin-top: 4px;
+        margin-bottom: 4px;
         text-align: right;
     }
 

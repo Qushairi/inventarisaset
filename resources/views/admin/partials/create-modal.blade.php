@@ -31,7 +31,7 @@
         'loan' => [
             'id' => 'adminLoanCreateModal',
             'title' => 'Tambah Peminjaman',
-            'subtitle' => 'Catat aset, pegawai, periode, dan status peminjaman.',
+            'subtitle' => 'Catat aset, peminjam, periode, dan status peminjaman.',
             'icon' => 'box-arrow-up-right',
             'action' => route('admin.loans.store'),
         ],
@@ -64,7 +64,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
-            <form action="{{ $config['action'] }}" method="POST" @if ($resource === 'asset') enctype="multipart/form-data" @endif>
+            <form action="{{ $config['action'] }}" method="POST" @if ($resource === 'asset') enctype="multipart/form-data" data-admin-asset-create-form @endif @if ($resource === 'loan') data-admin-loan-create-form @endif>
                 @csrf
                 <input type="hidden" name="_create_modal" value="{{ $resource }}">
 
@@ -217,7 +217,8 @@
                                 <div class="col-md-3 col-6"><div class="form-group transaction-field"><label for="admin_asset_status">Status</label><div class="transaction-input-shell"><select id="admin_asset_status" name="status" class="form-select" required>@foreach($statuses as $status)<option value="{{ $status }}" @selected(($showCreateErrors ? old('status', 'Tersedia') : 'Tersedia') === $status)>{{ $status }}</option>@endforeach</select></div></div></div>
                                 <div class="col-md-3 col-6"><div class="form-group transaction-field"><label for="admin_asset_quantity">Jumlah</label><div class="transaction-input-shell"><input type="number" min="1" id="admin_asset_quantity" name="quantity" class="form-control" value="{{ $showCreateErrors ? old('quantity', 1) : 1 }}" required></div></div></div>
                                 <div class="col-md-3 col-6"><div class="form-group transaction-field"><label for="admin_asset_year">Tahun</label><div class="transaction-input-shell"><input type="number" min="1900" max="{{ now()->addYear()->year }}" id="admin_asset_year" name="acquisition_year" class="form-control" value="{{ $showCreateErrors ? old('acquisition_year') : '' }}"></div></div></div>
-                                <div class="col-md-4 col-12"><div class="form-group transaction-field"><label for="admin_asset_serial">Nomor Seri</label><div class="transaction-input-shell"><input type="text" id="admin_asset_serial" name="serial_number" class="form-control" value="{{ $showCreateErrors ? old('serial_number') : '' }}"></div></div></div>
+                                <div class="col-md-4 col-12"><div class="form-group transaction-field"><label for="admin_asset_brand_model">Merk/Model</label><div class="transaction-input-shell"><input type="text" id="admin_asset_brand_model" name="brand_model" class="form-control" value="{{ $showCreateErrors ? old('brand_model') : '' }}"></div></div></div>
+                                <div class="col-md-4 col-12"><div class="form-group transaction-field"><label for="admin_asset_serial">No. Seri Pabrik</label><div class="transaction-input-shell"><input type="text" id="admin_asset_serial" name="serial_number" class="form-control" value="{{ $showCreateErrors ? old('serial_number') : '' }}"></div></div></div>
                                 <div class="col-md-4 col-6"><div class="form-group transaction-field"><label for="admin_asset_size">Ukuran</label><div class="transaction-input-shell"><input type="text" id="admin_asset_size" name="size" class="form-control" value="{{ $showCreateErrors ? old('size') : '' }}"></div></div></div>
                                 <div class="col-md-4 col-6"><div class="form-group transaction-field"><label for="admin_asset_material">Bahan</label><div class="transaction-input-shell"><input type="text" id="admin_asset_material" name="material" class="form-control" value="{{ $showCreateErrors ? old('material') : '' }}"></div></div></div>
                             </div>
@@ -227,51 +228,155 @@
                             <div class="row g-3">
                                 <div class="col-md-6 col-12"><div class="form-group transaction-field"><label for="admin_asset_price">Nilai Perolehan</label><div class="transaction-input-shell"><span class="transaction-input-icon"><i class="bi bi-cash"></i></span><input type="number" min="0" step="0.01" id="admin_asset_price" name="acquisition_price" class="form-control" value="{{ $showCreateErrors ? old('acquisition_price') : '' }}" required></div></div></div>
                                 <div class="col-md-6 col-12"><div class="form-group transaction-field"><label for="admin_asset_image">Upload Gambar</label><div class="transaction-input-shell"><input type="file" id="admin_asset_image" name="image_file" class="form-control" accept=".jpg,.jpeg,.png,.webp"></div></div></div>
-                                <div class="col-12"><div class="form-group transaction-field"><label for="admin_asset_note">Catatan</label><div class="transaction-input-shell transaction-textarea-shell"><span class="transaction-input-icon"><i class="bi bi-pencil-square"></i></span><textarea id="admin_asset_note" name="note" class="form-control" rows="4">{{ $showCreateErrors ? old('note') : '' }}</textarea></div></div></div>
+                                <div class="col-12"><div class="form-group transaction-field"><label for="admin_asset_note">Keterangan</label><div class="transaction-input-shell transaction-textarea-shell"><span class="transaction-input-icon"><i class="bi bi-pencil-square"></i></span><textarea id="admin_asset_note" name="note" class="form-control" rows="4">{{ $showCreateErrors ? old('note') : '' }}</textarea></div></div></div>
                             </div>
                         </div>
                     @elseif ($resource === 'loan')
                         <div class="transaction-form-section">
-                            <div class="transaction-section-heading"><span><i class="bi bi-clipboard-data"></i></span><div><h5>Data Utama</h5><small>Aset dan pegawai peminjam</small></div></div>
+                            <div class="transaction-section-heading"><span><i class="bi bi-clipboard-data"></i></span><div><h5>Data Utama</h5><small>Aset dan peminjam</small></div></div>
                             <div class="row g-3">
-                                <div class="col-md-6 col-12"><div class="form-group transaction-field"><label for="admin_loan_asset">Aset</label><div class="transaction-input-shell"><span class="transaction-input-icon"><i class="bi bi-archive"></i></span><select id="admin_loan_asset" name="asset_id" class="form-select" required><option value="">Pilih aset</option>@foreach($createAssets as $asset)<option value="{{ $asset->id }}" @selected($showCreateErrors && old('asset_id') == $asset->id)>{{ $asset->name }} ({{ $asset->code }}) - Stok {{ $asset->quantity }}</option>@endforeach</select></div></div></div>
-                                <div class="col-md-6 col-12"><div class="form-group transaction-field"><label for="admin_loan_employee">Pegawai</label><div class="transaction-input-shell"><span class="transaction-input-icon"><i class="bi bi-person-badge"></i></span><select id="admin_loan_employee" name="user_id" class="form-select" required><option value="">Pilih pegawai</option>@foreach($createEmployees as $employee)<option value="{{ $employee->id }}" @selected($showCreateErrors && old('user_id') == $employee->id)>{{ $employee->name }} ({{ $employee->email }})</option>@endforeach</select></div></div></div>
+                                <div class="col-12">
+                                    <div class="form-group transaction-field">
+                                        <label for="admin_loan_employee">Peminjam</label>
+                                        <div class="transaction-input-shell">
+                                            <span class="transaction-input-icon"><i class="bi bi-person-badge"></i></span>
+                                            <select id="admin_loan_employee" name="user_id" class="form-select {{ $showCreateErrors && $errors->has('user_id') ? 'is-invalid' : '' }}" required>
+                                                <option value="">Pilih peminjam</option>
+                                                @foreach($createEmployees as $employee)
+                                                    <option value="{{ $employee->id }}" @selected($showCreateErrors && old('user_id') == $employee->id)>{{ $employee->name }} ({{ $employee->email }}) - {{ ucfirst($employee->role) }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        @if ($showCreateErrors) @error('user_id')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @php
+                            $loanAssetOptions = $createAssets->map(fn ($asset) => [
+                                'id' => (string) $asset->id,
+                                'name' => $asset->name,
+                                'code' => $asset->code,
+                                'stock' => (int) $asset->quantity,
+                                'category' => $asset->category?->name,
+                                'location' => $asset->location?->name,
+                                'label' => $asset->name.' ('.$asset->code.') - Stok '.$asset->quantity,
+                            ])->values();
+                            $loanSelectedItems = collect($showCreateErrors ? old('items', []) : [])
+                                ->filter(fn ($item) => is_array($item) && filled($item['asset_id'] ?? null))
+                                ->map(fn ($item) => [
+                                    'asset_id' => (string) $item['asset_id'],
+                                    'quantity' => $item['quantity'] ?? 1,
+                                ])
+                                ->values();
+                            $loanJsonFlags = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
+                        @endphp
+                        <div class="transaction-form-section">
+                            <div class="transaction-section-heading"><span><i class="bi bi-boxes"></i></span><div><h5>Aset Dipinjam</h5><small>Cari aset dan tentukan jumlah masing-masing</small></div></div>
+                            <div class="loan-asset-picker" data-admin-loan-asset-picker data-max-items="50">
+                                <div class="form-group transaction-field">
+                                    <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
+                                        <label for="admin_loan_asset_search" class="mb-0">Cari Aset</label>
+                                        <span class="badge bg-light-primary" data-admin-loan-item-count>0 aset dipilih</span>
+                                    </div>
+                                    <select id="admin_loan_asset_search" class="form-select" data-admin-loan-asset-search>
+                                        <option value="">Cari nama atau kode aset</option>
+                                        @foreach ($loanAssetOptions as $assetOption)
+                                            <option value="{{ $assetOption['id'] }}">{{ $assetOption['label'] }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <script type="application/json" data-admin-loan-assets>{!! json_encode($loanAssetOptions, $loanJsonFlags) !!}</script>
+                                <script type="application/json" data-admin-loan-selected-items>{!! json_encode($loanSelectedItems, $loanJsonFlags) !!}</script>
+
+                                <div class="loan-asset-selected-list" data-admin-loan-items aria-live="polite"></div>
+                                <div class="loan-asset-empty" data-admin-loan-empty>
+                                    <i class="bi bi-inboxes"></i>
+                                    <span>Belum ada aset dipilih.</span>
+                                </div>
+                                <div class="invalid-feedback d-none" data-admin-loan-picker-error>Pilih minimal satu aset untuk dipinjam.</div>
+                                @if ($showCreateErrors)
+                                    @error('items')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                                @endif
                             </div>
                         </div>
                         <div class="transaction-form-section">
-                            <div class="transaction-section-heading"><span><i class="bi bi-calendar-week"></i></span><div><h5>Periode</h5><small>Tanggal, jumlah, dan status peminjaman</small></div></div>
+                            <div class="transaction-section-heading"><span><i class="bi bi-calendar-week"></i></span><div><h5>Periode</h5><small>Tanggal dan status peminjaman</small></div></div>
                             <div class="row g-3">
-                                <div class="col-md-3 col-6"><div class="form-group transaction-field"><label for="admin_loan_date">Tanggal Pinjam</label><div class="transaction-input-shell"><input type="date" id="admin_loan_date" name="loan_date" class="form-control" value="{{ $showCreateErrors ? old('loan_date') : now()->format('Y-m-d') }}" required></div></div></div>
-                                <div class="col-md-3 col-6"><div class="form-group transaction-field"><label for="admin_loan_return">Rencana Kembali</label><div class="transaction-input-shell"><input type="date" id="admin_loan_return" name="planned_return_date" class="form-control" value="{{ $showCreateErrors ? old('planned_return_date') : '' }}"></div></div></div>
-                                <div class="col-md-3 col-6"><div class="form-group transaction-field"><label for="admin_loan_quantity">Jumlah</label><div class="transaction-input-shell"><input type="number" min="1" id="admin_loan_quantity" name="quantity" class="form-control" value="{{ $showCreateErrors ? old('quantity', 1) : 1 }}" required></div></div></div>
-                                <div class="col-md-3 col-6"><div class="form-group transaction-field"><label for="admin_loan_status">Status</label><div class="transaction-input-shell"><select id="admin_loan_status" name="status" class="form-select" required>@foreach($createStatuses as $status)<option value="{{ $status }}" @selected(($showCreateErrors ? old('status', 'Menunggu') : 'Menunggu') === $status)>{{ $status }}</option>@endforeach</select></div></div></div>
+                                <div class="col-md-4 col-12">
+                                    <div class="form-group transaction-field">
+                                        <label for="admin_loan_date">Tanggal Pinjam</label>
+                                        <div class="transaction-input-shell"><input type="date" id="admin_loan_date" name="loan_date" class="form-control {{ $showCreateErrors && $errors->has('loan_date') ? 'is-invalid' : '' }}" value="{{ $showCreateErrors ? old('loan_date') : now()->format('Y-m-d') }}" data-admin-loan-date required></div>
+                                        @if ($showCreateErrors) @error('loan_date')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror @endif
+                                    </div>
+                                </div>
+                                <div class="col-md-4 col-12">
+                                    <div class="form-group transaction-field">
+                                        <label for="admin_loan_return">Rencana Kembali</label>
+                                        <div class="transaction-input-shell"><input type="date" id="admin_loan_return" name="planned_return_date" class="form-control {{ $showCreateErrors && $errors->has('planned_return_date') ? 'is-invalid' : '' }}" value="{{ $showCreateErrors ? old('planned_return_date') : '' }}" min="{{ $showCreateErrors ? old('loan_date') : now()->format('Y-m-d') }}" data-admin-loan-return></div>
+                                        @if ($showCreateErrors) @error('planned_return_date')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror @endif
+                                    </div>
+                                </div>
+                                <div class="col-md-4 col-12">
+                                    <div class="form-group transaction-field">
+                                        <label for="admin_loan_status">Status</label>
+                                        <div class="transaction-input-shell">
+                                            <select id="admin_loan_status" name="status" class="form-select {{ $showCreateErrors && $errors->has('status') ? 'is-invalid' : '' }}" required>
+                                                @foreach($createStatuses as $status)
+                                                    <option value="{{ $status }}" @selected(($showCreateErrors ? old('status', 'Menunggu') : 'Menunggu') === $status)>{{ $status }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        @if ($showCreateErrors) @error('status')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror @endif
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="transaction-form-section mb-0">
                             <div class="transaction-section-heading"><span><i class="bi bi-chat-left-text"></i></span><div><h5>Keterangan</h5><small>Catatan status peminjaman</small></div></div>
-                            <div class="form-group transaction-field mb-0"><label for="admin_loan_note">Keterangan</label><div class="transaction-input-shell transaction-textarea-shell"><span class="transaction-input-icon"><i class="bi bi-pencil-square"></i></span><textarea id="admin_loan_note" name="status_note" class="form-control" rows="4">{{ $showCreateErrors ? old('status_note') : '' }}</textarea></div></div>
+                            <div class="form-group transaction-field mb-0">
+                                <label for="admin_loan_note">Keterangan</label>
+                                <div class="transaction-input-shell transaction-textarea-shell"><span class="transaction-input-icon"><i class="bi bi-pencil-square"></i></span><textarea id="admin_loan_note" name="status_note" class="form-control {{ $showCreateErrors && $errors->has('status_note') ? 'is-invalid' : '' }}" rows="4">{{ $showCreateErrors ? old('status_note') : '' }}</textarea></div>
+                                @if ($showCreateErrors) @error('status_note')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror @endif
+                            </div>
                         </div>
                     @elseif ($resource === 'return')
                         <div class="transaction-form-section">
-                            <div class="transaction-section-heading"><span><i class="bi bi-clipboard-data"></i></span><div><h5>Data Pengembalian</h5><small>Aset, pegawai, dan peminjaman terkait</small></div></div>
+                            <div class="transaction-section-heading"><span><i class="bi bi-clipboard-data"></i></span><div><h5>Data Pengembalian</h5><small>Pilih peminjaman yang akan dikembalikan</small></div></div>
                             <div class="row g-3">
-                                <div class="col-md-4 col-12"><div class="form-group transaction-field"><label for="admin_return_loan">Peminjaman Terkait</label><div class="transaction-input-shell"><select id="admin_return_loan" name="loan_id" class="form-select"><option value="">Opsional</option>@foreach($createLoans as $loan)<option value="{{ $loan->id }}" @selected($showCreateErrors && old('loan_id') == $loan->id)>{{ $loan->asset?->name }} - {{ $loan->user?->name }} - {{ optional($loan->loan_date)->format('d/m/Y') }}</option>@endforeach</select></div></div></div>
-                                <div class="col-md-4 col-12"><div class="form-group transaction-field"><label for="admin_return_asset">Aset</label><div class="transaction-input-shell"><select id="admin_return_asset" name="asset_id" class="form-select" required><option value="">Pilih aset</option>@foreach($createAssets as $asset)<option value="{{ $asset->id }}" @selected($showCreateErrors && old('asset_id') == $asset->id)>{{ $asset->name }} ({{ $asset->code }})</option>@endforeach</select></div></div></div>
-                                <div class="col-md-4 col-12"><div class="form-group transaction-field"><label for="admin_return_employee">Pegawai</label><div class="transaction-input-shell"><select id="admin_return_employee" name="user_id" class="form-select" required><option value="">Pilih pegawai</option>@foreach($createEmployees as $employee)<option value="{{ $employee->id }}" @selected($showCreateErrors && old('user_id') == $employee->id)>{{ $employee->name }} ({{ $employee->email }})</option>@endforeach</select></div></div></div>
+                                <div class="col-12">
+                                    <div class="form-group transaction-field">
+                                        <label for="admin_return_loan">Peminjaman Terkait</label>
+                                        <div class="transaction-input-shell">
+                                            <select id="admin_return_loan" name="loan_id" class="form-select @if($showCreateErrors) @error('loan_id') is-invalid @enderror @endif" required>
+                                                <option value="">Pilih peminjaman</option>
+                                                @forelse($createLoans as $loan)
+                                                    <option value="{{ $loan['id'] }}" @selected($showCreateErrors && old('loan_id') == $loan['id'])>
+                                                        {{ $loan['label'] }}
+                                                    </option>
+                                                @empty
+                                                    <option value="" disabled>Belum ada peminjaman aktif</option>
+                                                @endforelse
+                                            </select>
+                                        </div>
+                                        @if($showCreateErrors) @error('loan_id')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror @endif
+                                        <small class="text-muted">Aset dan pegawai otomatis mengikuti peminjaman yang dipilih.</small>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="transaction-form-section">
                             <div class="transaction-section-heading"><span><i class="bi bi-clipboard-check"></i></span><div><h5>Pemeriksaan</h5><small>Tanggal kembali dan kondisi aset</small></div></div>
                             <div class="row g-3">
-                                <div class="col-md-4 col-12"><div class="form-group transaction-field"><label for="admin_return_date">Tanggal Pengembalian</label><div class="transaction-input-shell"><input type="date" id="admin_return_date" name="returned_at" class="form-control" value="{{ $showCreateErrors ? old('returned_at') : now()->format('Y-m-d') }}" required></div></div></div>
-                                <div class="col-md-4 col-12"><div class="form-group transaction-field"><label for="admin_return_condition">Kondisi</label><div class="transaction-input-shell"><select id="admin_return_condition" name="condition" class="form-select" required>@foreach($conditions as $condition)<option value="{{ $condition }}" @selected(($showCreateErrors ? old('condition', 'Baik') : 'Baik') === $condition)>{{ $condition }}</option>@endforeach</select></div></div></div>
-                                <div class="col-md-4 col-12"><div class="form-group transaction-field"><label for="admin_return_verified">Catatan Verifikasi</label><div class="transaction-input-shell"><input type="text" id="admin_return_verified" name="verified_note" class="form-control" value="{{ $showCreateErrors ? old('verified_note') : '' }}"></div></div></div>
+                                <div class="col-md-6 col-12"><div class="form-group transaction-field"><label for="admin_return_date">Tanggal Pengembalian</label><div class="transaction-input-shell"><input type="date" id="admin_return_date" name="returned_at" class="form-control" value="{{ $showCreateErrors ? old('returned_at', now()->format('Y-m-d')) : now()->format('Y-m-d') }}" min="{{ now()->format('Y-m-d') }}" required></div></div></div>
+                                <div class="col-md-6 col-12"><div class="form-group transaction-field"><label for="admin_return_condition">Kondisi Awal</label><div class="transaction-input-shell"><select id="admin_return_condition" name="condition" class="form-select" required>@foreach($conditions as $condition)<option value="{{ $condition }}" @selected(($showCreateErrors ? old('condition', 'Baik') : 'Baik') === $condition)>{{ $condition }}</option>@endforeach</select></div></div></div>
                             </div>
                         </div>
                         <div class="transaction-form-section mb-0">
                             <div class="transaction-section-heading"><span><i class="bi bi-file-earmark-text"></i></span><div><h5>Berita Acara</h5><small>Nomor dan catatan dokumen pengembalian</small></div></div>
                             <div class="row g-3">
-                                <div class="col-md-6 col-12"><div class="form-group transaction-field"><label for="admin_return_report_number">Nomor Berita Acara</label><div class="transaction-input-shell"><input type="text" id="admin_return_report_number" name="report_number" class="form-control" value="{{ $showCreateErrors ? old('report_number') : '' }}" required></div></div></div>
+                                <div class="col-md-6 col-12"><div class="form-group transaction-field"><label for="admin_return_report_number">Nomor Berita Acara</label><div class="transaction-input-shell"><input type="text" id="admin_return_report_number" class="form-control" value="{{ $showCreateErrors ? old('report_number', 'Otomatis saat disimpan') : 'Otomatis saat disimpan' }}" readonly></div></div></div>
                                 <div class="col-md-6 col-12"><div class="form-group transaction-field"><label for="admin_return_status_note">Keterangan Status</label><div class="transaction-input-shell"><input type="text" id="admin_return_status_note" name="status_note" class="form-control" value="{{ $showCreateErrors ? old('status_note') : '' }}"></div></div></div>
                                 <div class="col-12"><div class="form-group transaction-field"><label for="admin_return_report_note">Catatan Berita Acara</label><div class="transaction-input-shell transaction-textarea-shell"><textarea id="admin_return_report_note" name="report_note" class="form-control" rows="4">{{ $showCreateErrors ? old('report_note') : '' }}</textarea></div></div></div>
                             </div>

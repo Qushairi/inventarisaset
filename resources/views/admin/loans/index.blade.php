@@ -2,6 +2,10 @@
 
 @section('title', 'Peminjaman Aset')
 
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('assets/vendors/choices.js/choices.min.css') }}">
+@endpush
+
 @section('content')
     <div class="page-content">
         <section class="section">
@@ -77,9 +81,12 @@
                                     @endphp
                                     <tr>
                                         <td>
-                                            <div>{{ $loan['asset_name'] }}</div>
-                                            <small class="text-muted">{{ $loan['asset_code'] }}</small>
-                                            <div><small class="text-muted">Jumlah: {{ $loan['quantity'] }}</small></div>
+                                            @foreach ($loan['assets'] as $asset)
+                                                <div @class(['mb-2' => ! $loop->last])>
+                                                    <div>{{ $asset['name'] }}</div>
+                                                    <small class="text-muted">{{ $asset['code'] }} · Jumlah: {{ $asset['quantity'] }}</small>
+                                                </div>
+                                            @endforeach
                                         </td>
                                         <td>
                                             <div>{{ $loan['employee_name'] }}</div>
@@ -95,6 +102,7 @@
                                         </td>
                                         <td class="text-end">
                                             <div class="d-inline-flex flex-nowrap gap-2 align-items-center">
+                                                {{-- <button type="button" class="btn btn-sm btn-light-primary icon icon-left" data-bs-toggle="modal" data-bs-target="#adminLoanEditModal-{{ $loan['id'] }}"><i class="bi bi-pencil-square"></i><span>Edit</span></button> --}}
                                                 @if ($loan['status'] === 'Menunggu')
                                                     <form action="{{ route('admin.loans.status', $loan['id']) }}" method="POST" class="d-inline-block" data-swal-confirm data-swal-icon="question" data-swal-title="Terima peminjaman?" data-swal-text="Apakah Anda yakin ingin menyetujui pengajuan peminjaman ini?" data-swal-confirm-text="Ya, terima" data-swal-confirm-color="#198754">
                                                         @csrf
@@ -138,4 +146,66 @@
         </section>
     </div>
     @include('admin.partials.create-modal', ['resource' => 'loan'])
+    @foreach ($loans as $loan)
+        @include('admin.partials.edit-modal', ['resource' => 'loan', 'record' => $loan])
+    @endforeach
 @endsection
+
+@push('scripts')
+    <script src="{{ asset('assets/vendors/choices.js/choices.min.js') }}"></script>
+    <script src="{{ asset('assets/js/admin-loan-asset-picker.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const createForm = document.querySelector('[data-admin-loan-create-form]');
+
+            if (createForm) {
+                createForm.addEventListener('submit', function (event) {
+                    if (event.defaultPrevented) {
+                        return;
+                    }
+
+                    if (createForm.dataset.submitting === 'true') {
+                        event.preventDefault();
+
+                        return;
+                    }
+
+                    createForm.dataset.submitting = 'true';
+                    createForm.setAttribute('aria-busy', 'true');
+
+                    const submitButton = event.submitter || createForm.querySelector('button[type="submit"]');
+
+                    if (submitButton) {
+                        submitButton.disabled = true;
+                        const submitIcon = submitButton.querySelector('i');
+
+                        if (submitIcon) {
+                            submitIcon.className = 'spinner-border spinner-border-sm';
+                            submitIcon.setAttribute('aria-hidden', 'true');
+                        }
+                    }
+                });
+            }
+
+            document.querySelectorAll('[data-admin-loan-date]').forEach(function (loanDateInput) {
+                const form = loanDateInput.closest('form');
+                const plannedReturnInput = form?.querySelector('[data-admin-loan-return]');
+
+                if (!plannedReturnInput) {
+                    return;
+                }
+
+                const syncReturnDateMin = function () {
+                    plannedReturnInput.min = loanDateInput.value || '';
+
+                    if (plannedReturnInput.value && loanDateInput.value && plannedReturnInput.value < loanDateInput.value) {
+                        plannedReturnInput.value = '';
+                    }
+                };
+
+                syncReturnDateMin();
+                loanDateInput.addEventListener('change', syncReturnDateMin);
+            });
+        });
+    </script>
+@endpush

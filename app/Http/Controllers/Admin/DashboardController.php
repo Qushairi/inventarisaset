@@ -13,10 +13,17 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Collection;
 use App\Models\AssetReturn;
 
+/**
+ * Menyediakan seluruh data ringkasan dan grafik untuk dashboard admin.
+ */
 class DashboardController extends Controller
 {
+    /**
+     * Menampilkan dashboard admin dengan statistik, grafik, dan daftar aktivitas.
+     */
     public function index()
     {
+        // Setiap bagian dashboard dibangun oleh method terpisah agar sumber datanya terisolasi.
         return view('admin.dashboard', [
             'statCards' => $this->statCards(),
             'activityChart' => $this->activityChart(),
@@ -28,8 +35,14 @@ class DashboardController extends Controller
         ]);
     }
 
+    /**
+     * Menyusun kartu statistik utama untuk aset dan transaksi.
+     *
+     * @return array<int, array<string, mixed>>
+     */
     private function statCards(): array
     {
+        // Hitung jumlah data langsung dari masing-masing model untuk nilai terkini.
         return [
             [
                 'label' => 'Total Aset',
@@ -62,11 +75,18 @@ class DashboardController extends Controller
         ];
     }
 
+    /**
+     * Menyusun seri aktivitas aset dan peminjaman selama lima tahun terakhir.
+     *
+     * @return array<string, array<int, mixed>>
+     */
     private function activityChart(): array
     {
+        // Bangun koleksi awal tahun dari empat tahun lalu hingga tahun berjalan.
         $years = collect(range(4, 0))
             ->map(fn(int $offset) => now()->subYears($offset)->startOfYear());
 
+        // Pasangkan label tahun dengan jumlah aset dan peminjaman pada setiap tahun.
         return [
             'labels' => $years
                 ->map(fn(Carbon $year) => $year->format('Y'))
@@ -76,8 +96,14 @@ class DashboardController extends Controller
         ];
     }
 
+    /**
+     * Menyusun distribusi jumlah aset berdasarkan kondisi fisiknya.
+     *
+     * @return array<string, array<int, mixed>>
+     */
     private function assetConditionChart(): array
     {
+        // Urutan nilai seri harus sama dengan urutan label kondisi.
         return [
             'labels' => ['Baik', 'Rusak Ringan', 'Rusak Berat'],
             'series' => [
@@ -88,19 +114,28 @@ class DashboardController extends Controller
         ];
     }
 
+    /**
+     * Mengambil maksimal lima aset yang memerlukan perhatian atau perbaikan.
+     *
+     * @return Collection<int, array<string, mixed>>
+     */
     private function maintenanceAssets(): Collection
     {
         return Asset::query()
+            // Muat kategori dan lokasi untuk melengkapi informasi setiap aset.
             ->with(['category', 'location'])
+            // Aset masuk daftar bila rusak atau secara eksplisit berstatus perbaikan.
             ->where(function ($query) {
                 $query->whereIn('condition', ['Rusak Ringan', 'Rusak Berat'])
                     ->orWhere('status', 'Perbaikan');
             })
+            // Dahulukan kerusakan berat, kemudian ringan, sebelum mengurutkan nama.
             ->orderByRaw("case when `condition` = ? then 0 when `condition` = ? then 1 else 2 end", ['Rusak Berat', 'Rusak Ringan'])
             ->orderBy('name')
             ->take(5)
             ->get()
             ->map(function (Asset $asset) {
+                // Bentuk data tampilan, termasuk avatar dan varian warna status.
                 return [
                     'name' => $asset->name,
                     'code' => $asset->code,
@@ -126,14 +161,21 @@ class DashboardController extends Controller
             });
     }
 
+    /**
+     * Mengambil empat peminjaman terbaru untuk panel aktivitas dashboard.
+     *
+     * @return Collection<int, array<string, mixed>>
+     */
     private function recentLoans(): Collection
     {
         return Loan::query()
+            // Muat aset dan pegawai sekaligus agar detail transaksi siap ditampilkan.
             ->with(['asset', 'user'])
             ->latest('loan_date')
             ->take(4)
             ->get()
             ->map(function (Loan $loan) {
+                // Ubah status bisnis menjadi label data dan varian warna antarmuka.
                 return [
                     'asset_name' => $loan->asset?->name,
                     'asset_code' => $loan->asset?->code,
@@ -151,13 +193,20 @@ class DashboardController extends Controller
             });
     }
 
+    /**
+     * Mengambil lima aset yang paling sering dipinjam secara sah.
+     *
+     * @return Collection<int, array<string, mixed>>
+     */
     private function popularAssets(): Collection
     {
         return Asset::query()
             ->with(['category'])
+            // Hitung hanya peminjaman yang disetujui atau telah selesai.
             ->withCount([
                 'loans as loan_count' => fn($query) => $query->whereIn('status', ['Disetujui', 'Selesai']),
             ])
+            // Abaikan aset tanpa riwayat peminjaman yang memenuhi kriteria.
             ->having('loan_count', '>', 0)
             ->orderByDesc('loan_count')
             ->orderBy('name')
@@ -165,6 +214,7 @@ class DashboardController extends Controller
             ->get()
             ->values()
             ->map(function (Asset $asset, int $index) {
+                // Indeks hasil dipakai untuk menentukan peringkat aset.
                 return [
                     'rank' => $index + 1,
                     'name' => $asset->name,
@@ -175,14 +225,22 @@ class DashboardController extends Controller
             });
     }
 
+    /**
+     * Mengambil peminjaman yang paling dekat dengan batas waktu pengembalian.
+     *
+     * @return Collection<int, array<string, mixed>>
+     */
     private function returnDueLoans(): Collection
     {
+        // Normalisasi waktu hari ini agar perbandingan hanya mempertimbangkan tanggal.
         $today = now()->startOfDay();
 
         return Loan::query()
             ->with(['asset', 'user'])
+            // Hanya peminjaman aktif dengan rencana pengembalian yang perlu dipantau.
             ->where('status', 'Disetujui')
             ->whereNotNull('planned_return_date')
+            // Keluarkan pinjaman yang sudah memiliki pengembalian terverifikasi.
             ->whereDoesntHave('returnRecord', function ($query) {
                 $query->where('status', 'Terverifikasi');
             })
@@ -190,12 +248,14 @@ class DashboardController extends Controller
             ->take(5)
             ->get()
             ->map(function (Loan $loan) use ($today) {
+                // Normalisasi rencana kembali sebelum menentukan apakah sudah terlambat.
                 $plannedReturnDate = $loan->planned_return_date
                     ? Carbon::parse($loan->planned_return_date)->startOfDay()
                     : null;
                 $isOverdue = $plannedReturnDate?->lt($today) ?? false;
                 $isDueToday = $plannedReturnDate?->isSameDay($today) ?? false;
 
+                // Terjemahkan hasil perbandingan tanggal menjadi label dan warna status.
                 return [
                     'asset_name' => $loan->asset?->name,
                     'asset_code' => $loan->asset?->code,
@@ -207,10 +267,19 @@ class DashboardController extends Controller
             });
     }
 
+    /**
+     * Menghitung jumlah record model tertentu untuk setiap tahun yang diberikan.
+     *
+     * @param  class-string  $modelClass  Nama class model Eloquent yang akan dihitung.
+     * @param  string  $column  Kolom tanggal yang menjadi dasar perhitungan.
+     * @param  Collection<int, Carbon>  $years  Daftar awal tahun yang akan dihitung.
+     * @return array<int, int>
+     */
     private function buildYearlySeries(string $modelClass, string $column, Collection $years): array
     {
         return $years
             ->map(function (Carbon $year) use ($modelClass, $column) {
+                // Hitung record yang tanggalnya berada di awal hingga akhir tahun terkait.
                 return $modelClass::query()
                     ->whereBetween($column, [
                         $year->copy()->startOfYear(),

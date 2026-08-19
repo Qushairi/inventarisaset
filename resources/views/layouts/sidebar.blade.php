@@ -1,9 +1,6 @@
 @php
     $sidebarMenus = $sidebarMenus ?? [
-        [
-            'title' => true,
-            'name' => 'Menu Admin',
-        ],
+        
         [
             'name' => 'Dashboard',
             'icon' => 'grid-fill',
@@ -63,7 +60,7 @@
                     <img src="{{ asset('assets/images/logo/logobengkalis.png') }}" alt="Logo Inventaris Aset" style="height: 72px; width: auto;">
                 </a>
                 <h6 class="mb-1">Inventaris Aset</h6>
-                <p class="mb-0 text-sm text-muted">Administrator Panel</p>
+                <p class="mb-0 text-sm text-muted">Dinas Pendidikan Kabupaten Bengkalis</p>
             </div>
             <div class="toggler">
                 <a href="#" class="sidebar-hide d-xl-none d-block">

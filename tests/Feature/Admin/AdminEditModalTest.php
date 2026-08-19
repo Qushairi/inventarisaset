@@ -4,7 +4,6 @@ namespace Tests\Feature\Admin;
 
 use App\Models\Asset;
 use App\Models\Category;
-use App\Models\Loan;
 use App\Models\Location;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -43,16 +42,6 @@ class AdminEditModalTest extends TestCase
             'acquisition_price' => 10000000,
             'acquisition_year' => 2024,
         ]);
-        $loan = Loan::query()->create([
-            'asset_id' => $asset->id,
-            'user_id' => $employee->id,
-            'loan_date' => '2026-06-01',
-            'planned_return_date' => '2026-06-10',
-            'quantity' => 1,
-            'status' => 'Menunggu',
-            'status_note' => 'Menunggu persetujuan',
-        ]);
-
         $menus = [
             [
                 'route' => 'admin.categories.index',
@@ -77,12 +66,6 @@ class AdminEditModalTest extends TestCase
                 'modal' => 'adminEmployeeEditModal-'.$employee->id,
                 'action' => route('admin.employees.update', $employee),
                 'fields' => ['name', 'nip', 'email', 'password', 'password_confirmation'],
-            ],
-            [
-                'route' => 'admin.loans.index',
-                'modal' => 'adminLoanEditModal-'.$loan->id,
-                'action' => route('admin.loans.update', $loan),
-                'fields' => ['asset_id', 'user_id', 'loan_date', 'planned_return_date', 'quantity', 'status', 'status_note'],
             ],
         ];
 

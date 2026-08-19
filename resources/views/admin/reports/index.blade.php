@@ -8,7 +8,7 @@
             <div class="card">
                 <div class="card-header">
                     <h4 class="card-title mb-1">Unduh Laporan</h4>
-                    <p class="mb-0 text-muted">Pilih jenis laporan dan gunakan filter sebelum mengunduh PDF.</p>
+                    <p class="mb-0 text-muted">Pilih jenis laporan dan gunakan filter sebelum mengunduh berkas Excel.</p>
                 </div>
                 <div class="card-body">
                     @if ($errors->any())
@@ -75,7 +75,7 @@
                                     </div>
                                     <div class="col-12 d-flex justify-content-end">
                                         <button type="submit" class="btn btn-primary icon icon-left">
-                                            <i class="bi bi-download"></i><span>Unduh PDF Inventaris</span>
+                                            <i class="bi bi-file-earmark-excel"></i><span>Unduh Data Aset</span>
                                         </button>
                                     </div>
                                 </div>
@@ -85,7 +85,7 @@
                         <div class="tab-pane fade" id="loan-filter" role="tabpanel">
                             <form action="{{ route('admin.reports.download', 'peminjaman') }}" method="GET">
                                 <div class="row g-3 align-items-end">
-                                    <div class="col-lg-4 col-md-6">
+                                    <div class="col-lg-3 col-md-6">
                                         <label for="report_loan_employee" class="form-label">Pegawai</label>
                                         <select id="report_loan_employee" name="user_id" class="form-select">
                                             <option value="">Semua pegawai</option>
@@ -94,7 +94,7 @@
                                             @endforeach
                                         </select>
                                     </div>
-                                    <div class="col-lg-3 col-md-6">
+                                    <div class="col-lg-2 col-md-6">
                                         <label for="report_loan_status" class="form-label">Status</label>
                                         <select id="report_loan_status" name="status" class="form-select">
                                             <option value="">Semua status</option>
@@ -102,6 +102,10 @@
                                                 <option value="{{ $status }}">{{ $status }}</option>
                                             @endforeach
                                         </select>
+                                    </div>
+                                    <div class="col-lg-2 col-md-4">
+                                        <label for="report_loan_year" class="form-label">Tahun</label>
+                                        <input type="number" id="report_loan_year" name="year" min="1900" max="{{ now()->addYear()->year }}" class="form-control" placeholder="{{ now()->year }}">
                                     </div>
                                     <div class="col-lg-2 col-md-6">
                                         <label for="report_loan_from" class="form-label">Dari Tanggal</label>
@@ -113,7 +117,7 @@
                                     </div>
                                     <div class="col-12 d-flex justify-content-end">
                                         <button type="submit" class="btn btn-success icon icon-left">
-                                            <i class="bi bi-download"></i><span>Unduh PDF Peminjaman</span>
+                                            <i class="bi bi-file-earmark-excel"></i><span>Unduh Peminjaman</span>
                                         </button>
                                     </div>
                                 </div>
@@ -123,7 +127,7 @@
                         <div class="tab-pane fade" id="return-filter" role="tabpanel">
                             <form action="{{ route('admin.reports.download', 'pengembalian') }}" method="GET">
                                 <div class="row g-3 align-items-end">
-                                    <div class="col-lg-4 col-md-6">
+                                    <div class="col-lg-3 col-md-6">
                                         <label for="report_return_employee" class="form-label">Pegawai</label>
                                         <select id="report_return_employee" name="user_id" class="form-select">
                                             <option value="">Semua pegawai</option>
@@ -132,7 +136,7 @@
                                             @endforeach
                                         </select>
                                     </div>
-                                    <div class="col-lg-3 col-md-6">
+                                    <div class="col-lg-2 col-md-6">
                                         <label for="report_return_condition" class="form-label">Kondisi</label>
                                         <select id="report_return_condition" name="condition" class="form-select">
                                             <option value="">Semua kondisi</option>
@@ -140,6 +144,10 @@
                                                 <option value="{{ $condition }}">{{ $condition }}</option>
                                             @endforeach
                                         </select>
+                                    </div>
+                                    <div class="col-lg-2 col-md-4">
+                                        <label for="report_return_year" class="form-label">Tahun</label>
+                                        <input type="number" id="report_return_year" name="year" min="1900" max="{{ now()->addYear()->year }}" class="form-control" placeholder="{{ now()->year }}">
                                     </div>
                                     <div class="col-lg-2 col-md-6">
                                         <label for="report_return_from" class="form-label">Dari Tanggal</label>
@@ -151,7 +159,7 @@
                                     </div>
                                     <div class="col-12 d-flex justify-content-end">
                                         <button type="submit" class="btn btn-warning icon icon-left">
-                                            <i class="bi bi-download"></i><span>Unduh PDF Pengembalian</span>
+                                            <i class="bi bi-file-earmark-excel"></i><span>Unduh Pengembalian</span>
                                         </button>
                                     </div>
                                 </div>

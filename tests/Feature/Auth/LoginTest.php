@@ -18,6 +18,8 @@ class LoginTest extends TestCase
         $response->assertSee('Dinas Pendidikan', escape: false);
         $response->assertSee('Kabupaten Bengkalis', escape: false);
         $response->assertSee('Login', escape: false);
+        $response->assertSee('Lupa password?', escape: false);
+        $response->assertSee('href="'.route('password.request').'"', escape: false);
         $response->assertDontSee('Hubungi admin', escape: false);
     }
 

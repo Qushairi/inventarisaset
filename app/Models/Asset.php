@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Filesystem\FilesystemAdapter;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 
@@ -16,6 +17,7 @@ use Illuminate\Support\Facades\Storage;
  * @property int $location_id
  * @property string $name
  * @property string $code
+ * @property string|null $brand_model
  * @property string|null $note
  * @property string|null $image_path
  * @property string|null $serial_number
@@ -26,7 +28,7 @@ use Illuminate\Support\Facades\Storage;
  * @property int $quantity
  * @property string|float|null $acquisition_price
  * @property int|null $acquisition_year
- * @property \Illuminate\Support\Carbon|null $acquired_at
+ * @property Carbon|null $acquired_at
  */
 class Asset extends Model
 {
@@ -37,6 +39,7 @@ class Asset extends Model
         'location_id',
         'name',
         'code',
+        'brand_model',
         'note',
         'image_path',
         'serial_number',
@@ -103,11 +106,6 @@ class Asset extends Model
         }
 
         return asset($path);
-    }
-
-    public function getRouteKeyName(): string
-    {
-        return 'code';
     }
 
     private function publicDisk(): FilesystemAdapter

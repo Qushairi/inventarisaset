@@ -109,7 +109,7 @@
                                         <label for="returned_at">Tanggal Pengembalian</label>
                                         <div class="transaction-input-shell">
                                             <span class="transaction-input-icon"><i class="bi bi-calendar-check"></i></span>
-                                            <input type="date" id="returned_at" name="returned_at" class="form-control @error('returned_at') is-invalid @enderror" value="{{ old('returned_at', optional($returnRecord->returned_at)->format('Y-m-d')) }}">
+                                            <input type="date" id="returned_at" name="returned_at" class="form-control @error('returned_at') is-invalid @enderror" value="{{ old('returned_at', max(optional($returnRecord->returned_at)->format('Y-m-d') ?? now()->format('Y-m-d'), now()->format('Y-m-d'))) }}" min="{{ now()->format('Y-m-d') }}">
                                         </div>
                                         @error('returned_at')
                                             <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -138,7 +138,11 @@
                                         <label for="verified_note">Catatan Verifikasi</label>
                                         <div class="transaction-input-shell">
                                             <span class="transaction-input-icon"><i class="bi bi-patch-check"></i></span>
-                                            <input type="text" id="verified_note" name="verified_note" class="form-control @error('verified_note') is-invalid @enderror" placeholder="Contoh: Diverifikasi admin" value="{{ old('verified_note', $returnRecord->verified_note) }}">
+                                            @if ($returnRecord->status === 'Terverifikasi')
+                                                <input type="text" id="verified_note" name="verified_note" class="form-control @error('verified_note') is-invalid @enderror" placeholder="Contoh: Diverifikasi admin" value="{{ old('verified_note', $returnRecord->verified_note) }}">
+                                            @else
+                                                <input type="text" id="verified_note" class="form-control" value="Diisi saat verifikasi pengembalian" readonly>
+                                            @endif
                                         </div>
                                         @error('verified_note')
                                             <div class="invalid-feedback d-block">{{ $message }}</div>

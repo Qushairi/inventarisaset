@@ -62,8 +62,9 @@
     };
 
     $assetName = strtoupper($asset?->name ?? 'ASET INVENTARIS');
-    $assetType = $asset?->note ?: ($asset?->code ?: '-');
+    $assetType = $asset?->brand_model ?: '-';
     $assetPrice = $rupiah($asset?->acquisition_price);
+    $loanQuantity = max(1, (int) ($loan?->quantity ?? 1));
     $printedDate = $printedAt ?? now();
 @endphp
 

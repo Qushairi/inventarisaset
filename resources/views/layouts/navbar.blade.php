@@ -131,7 +131,7 @@
                             <h6 class="dropdown-header">Halo, {{ $user?->name ?? 'Admin' }}!</h6>
                         </li>
                         @if ($hasProfileRoute)
-                            <li><a class="dropdown-item" href="{{ $profileUrl }}"><i class="icon-mid bi bi-person me-2"></i> Profil</a></li>
+                            <li><a class="dropdown-item" href="{{ $profileUrl }}"><i class="icon-mid bi bi-person me-2"></i>Profil</a></li>
                         @endif
                         <li>
                             <hr class="dropdown-divider">

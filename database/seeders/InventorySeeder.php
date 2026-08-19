@@ -10,8 +10,8 @@ use App\Models\Location;
 use App\Models\User;
 use DateTimeInterface;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Hash;
 
 class InventorySeeder extends Seeder
 {
@@ -264,7 +264,7 @@ class InventorySeeder extends Seeder
                 'condition' => 'Rusak Ringan',
                 'status' => 'Terverifikasi',
                 'status_note' => 'Rusak ringan',
-                'report_number' => 'BA-20260422065603-0010',
+                'report_number' => 'BA-20260422065603',
                 'report_note' => 'Berita acara sudah tersedia.',
             ],
             [
@@ -276,7 +276,7 @@ class InventorySeeder extends Seeder
                 'condition' => 'Rusak Berat',
                 'status' => 'Terverifikasi',
                 'status_note' => 'Rusak',
-                'report_number' => 'BA-20260417064102-0009',
+                'report_number' => 'BA-20260417064102',
                 'report_note' => 'Berita acara sudah tersedia.',
             ],
             [
@@ -288,7 +288,7 @@ class InventorySeeder extends Seeder
                 'condition' => 'Rusak Ringan',
                 'status' => 'Terverifikasi',
                 'status_note' => 'Rusak ringan',
-                'report_number' => 'BA-20260416080246-0008',
+                'report_number' => 'BA-20260416080246',
                 'report_note' => 'Berita acara sudah tersedia.',
             ],
             [
@@ -300,7 +300,7 @@ class InventorySeeder extends Seeder
                 'condition' => 'Baik',
                 'status' => 'Terverifikasi',
                 'status_note' => 'Mntp',
-                'report_number' => 'BA-20260422063454-0007',
+                'report_number' => 'BA-20260422063454',
                 'report_note' => 'Berita acara sudah tersedia.',
             ],
             [
@@ -312,7 +312,7 @@ class InventorySeeder extends Seeder
                 'condition' => 'Rusak Berat',
                 'status' => 'Terverifikasi',
                 'status_note' => 'Rusak',
-                'report_number' => 'BA-20260410094909-0006',
+                'report_number' => 'BA-20260410094909',
                 'report_note' => 'Berita acara sudah tersedia.',
             ],
         ], ['report_number'], ['loan_id', 'asset_id', 'user_id', 'returned_at', 'verified_note', 'condition', 'status', 'status_note', 'report_note']);

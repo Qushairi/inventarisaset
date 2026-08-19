@@ -89,17 +89,6 @@
         return sprintf('%02d %s %d', $date->day, $bulan[$date->month] ?? '-', $date->year);
     };
 
-    $rupiah = function ($nominal) {
-        if ($nominal === null) {
-            return '-';
-        }
-
-        return 'Rp ' . number_format((float) $nominal, 0, ',', '.');
-    };
-
-    $assetName = strtoupper($asset?->name ?? 'ASET INVENTARIS');
-    $assetType = $asset?->note ?: ($asset?->code ?: '-');
-    $assetPrice = $rupiah($asset?->acquisition_price);
     $printedDate = $printedAt ?? now();
     $loanDate = $loan?->loan_date;
     $returnedAt = $returnRecord->returned_at;
@@ -195,22 +184,27 @@
         <thead>
             <tr>
                 <th style="width: 35px;">No</th>
-                <th>Kode Barang</th>
-                <th>Nama & Jenis Barang</th>
+                <th>Nama Barang</th>
+                <th>Merk / Type</th>
                 <th>Kategori</th>
-                <th style="width: 75px;">Jumlah</th>
-                <th style="width: 110px;">Kondisi Dikembalikan</th>
+                <th>Tanggal Peminjaman</th>
+                <th>Tanggal Pengembalian</th>
+                <th style="width: 90px;">Kondisi</th>
             </tr>
         </thead>
         <tbody>
-            <tr>
-                <td class="center">1</td>
-                <td class="bold center">{{ $asset?->code ?: '-' }}</td>
-                <td>{{ $assetName }}</td>
-                <td>{{ strtoupper($asset?->category?->name ?? '-') }}</td>
-                <td class="center bold">{{ $returnRecord->quantity ?? $loan?->quantity ?? 1 }} Unit</td>
-                <td class="center bold">{{ strtoupper($returnRecord->condition) }}</td>
-            </tr>
+            @foreach ($assetRows as $row)
+                @php($rowAsset = $row['asset'])
+                <tr>
+                    <td class="center">{{ $loop->iteration }}</td>
+                    <td>{{ strtoupper($rowAsset?->name ?? 'ASET INVENTARIS') }}</td>
+                    <td>{{ $rowAsset?->brand_model ?: '-' }}</td>
+                    <td>{{ strtoupper($rowAsset?->category?->name ?? '-') }}</td>
+                    <td>{{ optional($row['loan_date'])->format('d/m/Y') ?: '-' }}</td>
+                    <td>{{ optional($row['returned_at'])->format('d/m/Y') ?: '-' }}</td>
+                    <td class="center">{{ strtoupper($row['condition']) }}</td>
+                </tr>
+            @endforeach
         </tbody>
     </table>
 

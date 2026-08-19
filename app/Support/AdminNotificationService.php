@@ -99,14 +99,12 @@ class AdminNotificationService
         return $this->notifyAdmins([
             'dedupe_key' => 'admin-return-request-'.$return->id,
             'type_key' => 'admin_return_request',
-            'title' => $isVerified ? 'Pengembalian baru terverifikasi' : 'Pengajuan pengembalian baru',
-            'message' => $isVerified
-                ? 'Pengembalian aset '.$assetLabel.' dari '.$return->user->name.' sudah otomatis terverifikasi.'
-                : $return->user->name.' mengajukan pengembalian aset '.$assetLabel.'.',
+            'title' => 'Pengajuan pengembalian baru',
+            'message' => $return->user->name.' mengajukan pengembalian aset '.$assetLabel.'.',
             'action_label' => 'Lihat pengembalian',
             'action_url' => route('admin.returns.index', absolute: false),
-            'icon' => $isVerified ? 'clipboard-check' : 'arrow-counterclockwise',
-            'variant' => $isVerified ? 'success' : 'info',
+            'icon' => 'arrow-counterclockwise',
+            'variant' => 'warning',
             'reference_type' => 'asset_return',
             'reference_id' => $return->id,
             'occurred_at' => now()->toIso8601String(),
