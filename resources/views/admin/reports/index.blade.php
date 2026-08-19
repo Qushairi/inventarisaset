@@ -170,7 +170,7 @@
             </div>
 
             <div class="row">
-                <div class="col-12 col-xl-6">
+                <div class="col-12 d-none" id="loan-preview-card">
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-3">
                             <div>
@@ -190,7 +190,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach ($loanPreview as $loan)
+                                        @forelse ($loanPreview as $loan)
                                             <tr>
                                                 <td>
                                                     <div>{{ $loan['asset_name'] }}</div>
@@ -205,7 +205,11 @@
                                                     <small class="text-muted">{{ $loan['return_plan'] }}</small>
                                                 </td>
                                             </tr>
-                                        @endforeach
+                                        @empty
+                                            <tr>
+                                                <td colspan="3" class="text-center text-muted py-3">Belum ada data peminjaman.</td>
+                                            </tr>
+                                        @endforelse
                                     </tbody>
                                 </table>
                             </div>
@@ -213,7 +217,7 @@
                     </div>
                 </div>
 
-                <div class="col-12 col-xl-6">
+                <div class="col-12 d-none" id="return-preview-card">
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-3">
                             <div>
@@ -234,7 +238,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach ($returnPreview as $return)
+                                        @forelse ($returnPreview as $return)
                                             <tr>
                                                 <td>
                                                     <div>{{ $return['asset_name'] }}</div>
@@ -252,7 +256,11 @@
                                                     <small class="text-muted">{{ $return['report_note'] }}</small>
                                                 </td>
                                             </tr>
-                                        @endforeach
+                                        @empty
+                                            <tr>
+                                                <td colspan="4" class="text-center text-muted py-3">Belum ada data pengembalian.</td>
+                                            </tr>
+                                        @endforelse
                                     </tbody>
                                 </table>
                             </div>
@@ -263,3 +271,35 @@
         </section>
     </div>
 @endsection
+
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const loanTab = document.getElementById('loan-filter-tab');
+            const returnTab = document.getElementById('return-filter-tab');
+            const loanCard = document.getElementById('loan-preview-card');
+            const returnCard = document.getElementById('return-preview-card');
+
+            function syncPreviewCards() {
+                if (!loanCard || !returnCard) return;
+
+                if (loanTab && loanTab.classList.contains('active')) {
+                    loanCard.classList.remove('d-none');
+                    returnCard.classList.add('d-none');
+                } else if (returnTab && returnTab.classList.contains('active')) {
+                    returnCard.classList.remove('d-none');
+                    loanCard.classList.add('d-none');
+                } else {
+                    loanCard.classList.add('d-none');
+                    returnCard.classList.add('d-none');
+                }
+            }
+
+            document.querySelectorAll('#reportFilterTabs button[data-bs-toggle="tab"]').forEach(function (tabButton) {
+                tabButton.addEventListener('shown.bs.tab', syncPreviewCards);
+            });
+
+            syncPreviewCards();
+        });
+    </script>
+@endpush
