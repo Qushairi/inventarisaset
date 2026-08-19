@@ -19,7 +19,7 @@
             'title' => 'Edit Aset',
             'subtitle' => 'Perbarui identitas dan informasi inventaris aset.',
             'icon' => 'pencil-square',
-            'action' => route('admin.assets.update', $record['code']),
+            'action' => route('admin.assets.update', $record['id']),
         ],
         'employee' => [
             'id' => 'adminEmployeeEditModal-'.$record['id'],
@@ -31,7 +31,7 @@
         'loan' => [
             'id' => 'adminLoanEditModal-'.$record['id'],
             'title' => 'Edit Peminjaman',
-            'subtitle' => 'Perbarui aset, pegawai, periode, dan status peminjaman.',
+            'subtitle' => 'Perbarui aset, peminjam, periode, dan status peminjaman.',
             'icon' => 'pencil-square',
             'action' => route('admin.loans.update', $record['id']),
         ],
@@ -209,12 +209,12 @@
                                 </div>
                                 <div class="col-md-6 col-12">
                                     <div class="form-group transaction-field">
-                                        <label for="{{ $fieldPrefix }}_employee">Pegawai</label>
+                                        <label for="{{ $fieldPrefix }}_employee">Peminjam</label>
                                         <div class="transaction-input-shell">
                                             <select id="{{ $fieldPrefix }}_employee" name="user_id" class="form-select {{ $showEditErrors && $errors->has('user_id') ? 'is-invalid' : '' }}">
-                                                <option value="">Pilih pegawai</option>
+                                                <option value="">Pilih peminjam</option>
                                                 @foreach ($editEmployees as $employee)
-                                                    <option value="{{ $employee->id }}" @selected(($showEditErrors ? old('user_id') : $record['user_id']) == $employee->id)>{{ $employee->name }} ({{ $employee->email }})</option>
+                                                    <option value="{{ $employee->id }}" @selected(($showEditErrors ? old('user_id') : $record['user_id']) == $employee->id)>{{ $employee->name }} ({{ $employee->email }}) - {{ ucfirst($employee->role) }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -223,13 +223,13 @@
                                 <div class="col-md-3 col-6">
                                     <div class="form-group transaction-field">
                                         <label for="{{ $fieldPrefix }}_loan_date">Tanggal Pinjam</label>
-                                        <div class="transaction-input-shell"><input type="date" id="{{ $fieldPrefix }}_loan_date" name="loan_date" class="form-control {{ $showEditErrors && $errors->has('loan_date') ? 'is-invalid' : '' }}" value="{{ $showEditErrors ? old('loan_date') : $record['edit_loan_date'] }}"></div>
+                                        <div class="transaction-input-shell"><input type="date" id="{{ $fieldPrefix }}_loan_date" name="loan_date" class="form-control {{ $showEditErrors && $errors->has('loan_date') ? 'is-invalid' : '' }}" value="{{ $showEditErrors ? old('loan_date') : $record['edit_loan_date'] }}" data-admin-loan-date></div>
                                     </div>
                                 </div>
                                 <div class="col-md-3 col-6">
                                     <div class="form-group transaction-field">
                                         <label for="{{ $fieldPrefix }}_return_date">Rencana Kembali</label>
-                                        <div class="transaction-input-shell"><input type="date" id="{{ $fieldPrefix }}_return_date" name="planned_return_date" class="form-control {{ $showEditErrors && $errors->has('planned_return_date') ? 'is-invalid' : '' }}" value="{{ $showEditErrors ? old('planned_return_date') : $record['planned_return_date'] }}"></div>
+                                        <div class="transaction-input-shell"><input type="date" id="{{ $fieldPrefix }}_return_date" name="planned_return_date" class="form-control {{ $showEditErrors && $errors->has('planned_return_date') ? 'is-invalid' : '' }}" value="{{ $showEditErrors ? old('planned_return_date') : $record['planned_return_date'] }}" min="{{ $showEditErrors ? old('loan_date') : $record['edit_loan_date'] }}" data-admin-loan-return></div>
                                     </div>
                                 </div>
                                 <div class="col-md-3 col-6">
@@ -307,7 +307,10 @@
                                     <div class="form-group transaction-field"><label for="{{ $fieldPrefix }}_year">Tahun</label><div class="transaction-input-shell"><input type="number" min="1900" max="{{ now()->addYear()->year }}" id="{{ $fieldPrefix }}_year" name="acquisition_year" class="form-control {{ $showEditErrors && $errors->has('acquisition_year') ? 'is-invalid' : '' }}" placeholder="Contoh: 2021" value="{{ $showEditErrors ? old('acquisition_year') : $record['acquisition_year'] }}"></div></div>
                                 </div>
                                 <div class="col-md-4 col-12">
-                                    <div class="form-group transaction-field"><label for="{{ $fieldPrefix }}_serial">Nomor Seri</label><div class="transaction-input-shell"><input type="text" id="{{ $fieldPrefix }}_serial" name="serial_number" class="form-control {{ $showEditErrors && $errors->has('serial_number') ? 'is-invalid' : '' }}" placeholder="Nomor seri pabrik" value="{{ $showEditErrors ? old('serial_number') : $record['serial_number'] }}"></div></div>
+                                    <div class="form-group transaction-field"><label for="{{ $fieldPrefix }}_brand_model">Merk/Model</label><div class="transaction-input-shell"><input type="text" id="{{ $fieldPrefix }}_brand_model" name="brand_model" class="form-control {{ $showEditErrors && $errors->has('brand_model') ? 'is-invalid' : '' }}" placeholder="Merk atau model" value="{{ $showEditErrors ? old('brand_model') : $record['brand_model'] }}"></div></div>
+                                </div>
+                                <div class="col-md-4 col-12">
+                                    <div class="form-group transaction-field"><label for="{{ $fieldPrefix }}_serial">No. Seri Pabrik</label><div class="transaction-input-shell"><input type="text" id="{{ $fieldPrefix }}_serial" name="serial_number" class="form-control {{ $showEditErrors && $errors->has('serial_number') ? 'is-invalid' : '' }}" placeholder="Nomor seri pabrik" value="{{ $showEditErrors ? old('serial_number') : $record['serial_number'] }}"></div></div>
                                 </div>
                                 <div class="col-md-4 col-6">
                                     <div class="form-group transaction-field"><label for="{{ $fieldPrefix }}_size">Ukuran</label><div class="transaction-input-shell"><input type="text" id="{{ $fieldPrefix }}_size" name="size" class="form-control {{ $showEditErrors && $errors->has('size') ? 'is-invalid' : '' }}" placeholder="Ukuran" value="{{ $showEditErrors ? old('size') : $record['size'] }}"></div></div>
@@ -336,7 +339,7 @@
                                     </div>
                                 @endif
                                 <div class="col-12">
-                                    <div class="form-group transaction-field mb-0"><label for="{{ $fieldPrefix }}_note">Catatan</label><div class="transaction-input-shell"><textarea id="{{ $fieldPrefix }}_note" name="note" class="form-control {{ $showEditErrors && $errors->has('note') ? 'is-invalid' : '' }}" rows="4" placeholder="Catatan aset">{{ $showEditErrors ? old('note') : $record['note'] }}</textarea></div></div>
+                                    <div class="form-group transaction-field mb-0"><label for="{{ $fieldPrefix }}_note">Keterangan</label><div class="transaction-input-shell"><textarea id="{{ $fieldPrefix }}_note" name="note" class="form-control {{ $showEditErrors && $errors->has('note') ? 'is-invalid' : '' }}" rows="4" placeholder="Keterangan sesuai KIR">{{ $showEditErrors ? old('note') : $record['note'] }}</textarea></div></div>
                                 </div>
                             </div>
                         </div>

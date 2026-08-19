@@ -76,6 +76,13 @@ class AssetReturnLetterService
         $loan = $return->loan;
         $approver = $this->resolveApprover($return, $admin);
         $pegawai = $return->user ?? $loan?->user;
+        $returnRecords = filled($loan?->transaction_uuid)
+            ? AssetReturn::query()
+                ->with(['asset.category', 'loan.asset.category'])
+                ->whereHas('loan', fn ($query) => $query->where('transaction_uuid', $loan->transaction_uuid))
+                ->orderBy('id')
+                ->get()
+            : collect([$return]);
 
         return [
             'returnRecord' => $return,
@@ -83,13 +90,22 @@ class AssetReturnLetterService
             'loan' => $loan,
             'approver' => $approver,
             'pegawai' => $pegawai,
+            'assetRows' => $returnRecords->map(function (AssetReturn $item): array {
+                $itemAsset = $item->asset ?? $item->loan?->asset;
+
+                return [
+                    'asset' => $itemAsset,
+                    'condition' => $item->condition,
+                    'loan_date' => $item->loan?->loan_date,
+                    'returned_at' => $item->returned_at,
+                ];
+            }),
             'office' => $this->officeProfile(),
             'logoDataUri' => $this->dataUriFromPublicPath(public_path('assets/images/logo/logobengkalis.png')),
             'approverSignatureDataUri' => $return->status === 'Terverifikasi'
                 ? $this->dataUriFromStoragePath($approver?->signature_path)
                 : null,
             'pegawaiSignatureDataUri' => $this->dataUriFromStoragePath($pegawai?->signature_path),
-            'asalPengadaan' => $this->originLabel($asset?->acquired_at),
             'printedAt' => $return->returned_at ?? now(),
         ];
     }
@@ -108,15 +124,6 @@ class AssetReturnLetterService
             ->where('role', 'admin')
             ->orderBy('name')
             ->first();
-    }
-
-    private function originLabel($acquiredAt): string
-    {
-        if (! $acquiredAt) {
-            return '-';
-        }
-
-        return 'APBD '.$acquiredAt->format('Y');
     }
 
     private function dataUriFromPublicPath(string $absolutePath): ?string

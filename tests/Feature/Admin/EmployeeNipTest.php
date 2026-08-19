@@ -80,4 +80,23 @@ class EmployeeNipTest extends TestCase
             'password_confirmation' => 'password123',
         ])->assertSessionHasErrors('nip');
     }
+
+    public function test_duplicate_employee_email_uses_indonesian_validation_message(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $existingEmployee = User::factory()->create([
+            'role' => 'pegawai',
+            'email' => 'pegawai.terdaftar@example.com',
+        ]);
+
+        $this->actingAs($admin)->post(route('admin.employees.store'), [
+            'name' => 'Pegawai Duplikat',
+            'nip' => '198801012010011007',
+            'email' => $existingEmployee->email,
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ])->assertSessionHasErrors([
+            'email' => 'Email sudah digunakan.',
+        ]);
+    }
 }

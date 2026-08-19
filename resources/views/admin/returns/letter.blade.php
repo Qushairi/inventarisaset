@@ -41,7 +41,7 @@
         <section class="section">
             @if ($returnRecord->status !== 'Terverifikasi')
                 <div class="alert alert-light-warning color-warning">
-                    <i class="bi bi-exclamation-triangle me-1"></i>Dokumen ini masih bersifat draft karena pengembalian belum terverifikasi. Tanda tangan admin baru akan tampil setelah status diubah menjadi <strong>Terverifikasi</strong>.
+                    <i class="bi bi-exclamation-triangle me-1"></i>Dokumen ini masih bersifat draft karena pengembalian belum terverifikasi. Tanda tangan admin tampil setelah aset diterima dan diverifikasi.
                 </div>
             @endif
 
@@ -61,11 +61,6 @@
                         <a href="{{ $backUrl }}" class="btn btn-light-secondary btn-sm icon icon-left">
                             <i class="bi bi-arrow-left"></i><span>Kembali</span>
                         </a>
-                        @if ($returnRecord->status !== 'Terverifikasi')
-                            <a href="{{ $editUrl }}" class="btn btn-light-primary btn-sm icon icon-left">
-                                <i class="bi bi-pencil-square"></i><span>Kelola Verifikasi</span>
-                            </a>
-                        @endif
                         <a href="{{ $downloadUrl }}" class="btn btn-primary btn-sm icon icon-left">
                             <i class="bi bi-download"></i><span>Download PDF</span>
                         </a>

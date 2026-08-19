@@ -21,8 +21,8 @@ class AdminCreateModalTest extends TestCase
             ['route' => 'admin.locations.index', 'modal' => 'adminLocationCreateModal', 'fields' => ['name', 'code', 'address', 'address_note', 'description', 'note']],
             ['route' => 'admin.assets.index', 'modal' => 'adminAssetCreateModal', 'fields' => ['name', 'code', 'category_id', 'location_id', 'condition', 'status', 'quantity', 'acquisition_price', 'image_file']],
             ['route' => 'admin.employees.index', 'modal' => 'adminEmployeeCreateModal', 'fields' => ['name', 'nip', 'email', 'password', 'password_confirmation']],
-            ['route' => 'admin.loans.index', 'modal' => 'adminLoanCreateModal', 'fields' => ['asset_id', 'user_id', 'loan_date', 'planned_return_date', 'quantity', 'status', 'status_note']],
-            ['route' => 'admin.returns.index', 'modal' => 'adminReturnCreateModal', 'fields' => ['loan_id', 'asset_id', 'user_id', 'returned_at', 'condition', 'verified_note', 'report_number', 'status_note', 'report_note']],
+            ['route' => 'admin.loans.index', 'modal' => 'adminLoanCreateModal', 'fields' => ['user_id', 'loan_date', 'planned_return_date', 'status', 'status_note']],
+            ['route' => 'admin.returns.index', 'modal' => 'adminReturnCreateModal', 'fields' => ['loan_id', 'returned_at', 'condition', 'status_note', 'report_note']],
         ];
 
         foreach ($menus as $menu) {
@@ -38,6 +38,32 @@ class AdminCreateModalTest extends TestCase
 
             foreach ($menu['fields'] as $field) {
                 $response->assertSee('name="'.$field.'"', false);
+            }
+
+            if ($menu['route'] === 'admin.returns.index') {
+                $response->assertDontSee('name="asset_id"', false);
+                $response->assertDontSee('name="user_id"', false);
+                $response->assertSee('id="admin_return_report_number"', false);
+                $response->assertSee('Otomatis saat disimpan');
+                $response->assertDontSee('name="report_number"', false);
+                $response->assertDontSee('name="verified_note"', false);
+            }
+
+            if ($menu['route'] === 'admin.loans.index') {
+                $response->assertSee('data-admin-loan-create-form', false);
+                $response->assertSee('data-admin-loan-asset-picker', false);
+                $response->assertSee('data-admin-loan-asset-search', false);
+                $response->assertSee('data-admin-loan-items', false);
+                $response->assertSee('assets/vendors/choices.js/choices.min.css', false);
+                $response->assertSee('assets/js/admin-loan-asset-picker.js', false);
+                $response->assertDontSee('name="asset_id"', false);
+                $response->assertDontSee('name="quantity"', false);
+                $response->assertSee("createForm.dataset.submitting === 'true'", false);
+            }
+
+            if ($menu['route'] === 'admin.assets.index') {
+                $response->assertSee('data-admin-asset-create-form', false);
+                $response->assertSee("createForm.dataset.submitting === 'true'", false);
             }
         }
     }

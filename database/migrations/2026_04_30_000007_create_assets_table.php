@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('category_id')->constrained()->cascadeOnDelete();
             $table->foreignId('location_id')->constrained()->cascadeOnDelete();
             $table->string('name');
-            $table->string('code')->unique();
+            $table->string('code');
             $table->string('note')->nullable();
             $table->string('image_path')->nullable();
             $table->string('condition');

@@ -91,6 +91,7 @@ class LoanRequestTest extends TestCase
         $loan = Loan::query()->create([
             'asset_id' => $asset->id,
             'user_id' => $pegawai->id,
+            'quantity' => 3,
             'loan_date' => '2026-05-04',
             'planned_return_date' => '2026-05-06',
             'status' => 'Disetujui',
@@ -102,6 +103,7 @@ class LoanRequestTest extends TestCase
         $response->assertOk();
         $response->assertSee('SURAT PEMINJAMAN ASET');
         $response->assertSee('198801012010011001');
+        $response->assertSee('3 Unit');
         $response->assertSee('Download PDF');
 
         $loan->refresh();

@@ -50,6 +50,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     Route::get('/aset', [AssetController::class, 'index'])->name('assets.index');
     Route::get('/aset/create', [AssetController::class, 'create'])->name('assets.create');
+    Route::post('/aset/import', [AssetController::class, 'import'])->name('assets.import');
     Route::post('/aset', [AssetController::class, 'store'])->name('assets.store');
     Route::get('/aset/{asset}/edit', [AssetController::class, 'edit'])->name('assets.edit');
     Route::put('/aset/{asset}', [AssetController::class, 'update'])->name('assets.update');
@@ -75,6 +76,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/pengembalian', [ReturnController::class, 'store'])->name('returns.store');
     Route::put('/pengembalian/{return}/status', [ReturnController::class, 'updateStatus'])->name('returns.status');
     Route::get('/pengembalian/{return}/edit', [ReturnController::class, 'edit'])->name('returns.edit');
+    Route::put('/pengembalian/{return}/verifikasi', [ReturnController::class, 'verify'])->name('returns.verify');
     Route::put('/pengembalian/{return}', [ReturnController::class, 'update'])->name('returns.update');
     Route::delete('/pengembalian/{return}', [ReturnController::class, 'destroy'])->name('returns.destroy');
     Route::get('/pengembalian/{return}/surat', [ReturnController::class, 'showLetter'])->name('returns.letter.show');
@@ -90,6 +92,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/profile', [AdminProfileController::class, 'index'])->name('profile.index');
     Route::patch('/profile', [AdminProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [AdminProfileController::class, 'updatePassword'])->name('profile.password.update');
+
+    Route::view('/halaman', 'admin.halaman')->name('halaman');
 });
 
 Route::middleware(['auth', 'role:pegawai'])->prefix('pegawai')->name('pegawai.')->group(function () {

@@ -157,7 +157,7 @@
                                     </div>
                                 </div>
 
-                                <form action="{{ route('pegawai.profile.update') }}" method="POST" enctype="multipart/form-data">
+                                <form action="{{ route('pegawai.profile.update') }}" method="POST" enctype="multipart/form-data" data-swal-confirm data-swal-icon="question" data-swal-title="Simpan foto profil?" data-swal-text="Foto profil akun akan diperbarui." data-swal-confirm-text="Ya, simpan" data-swal-confirm-color="#435ebe">
                                     @csrf
                                     @method('PATCH')
                                     <div class="form-group mb-3">
@@ -173,7 +173,7 @@
                                             <i class="bi bi-upload"></i><span>Simpan Foto Profil</span>
                                         </button>
                                         @if ($pegawaiUser->hasProfilePhoto())
-                                            <button type="submit" name="remove_profile_photo" value="1" class="btn btn-light-danger icon icon-left">
+                                            <button type="submit" name="remove_profile_photo" value="1" class="btn btn-light-danger icon icon-left" data-swal-confirm data-swal-icon="warning" data-swal-title="Hapus foto profil?" data-swal-text="Foto profil saat ini akan dihapus dari akun." data-swal-confirm-text="Ya, hapus" data-swal-confirm-color="#dc3545">
                                                 <i class="bi bi-trash"></i><span>Hapus Foto</span>
                                             </button>
                                         @endif
@@ -207,7 +207,7 @@
                                     </div>
                                 </div>
 
-                                <form action="{{ route('pegawai.profile.update') }}" method="POST" enctype="multipart/form-data">
+                                <form action="{{ route('pegawai.profile.update') }}" method="POST" enctype="multipart/form-data" data-swal-confirm data-swal-icon="question" data-swal-title="Simpan tanda tangan?" data-swal-text="Tanda tangan akun akan diperbarui." data-swal-confirm-text="Ya, simpan" data-swal-confirm-color="#435ebe">
                                     @csrf
                                     @method('PATCH')
                                     <div class="form-group mb-3">
@@ -223,7 +223,7 @@
                                             <i class="bi bi-pen"></i><span>Simpan Tanda Tangan</span>
                                         </button>
                                         @if ($pegawaiUser->hasSignature())
-                                            <button type="submit" name="remove_signature" value="1" class="btn btn-light-danger icon icon-left">
+                                            <button type="submit" name="remove_signature" value="1" class="btn btn-light-danger icon icon-left" data-swal-confirm data-swal-icon="warning" data-swal-title="Hapus tanda tangan?" data-swal-text="Tanda tangan saat ini akan dihapus dari akun." data-swal-confirm-text="Ya, hapus" data-swal-confirm-color="#dc3545">
                                                 <i class="bi bi-trash"></i><span>Hapus Tanda Tangan</span>
                                             </button>
                                         @endif
@@ -241,7 +241,7 @@
                                     </div>
                                 @endif
 
-                                <form action="{{ route('pegawai.profile.password.update') }}" method="POST">
+                                <form action="{{ route('pegawai.profile.password.update') }}" method="POST" data-swal-confirm data-swal-icon="question" data-swal-title="Ubah password akun?" data-swal-text="Pastikan password baru dan konfirmasinya sudah benar." data-swal-confirm-text="Ya, ubah password" data-swal-confirm-color="#435ebe">
                                     @csrf
                                     @method('PUT')
                                     <div class="form-group mb-3">

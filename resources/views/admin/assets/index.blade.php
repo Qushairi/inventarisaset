@@ -23,9 +23,14 @@
                         <h4 class="card-title mb-1">Daftar Aset</h4>
                         <p class="mb-0 text-muted">Kelola inventaris aset, status penggunaan, dan data penempatan barang.</p>
                     </div>
-                    <button type="button" class="btn btn-primary btn-sm icon icon-left" data-bs-toggle="modal" data-bs-target="#adminAssetCreateModal">
-                        <i class="bi bi-plus-circle"></i><span>Tambah Aset</span>
-                    </button>
+                    <div class="d-flex flex-wrap gap-2">
+                        <button type="button" class="btn btn-light-primary btn-sm icon icon-left" data-bs-toggle="modal" data-bs-target="#adminAssetImportModal">
+                            <i class="bi bi-file-earmark-spreadsheet"></i><span>Import Excel</span>
+                        </button>
+                        <button type="button" class="btn btn-primary btn-sm icon icon-left" data-bs-toggle="modal" data-bs-target="#adminAssetCreateModal">
+                            <i class="bi bi-plus-circle"></i><span>Tambah Aset</span>
+                        </button>
+                    </div>
                 </div>
                 <div class="card-body">
                     <form action="{{ route('admin.assets.index') }}" method="GET" class="mb-4">
@@ -91,6 +96,7 @@
                                     <th>Lokasi</th>
                                     <th>Kondisi</th>
                                     <th>Status</th>
+                                    <th>Jumlah</th>
                                     <th>Perolehan</th>
                                     <th class="text-end">Aksi</th>
                                 </tr>
@@ -123,9 +129,9 @@
                                                 <div>
                                                     <h6 class="mb-0">{{ $asset['name'] }}</h6>
                                                     <small class="text-muted d-block">{{ $asset['code'] }}</small>
-                                                    <small class="text-muted d-block">Seri: {{ $asset['serial_number'] ?: '-' }}</small>
-                                                    <small class="text-muted d-block">Ukuran: {{ $asset['size'] ?: '-' }} | Bahan: {{ $asset['material'] ?: '-' }}</small>
-                                                    <small class="text-muted">{{ $asset['note'] }}</small>
+                                                    @foreach ($asset['details'] as $detail)
+                                                        <small class="text-muted d-block">{{ $detail }}</small>
+                                                    @endforeach
                                                 </div>
                                             </div>
                                         </td>
@@ -139,26 +145,31 @@
                                         </td>
                                         <td><span class="badge {{ $conditionBadge }}">{{ $asset['condition'] }}</span></td>
                                         <td><span class="badge {{ $statusBadge }}">{{ $asset['status'] }}</span></td>
+                                        <td><strong>{{ $asset['quantity'] }}</strong> Unit</td>
                                         <td>
-                                            <div>{{ $asset['price'] }}</div>
-                                            <small class="text-muted">Tahun {{ $asset['acquisition_year'] ?: '-' }}</small>
+                                            @foreach ($asset['acquisitions'] as $acquisition)
+                                                <div @class(['mb-1' => ! $loop->last])>
+                                                    <div>{{ $acquisition['price'] }}</div>
+                                                    <small class="text-muted">Tahun {{ $acquisition['year'] ?: '-' }}</small>
+                                                </div>
+                                            @endforeach
                                         </td>
                                         <td class="text-end">
                                             <div class="d-inline-flex flex-nowrap gap-2">
-                                                <button type="button" class="btn btn-sm btn-light-primary icon icon-left" data-bs-toggle="modal" data-bs-target="#adminAssetEditModal-{{ $asset['id'] }}"><i class="bi bi-pencil-square"></i><span>Edit</span></button>
-                                                <form action="{{ route('admin.assets.destroy', $asset['code']) }}" method="POST" class="d-inline-block" data-swal-confirm data-swal-title="Hapus aset?" data-swal-text="Apakah Anda yakin ingin menghapus data aset ini?" data-swal-confirm-text="Ya, hapus">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-light-danger icon icon-left">
-                                                        <i class="bi bi-trash"></i><span>Hapus</span>
-                                                    </button>
-                                                </form>
+                                                @foreach ($asset['records'] as $record)
+                                                    <button type="button" class="btn btn-sm btn-light-primary icon" data-bs-toggle="modal" data-bs-target="#adminAssetEditModal-{{ $record['id'] }}" title="Edit data {{ $loop->iteration }}"><i class="bi bi-pencil-square"></i></button>
+                                                    <form action="{{ route('admin.assets.destroy', $record['id']) }}" method="POST" class="d-inline-block" data-swal-confirm data-swal-title="Hapus aset?" data-swal-text="Apakah Anda yakin ingin menghapus data aset ini?" data-swal-confirm-text="Ya, hapus">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn btn-sm btn-light-danger icon" title="Hapus data {{ $loop->iteration }}"><i class="bi bi-trash"></i></button>
+                                                    </form>
+                                                @endforeach
                                             </div>
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="7" class="text-center text-muted">Belum ada data aset.</td>
+                                        <td colspan="8" class="text-center text-muted">Belum ada data aset.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -175,8 +186,46 @@
             </div>
         </section>
     </div>
+    @include('admin.assets.partials.import-modal')
     @include('admin.partials.create-modal', ['resource' => 'asset'])
     @foreach ($assets as $asset)
-        @include('admin.partials.edit-modal', ['resource' => 'asset', 'record' => $asset])
+        @foreach ($asset['records'] as $record)
+            @include('admin.partials.edit-modal', ['resource' => 'asset', 'record' => $record])
+        @endforeach
     @endforeach
 @endsection
+
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const createForm = document.querySelector('[data-admin-asset-create-form]');
+
+            if (!createForm) {
+                return;
+            }
+
+            createForm.addEventListener('submit', function (event) {
+                if (createForm.dataset.submitting === 'true') {
+                    event.preventDefault();
+
+                    return;
+                }
+
+                createForm.dataset.submitting = 'true';
+                createForm.setAttribute('aria-busy', 'true');
+
+                const submitButton = event.submitter || createForm.querySelector('button[type="submit"]');
+
+                if (submitButton) {
+                    submitButton.disabled = true;
+                    const submitIcon = submitButton.querySelector('i');
+
+                    if (submitIcon) {
+                        submitIcon.className = 'spinner-border spinner-border-sm';
+                        submitIcon.setAttribute('aria-hidden', 'true');
+                    }
+                }
+            });
+        });
+    </script>
+@endpush

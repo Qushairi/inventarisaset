@@ -343,6 +343,7 @@
                                                 name="returned_at"
                                                 class="form-control @error('returned_at', 'createReturn') is-invalid @enderror"
                                                 value="{{ old('returned_at', now()->format('Y-m-d')) }}"
+                                                min="{{ now()->format('Y-m-d') }}"
                                                 @disabled($returnableLoans->isEmpty())
                                             >
                                         </div>

@@ -85,8 +85,12 @@
                                     @endphp
                                     <tr>
                                         <td>
-                                            <div>{{ $return['asset_name'] }}</div>
-                                            <small class="text-muted">{{ $return['asset_code'] }}</small>
+                                            @foreach ($return['assets'] as $asset)
+                                                <div @class(['mb-2' => ! $loop->last])>
+                                                    <div>{{ $asset['name'] }}</div>
+                                                    <small class="text-muted">{{ $asset['code'] }} · Jumlah: {{ $asset['quantity'] }}</small>
+                                                </div>
+                                            @endforeach
                                         </td>
                                         <td>
                                             <div>{{ $return['employee_name'] }}</div>
@@ -95,7 +99,7 @@
                                         <td>
                                             <div>Pinjam: {{ $return['loan_date'] ?: '-' }}</div>
                                             <small class="text-muted d-block">Rencana kembali: {{ $return['planned_return_date'] ?: '-' }}</small>
-                                            <small class="text-muted d-block">Jumlah: {{ $return['loan_quantity'] }} | Durasi: {{ $return['loan_duration'] }}</small>
+                                            <small class="text-muted d-block">Total jumlah: {{ $return['total_quantity'] }} | Durasi: {{ $return['loan_duration'] }}</small>
                                         </td>
                                         <td>
                                             <div>Kembali: {{ $return['returned_at'] }}</div>
@@ -103,41 +107,36 @@
                                             <small class="text-muted d-block">{{ $return['verified_note'] ?: $return['status_note'] }}</small>
                                         </td>
                                         <td>
-                                            <span class="badge {{ $conditionBadge }}">{{ $return['condition'] }}</span>
+                                            @foreach ($return['assets'] as $asset)
+                                                @php
+                                                    $assetConditionBadge = match ($asset['condition_variant']) {
+                                                        'warning' => 'bg-light-warning',
+                                                        'danger' => 'bg-light-danger',
+                                                        default => 'bg-light-success',
+                                                    };
+                                                @endphp
+                                                <div @class(['mb-2' => ! $loop->last])>
+                                                    <small class="text-muted d-block">{{ $asset['name'] }}</small>
+                                                    <span class="badge {{ $assetConditionBadge }}">{{ $asset['condition'] }}</span>
+                                                </div>
+                                            @endforeach
                                         </td>
                                         <td>
-                                            <div>{{ $return['report_number'] }}</div>
+                                            @foreach ($return['assets'] as $asset)
+                                                <div>{{ $asset['report_number'] }}</div>
+                                            @endforeach
                                             <small class="text-muted">{{ $return['report_note'] }}</small>
                                         </td>
-                                        <td class="text-end text-nowrap">
-                                            <div class="d-inline-flex align-items-center gap-1 justify-content-end">
-                                                @if ($isPending)
-                                                    <form action="{{ route('admin.returns.status', $return['id']) }}" method="POST" class="d-inline-block" data-swal-confirm data-swal-title="Setujui pengembalian?" data-swal-text="Apakah Anda yakin barang ini sudah dikembalikan dan ingin menyetujui pengembalian ini?" data-swal-confirm-text="Ya, setujui">
-                                                        @csrf
-                                                        @method('PUT')
-                                                        <input type="hidden" name="status" value="Terverifikasi">
-                                                        <button type="submit" class="btn btn-sm btn-light-success icon icon-left">
-                                                            <i class="bi bi-check-circle"></i><span>Terima</span>
-                                                        </button>
-                                                    </form>
-
-                                                    <form action="{{ route('admin.returns.status', $return['id']) }}" method="POST" class="d-inline-block" data-swal-confirm data-swal-title="Tolak pengembalian?" data-swal-text="Apakah Anda yakin ingin menolak pengajuan pengembalian ini?" data-swal-confirm-text="Ya, tolak">
-                                                        @csrf
-                                                        @method('PUT')
-                                                        <input type="hidden" name="status" value="Ditolak">
-                                                        <button type="submit" class="btn btn-sm btn-light-danger icon icon-left">
-                                                            <i class="bi bi-x-circle"></i><span>Tolak</span>
-                                                        </button>
-                                                    </form>
-                                                @else
-                                                    @if ($return['status'] === 'Terverifikasi')
-                                                        <a href="{{ route('admin.returns.letter.show', $return['id']) }}" class="btn btn-sm btn-light-primary icon icon-left">
-                                                            <i class="bi bi-file-earmark-pdf"></i><span>Lihat Surat</span>
-                                                        </a>
-                                                    @else
-                                                        <span class="text-danger small font-semibold">Pengembalian Ditolak</span>
-                                                    @endif
+                                        <td class="text-end">
+                                            <div class="d-flex flex-wrap justify-content-end gap-2">
+                                                @if ($return['status'] === 'Menunggu Verifikasi')
+                                                    <button type="button" class="btn btn-sm btn-success icon icon-left" data-bs-toggle="modal" data-bs-target="#adminReturnVerifyModal-{{ $return['id'] }}">
+                                                        <i class="bi bi-patch-check"></i><span>Verifikasi</span>
+                                                    </button>
                                                 @endif
+                                                <a href="{{ route('admin.returns.letter.show', $return['id']) }}" class="btn btn-sm btn-light-primary icon icon-left">
+                                                    <i class="bi bi-file-earmark-pdf"></i><span>Lihat Surat</span>
+                                                </a>
                                             </div>
                                         </td>
                                     </tr>
@@ -160,5 +159,86 @@
             </div>
         </section>
     </div>
+
+    @foreach ($returns as $return)
+        @if ($return['status'] === 'Menunggu Verifikasi')
+            <div class="modal fade" id="adminReturnVerifyModal-{{ $return['id'] }}" tabindex="-1" aria-labelledby="adminReturnVerifyModalLabel-{{ $return['id'] }}" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content transaction-modal is-return">
+                        <div class="modal-header transaction-modal-header">
+                            <div class="transaction-form-title">
+                                <span class="transaction-form-icon"><i class="bi bi-patch-check"></i></span>
+                                <div>
+                                    <h5 class="modal-title" id="adminReturnVerifyModalLabel-{{ $return['id'] }}">Verifikasi Pengembalian</h5>
+                                    <small class="text-muted">{{ collect($return['assets'])->pluck('name')->join(', ') }} · {{ $return['employee_name'] }}</small>
+                                </div>
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+
+                        <form action="{{ route('admin.returns.verify', $return['id']) }}" method="POST" data-admin-return-verify-form>
+                            @csrf
+                            @method('PUT')
+
+                            <div class="modal-body transaction-modal-body">
+                                <div class="alert alert-light-warning color-warning mb-4">
+                                    <i class="bi bi-exclamation-triangle me-1"></i>Pastikan aset fisik sudah diterima sebelum verifikasi.
+                                </div>
+
+                                <div class="form-group transaction-field">
+                                    <label for="admin_return_verify_condition_{{ $return['id'] }}">Kondisi Setelah Diperiksa</label>
+                                    <div class="transaction-input-shell">
+                                        <select id="admin_return_verify_condition_{{ $return['id'] }}" name="condition" class="form-select" required>
+                                            @foreach ($conditions as $condition)
+                                                <option value="{{ $condition }}" @selected($return['condition'] === $condition)>{{ $condition }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group transaction-field mb-0">
+                                    <label for="admin_return_verify_note_{{ $return['id'] }}">Catatan Verifikasi</label>
+                                    <div class="transaction-input-shell transaction-textarea-shell">
+                                        <textarea id="admin_return_verify_note_{{ $return['id'] }}" name="verified_note" class="form-control" rows="3" maxlength="255" placeholder="Contoh: aset sudah diterima dan diperiksa"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="modal-footer transaction-modal-footer">
+                                <button type="button" class="btn btn-light-secondary" data-bs-dismiss="modal">Batal</button>
+                                <button type="submit" class="btn btn-success icon icon-left">
+                                    <i class="bi bi-patch-check"></i><span>Verifikasi</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        @endif
+    @endforeach
+
     @include('admin.partials.create-modal', ['resource' => 'return'])
 @endsection
+
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('[data-admin-return-verify-form]').forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (form.dataset.submitting === 'true') {
+                        event.preventDefault();
+                        return;
+                    }
+
+                    form.dataset.submitting = 'true';
+                    const submitButton = form.querySelector('button[type="submit"]');
+
+                    if (submitButton) {
+                        submitButton.disabled = true;
+                        submitButton.innerHTML = '<span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span><span>Memverifikasi...</span>';
+                    }
+                });
+            });
+        });
+    </script>
+@endpush

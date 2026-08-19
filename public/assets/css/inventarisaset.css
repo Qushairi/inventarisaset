@@ -306,6 +306,110 @@
     background-color: #fff;
 }
 
+.loan-asset-picker .choices {
+    margin-bottom: 0;
+}
+
+.loan-asset-picker .choices__inner {
+    min-height: 2.65rem;
+    padding: 0.43rem 0.85rem;
+    border: 1px solid #dfe7f1;
+    border-radius: 0.45rem;
+    background-color: #fff;
+    font-size: 1rem;
+}
+
+.loan-asset-picker .choices.is-focused .choices__inner,
+.loan-asset-picker .choices.is-open .choices__inner {
+    border-color: var(--transaction-accent);
+    box-shadow: 0 0 0 0.16rem var(--transaction-focus);
+}
+
+.loan-asset-picker.has-error .choices__inner {
+    border-color: #dc3545;
+}
+
+.loan-asset-picker .choices__input {
+    margin-bottom: 0;
+    border-bottom-color: #dfe7f1;
+    background-color: #fff;
+}
+
+.loan-asset-picker .choices__list--dropdown {
+    z-index: 1080;
+    border-color: #dfe7f1;
+    border-radius: 0.45rem;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
+}
+
+.loan-asset-picker .choices__list--dropdown .choices__item {
+    padding: 0.7rem 0.85rem;
+    overflow-wrap: anywhere;
+}
+
+.loan-asset-selected-list {
+    margin-top: 0.8rem;
+    border-top: 1px solid #e8eef6;
+}
+
+.loan-asset-selected-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 7rem 2.5rem;
+    align-items: center;
+    gap: 0.8rem;
+    min-height: 4.5rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #e8eef6;
+}
+
+.loan-asset-selected-identity {
+    min-width: 0;
+}
+
+.loan-asset-selected-identity strong,
+.loan-asset-selected-identity small {
+    display: block;
+    overflow-wrap: anywhere;
+}
+
+.loan-asset-selected-identity strong {
+    color: #172033;
+    line-height: 1.3;
+}
+
+.loan-asset-selected-identity .badge {
+    margin-top: 0.35rem;
+}
+
+.loan-asset-selected-quantity label {
+    display: block;
+    margin-bottom: 0.25rem;
+    color: #607080;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.loan-asset-selected-quantity .form-control {
+    min-height: 2.5rem;
+    padding: 0.45rem 0.65rem;
+}
+
+.loan-asset-selected-row > .btn {
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+}
+
+.loan-asset-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 4rem;
+    color: #7b8899;
+    text-align: center;
+}
+
 .table-footer-meta {
     color: #6b78ad;
 }
@@ -395,4 +499,12 @@
     .transaction-modal-footer .btn {
         width: 100%;
     }
+
+    .loan-asset-selected-row {
+        grid-template-columns: minmax(0, 1fr) minmax(6rem, 8rem) 2.5rem;
+        gap: 0.55rem;
+    }
 }
+    .sidebar-wrapper {
+    background-color: #fff;
+    }

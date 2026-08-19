@@ -1,151 +1,4 @@
 <x-guest-layout title="Login">
-    @push('styles')
-        <style>
-            #auth {
-                background: #f3f4f6;
-            }
-
-            #auth > .row {
-                justify-content: center;
-            }
-
-            #auth > .row > .col-lg-7 {
-                display: none !important;
-            }
-
-            #auth .auth-column {
-                justify-content: center;
-            }
-
-            #auth #auth-left {
-                max-width: 34rem;
-                padding: 2.5rem 1.5rem;
-            }
-
-            .login-card {
-                border: 0;
-                border-radius: 1.35rem;
-                box-shadow: 0 20px 50px rgba(31, 41, 55, 0.08);
-                overflow: hidden;
-            }
-
-            .login-card .card-body {
-                padding: 2.25rem;
-            }
-
-            .login-brand {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                gap: 1rem;
-                text-align: left;
-            }
-
-            .login-brand img {
-                width: 64px;
-                height: 64px;
-                object-fit: contain;
-                flex-shrink: 0;
-            }
-
-            .login-brand-primary {
-                margin-bottom: 0.1rem;
-                font-size: 1.35rem;
-                font-weight: 700;
-                color: var(--bs-primary);
-            }
-
-            .login-brand-secondary {
-                font-size: 1.1rem;
-                font-weight: 600;
-                color: #6c757d;
-            }
-
-            .login-divider {
-                margin: 1.5rem 0;
-                border-top: 1px solid var(--bs-border-color, #dee2e6);
-            }
-
-            .login-title {
-                margin-bottom: 0.35rem;
-                font-size: 1.9rem;
-                font-weight: 700;
-                color: var(--bs-heading-color, #25396f);
-            }
-
-            .login-subtitle {
-                margin-bottom: 0;
-                color: #6c757d;
-            }
-
-            .login-input-wrap {
-                position: relative;
-            }
-
-            .login-input-wrap .form-control {
-                padding-left: 3rem;
-                padding-right: 3rem;
-                padding-top: 0.95rem;
-                padding-bottom: 0.95rem;
-                border-radius: 0.9rem;
-                font-size: 1rem;
-            }
-
-            .login-input-icon {
-                position: absolute;
-                top: 50%;
-                left: 1rem;
-                transform: translateY(-50%);
-                color: #9ca3af;
-                pointer-events: none;
-            }
-
-            .login-password-toggle {
-                position: absolute;
-                top: 50%;
-                right: 0.8rem;
-                transform: translateY(-50%);
-                width: 2rem;
-                height: 2rem;
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                border: 0;
-                border-radius: 999px;
-                background: transparent;
-                color: #9ca3af;
-                transition: background-color 0.2s ease, color 0.2s ease;
-            }
-
-            .login-password-toggle:hover {
-                color: var(--bs-primary);
-                background: rgba(var(--bs-primary-rgb), 0.08);
-            }
-
-            .login-submit {
-                border-radius: 0.9rem;
-                font-weight: 700;
-            }
-
-            .login-footer-note {
-                margin-bottom: 0;
-                font-size: 0.75rem;
-                text-align: center;
-                color: #d1d5db;
-            }
-
-            @media (max-width: 767px) {
-                #auth #auth-left {
-                    padding: 1.5rem 1rem;
-                }
-
-                .login-card .card-body {
-                    padding: 1.5rem;
-                }
-            }
-        </style>
-    @endpush
-
     <div class="card login-card">
         <div class="card-body">
             <div class="login-brand">
@@ -240,11 +93,12 @@
                     @enderror
                 </div>
 
-                <div class="d-flex align-items-center mb-4">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
                     <div class="form-check mb-0">
                         <input class="form-check-input" type="checkbox" value="1" id="remember" name="remember" @checked(old('remember'))>
                         <label class="form-check-label text-muted" for="remember">Ingat saya</label>
                     </div>
+                    <a href="{{ route('password.request') }}" class="login-link">Lupa password?</a>
                 </div>
 
                 <button type="submit" class="btn btn-primary btn-block btn-lg shadow-lg login-submit">
@@ -252,7 +106,7 @@
                 </button>
             </form>
 
-            <p class="login-footer-note mt-4">&copy; 2025 Sistem Inventaris Aset - Dinas Pendidikan Kabupaten Bengkalis</p>
+            <p class="login-footer-note mt-4">&copy; {{ now()->year }} Sistem Inventaris Aset - Dinas Pendidikan Kabupaten Bengkalis</p>
         </div>
     </div>
 

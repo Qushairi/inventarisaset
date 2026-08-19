@@ -2,16 +2,18 @@
 
 namespace App\Support;
 
-use Carbon\CarbonInterface;
 use App\Models\BeritaAcara;
 use App\Models\Loan;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class SuratPeminjamanService
 {
+    private const PDF_STORAGE_PREFIX = 'surat-peminjaman/v2/';
+
     public function ensureForLoan(Loan $loan, ?User $approver = null, bool $force = false): ?BeritaAcara
     {
         $loan->loadMissing([
@@ -35,9 +37,9 @@ class SuratPeminjamanService
         }
 
         $issuedAt = now();
-        $suratPeminjaman = $loan->suratPeminjaman 
-            ?? $loan->beritaAcara 
-            ?? BeritaAcara::query()->where('loan_id', $loan->id)->first() 
+        $suratPeminjaman = $loan->suratPeminjaman
+            ?? $loan->beritaAcara
+            ?? BeritaAcara::query()->where('loan_id', $loan->id)->first()
             ?? new BeritaAcara();
         $isNewRecord = ! $suratPeminjaman->exists;
 
@@ -302,7 +304,7 @@ class SuratPeminjamanService
 
     private function pdfStoragePath(string $number): string
     {
-        return 'surat-peminjaman/'.Str::slug($number).'.pdf';
+        return self::PDF_STORAGE_PREFIX.Str::slug($number).'.pdf';
     }
 
     private function resolveDocumentNumber(BeritaAcara $suratPeminjaman, CarbonInterface $issuedAt): string
@@ -321,7 +323,8 @@ class SuratPeminjamanService
 
     private function usesLegacyStoragePath(BeritaAcara $suratPeminjaman): bool
     {
-        return filled($suratPeminjaman->pdf_path) && Str::startsWith((string) $suratPeminjaman->pdf_path, 'berita-acara/');
+        return filled($suratPeminjaman->pdf_path)
+            && ! Str::startsWith((string) $suratPeminjaman->pdf_path, self::PDF_STORAGE_PREFIX);
     }
 
     private function dataUriFromPublicPath(string $absolutePath): ?string

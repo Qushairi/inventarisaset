@@ -5,31 +5,39 @@ namespace App\Http\Controllers\Pegawai;
 use App\Models\AssetReturn;
 use App\Models\Loan;
 use App\Support\AdminNotificationService;
-use App\Support\AssetStateService;
-use App\Support\PegawaiNotificationService;
 use App\Support\SuratPeminjamanService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
+/**
+ * Mengelola pengajuan dan riwayat pengembalian aset milik pegawai.
+ */
 class ReturnController extends BasePegawaiController
 {
+    /**
+     * Menyuntikkan layanan surat dan notifikasi admin.
+     */
     public function __construct(
         private readonly SuratPeminjamanService $suratPeminjamanService,
         private readonly AdminNotificationService $adminNotificationService,
-        private readonly AssetStateService $assetStateService,
-        private readonly PegawaiNotificationService $pegawaiNotificationService,
-    ) {
-    }
+    ) {}
 
+    /**
+     * Menampilkan riwayat pengembalian dan peminjaman yang dapat dikembalikan.
+     */
     public function index(Request $request)
     {
+        // Seluruh data dibatasi pada pegawai yang sedang aktif.
         $pegawai = $this->currentPegawai();
+
+        // Gunakan ukuran halaman yang sudah dinormalisasi.
         $perPage = $this->perPage($request);
 
+        // Muat relasi yang diperlukan untuk detail aset, pinjaman, dan surat.
         $returns = AssetReturn::query()
             ->with(['asset', 'loan.asset.category', 'loan.user', 'loan.approvedBy', 'loan.suratPeminjaman'])
             ->where('user_id', $pegawai->id)
@@ -38,7 +46,10 @@ class ReturnController extends BasePegawaiController
             ->paginate($perPage)
             ->withQueryString()
             ->through(function (AssetReturn $return) {
+                // Ambil pinjaman asal untuk tanggal dan akses surat peminjaman.
                 $loan = $return->loan;
+
+                // Surat hanya dibuat bila catatan pengembalian masih memiliki pinjaman terkait.
                 $suratPeminjaman = $loan
                     ? $this->suratPeminjamanService->ensureForLoan($loan)
                     : null;
@@ -120,6 +131,7 @@ class ReturnController extends BasePegawaiController
                 ];
             });
 
+        // Lengkapi halaman dengan opsi kondisi, total, dan daftar pinjaman yang valid.
         return view('pegawai.returns.index', $this->layoutData([
             'conditions' => $this->conditionOptions(),
             'returns' => $returns,
@@ -128,113 +140,145 @@ class ReturnController extends BasePegawaiController
         ]));
     }
 
+    /**
+     * Membuat pengajuan pengembalian yang menunggu verifikasi penerimaan oleh admin.
+     */
     public function store(Request $request): RedirectResponse
     {
+        // Identitas pengembali berasal dari sesi, bukan dari input pengguna.
         $pegawai = $this->currentPegawai();
 
+        // Validasi formulir ke bag modal pengembalian.
         $validated = $request->validateWithBag('createReturn', [
             'loan_id' => ['required', 'exists:loans,id'],
-            'returned_at' => ['required', 'date'],
+            'returned_at' => ['required', 'date', 'after_or_equal:today'],
             'condition' => ['nullable', 'string'],
             'item_conditions' => ['nullable', 'array'],
             'report_note' => ['nullable', 'string', 'max:255'],
         ]);
 
-        $loan = $this->returnableLoansQuery($pegawai->id)
-            ->whereKey($validated['loan_id'])
-            ->first();
+        // Kunci pinjaman agar klik ganda tidak membuat dua pengajuan untuk barang yang sama.
+        $return = DB::transaction(function () use ($pegawai, $validated, $request): AssetReturn {
+            $loan = Loan::query()
+                ->whereKey($validated['loan_id'])
+                ->where('user_id', $pegawai->id)
+                ->lockForUpdate()
+                ->first();
 
-        if (! $loan) {
-            throw ValidationException::withMessages([
-                'loan_id' => 'Peminjaman yang dipilih belum dapat diajukan untuk pengembalian.',
-            ])->errorBag('createReturn');
-        }
-
-        if ($loan->loan_date && $loan->loan_date->gt(Carbon::parse($validated['returned_at']))) {
-            throw ValidationException::withMessages([
-                'returned_at' => 'Tanggal kembali tidak boleh lebih awal dari tanggal peminjaman.',
-            ])->errorBag('createReturn');
-        }
-
-        $itemConditions = $request->input('item_conditions', []);
-        $formattedConditions = [];
-        $uniqueConditions = [];
-
-        if (is_array($itemConditions) && count($itemConditions) > 0) {
-            $itemList = $loan->getItemList();
-            foreach ($itemList as $it) {
-                $assetObj = $it['asset'];
-                $assetId = $assetObj?->id;
-                $cond = $itemConditions[$assetId] ?? 'Baik';
-                if (! in_array($cond, $this->conditionOptions(), true)) {
-                    $cond = 'Baik';
-                }
-                $formattedConditions[] = ($assetObj?->name ?? 'Aset').' ('.$cond.')';
-                $uniqueConditions[] = $cond;
+            // Tolak ID yang tidak aktif atau sudah memiliki catatan pengembalian.
+            if (! $loan || $loan->status !== 'Disetujui' || $loan->returnRecord()->exists()) {
+                throw ValidationException::withMessages([
+                    'loan_id' => 'Peminjaman yang dipilih belum dapat diajukan untuk pengembalian.',
+                ])->errorBag('createReturn');
             }
-        }
 
-        $uniqueConditions = array_values(array_unique($uniqueConditions));
+            // Lindungi integritas kronologi jika tanggal pinjam berada setelah tanggal kembali.
+            if ($loan->loan_date && $loan->loan_date->gt(Carbon::parse($validated['returned_at']))) {
+                throw ValidationException::withMessages([
+                    'returned_at' => 'Tanggal kembali tidak boleh lebih awal dari tanggal peminjaman.',
+                ])->errorBag('createReturn');
+            }
 
-        if (count($uniqueConditions) === 1) {
-            $finalCondition = $uniqueConditions[0];
-        } elseif (count($uniqueConditions) > 1) {
-            $finalCondition = 'Kondisi Bervariasi (' . implode(', ', $uniqueConditions) . ')';
-        } else {
-            $finalCondition = $validated['condition'] ?? 'Baik';
-        }
+            $itemConditions = $request->input('item_conditions', []);
+            $formattedConditions = [];
+            $uniqueConditions = [];
 
-        $conditionSummary = count($formattedConditions) > 0
-            ? 'Kondisi per barang: ' . implode(' | ', $formattedConditions)
-            : null;
+            if (is_array($itemConditions) && count($itemConditions) > 0) {
+                $itemList = $loan->getItemList();
+                foreach ($itemList as $it) {
+                    $assetObj = $it['asset'];
+                    $assetId = $assetObj?->id;
+                    $cond = $itemConditions[$assetId] ?? 'Baik';
+                    if (! in_array($cond, $this->conditionOptions(), true)) {
+                        $cond = 'Baik';
+                    }
+                    $formattedConditions[] = ($assetObj?->name ?? 'Aset').' ('.$cond.')';
+                    $uniqueConditions[] = $cond;
+                }
+            }
 
-        $userNote = $validated['report_note'] ?? null;
-        $fullReportNote = trim(($conditionSummary ? $conditionSummary . ($userNote ? ' — ' : '') : '') . ($userNote ?? ''));
+            $uniqueConditions = array_values(array_unique($uniqueConditions));
 
-        $return = AssetReturn::query()->create([
-            'loan_id' => $loan->id,
-            'asset_id' => $loan->asset_id,
-            'user_id' => $pegawai->id,
-            'returned_at' => $validated['returned_at'],
-            'verified_note' => 'Menunggu pengecekan fisik barang oleh admin.',
-            'condition' => $finalCondition,
-            'status' => 'Menunggu',
-            'status_note' => 'Pengajuan pengembalian telah dikirim dan menunggu verifikasi admin.',
-            'report_number' => $this->generateReportNumber(),
-            'report_note' => $fullReportNote ?: null,
-        ]);
+            if (count($uniqueConditions) === 1) {
+                $finalCondition = $uniqueConditions[0];
+            } elseif (count($uniqueConditions) > 1) {
+                $finalCondition = 'Kondisi Bervariasi (' . implode(', ', $uniqueConditions) . ')';
+            } else {
+                $finalCondition = $validated['condition'] ?? 'Baik';
+            }
 
+            $conditionSummary = count($formattedConditions) > 0
+                ? 'Kondisi per barang: ' . implode(' | ', $formattedConditions)
+                : null;
+
+            $userNote = $validated['report_note'] ?? null;
+            $fullReportNote = trim(($conditionSummary ? $conditionSummary . ($userNote ? ' — ' : '') : '') . ($userNote ?? ''));
+
+            return AssetReturn::query()->create([
+                'loan_id' => $loan->id,
+                'asset_id' => $loan->asset_id,
+                'user_id' => $pegawai->id,
+                'returned_at' => $validated['returned_at'],
+                'verified_note' => null,
+                'condition' => $finalCondition,
+                'status' => 'Menunggu Verifikasi',
+                'status_note' => 'Menunggu verifikasi admin.',
+                'report_number' => $this->generateReportNumber(),
+                'report_note' => $fullReportNote ?: null,
+            ]);
+        });
+
+        // Informasikan pengembalian baru kepada admin.
         $this->adminNotificationService->sendReturnRequestNotification($return);
 
-        $assetName = $loan->asset?->name ?? 'Aset';
+        $assetName = $return->asset?->name ?? ($return->loan?->asset?->name ?? 'Aset');
 
         \App\Support\ActivityLogger::log(
             'return_created',
             'Pengajuan Pengembalian Aset',
-            "Mengajukan pengembalian aset {$assetName} dengan kondisi {$finalCondition}."
+            "Mengajukan pengembalian aset {$assetName} dengan kondisi {$return->condition}."
         );
 
+        // Kembali ke daftar riwayat dengan pesan keberhasilan.
         return redirect()
             ->route('pegawai.returns.index')
-            ->with('success', 'Pengajuan pengembalian berhasil dikirim. Menunggu pengecekan fisik barang dan verifikasi oleh Admin.');
+            ->with('success', 'Pengajuan pengembalian berhasil dikirim dan menunggu verifikasi admin.');
     }
 
+    /**
+     * Mengembalikan daftar kondisi aset yang sah untuk pengembalian.
+     *
+     * @return list<string>
+     */
     private function conditionOptions(): array
     {
         return ['Baik', 'Rusak Ringan', 'Rusak Berat'];
     }
 
+    /**
+     * Membuat nomor berita acara unik berdasarkan waktu saat ini.
+     */
     private function generateReportNumber(): string
     {
+        // Waktu menjadi bagian nomor agar urut dan mudah dilacak.
+        $reportDate = now();
+
+        // Tambah satu detik dan ulangi bila nomor pada detik tersebut sudah digunakan.
         do {
-            $reportNumber = 'RET-'.now()->format('YmdHis').'-'.Str::upper(Str::random(4));
+            $reportNumber = 'BA-'.$reportDate->format('YmdHis');
+            $reportDate->addSecond();
         } while (AssetReturn::query()->where('report_number', $reportNumber)->exists());
 
+        // Kembalikan nomor pertama yang belum tercatat di database.
         return $reportNumber;
     }
 
+    /**
+     * Menyusun query pinjaman disetujui yang belum memiliki pengembalian.
+     */
     private function returnableLoansQuery(int $pegawaiId)
     {
+        // Filter kepemilikan, status persetujuan, dan ketiadaan relasi returnRecord.
         return Loan::query()
             ->with('asset')
             ->where('user_id', $pegawaiId)
@@ -243,10 +287,15 @@ class ReturnController extends BasePegawaiController
             ->orderByDesc('loan_date');
     }
 
+    /**
+     * Menentukan jumlah riwayat yang ditampilkan pada setiap halaman.
+     */
     private function perPage(Request $request): int
     {
+        // Ambil nilai dari query string dengan nilai awal 10.
         $perPage = (int) $request->query('per_page', 10);
 
+        // Batasi pilihan untuk mencegah query dengan ukuran halaman berlebihan.
         return in_array($perPage, [10, 25, 50], true) ? $perPage : 10;
     }
 }

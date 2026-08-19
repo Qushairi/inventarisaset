@@ -108,7 +108,7 @@
                                         <label for="returned_at">Tanggal Pengembalian</label>
                                         <div class="transaction-input-shell">
                                             <span class="transaction-input-icon"><i class="bi bi-calendar-check"></i></span>
-                                            <input type="date" id="returned_at" name="returned_at" class="form-control @error('returned_at') is-invalid @enderror" value="{{ old('returned_at') }}">
+                                            <input type="date" id="returned_at" name="returned_at" class="form-control @error('returned_at') is-invalid @enderror" value="{{ old('returned_at', now()->format('Y-m-d')) }}" min="{{ now()->format('Y-m-d') }}">
                                         </div>
                                         @error('returned_at')
                                             <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -161,7 +161,7 @@
                                         <label for="report_number">Nomor Berita Acara</label>
                                         <div class="transaction-input-shell">
                                             <span class="transaction-input-icon"><i class="bi bi-hash"></i></span>
-                                            <input type="text" id="report_number" name="report_number" class="form-control @error('report_number') is-invalid @enderror" placeholder="Nomor BA" value="{{ old('report_number') }}">
+                                            <input type="text" id="report_number" class="form-control @error('report_number') is-invalid @enderror" value="{{ old('report_number', 'Otomatis saat disimpan') }}" readonly>
                                         </div>
                                         @error('report_number')
                                             <div class="invalid-feedback d-block">{{ $message }}</div>
