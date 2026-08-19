@@ -50,22 +50,26 @@ class Loan extends Model
 
     public function getItemList(): \Illuminate\Support\Collection
     {
-        if ($this->relationLoaded('items') && $this->items->count() > 0) {
-            return $this->items->map(function (LoanItem $item) {
-                return [
-                    'asset' => $item->asset,
-                    'quantity' => $item->quantity,
-                ];
-            });
-        }
+        try {
+            if ($this->relationLoaded('items') && $this->items->count() > 0) {
+                return $this->items->map(function (LoanItem $item) {
+                    return [
+                        'asset' => $item->asset,
+                        'quantity' => $item->quantity,
+                    ];
+                });
+            }
 
-        if ($this->items()->exists()) {
-            return $this->items()->with('asset')->get()->map(function (LoanItem $item) {
-                return [
-                    'asset' => $item->asset,
-                    'quantity' => $item->quantity,
-                ];
-            });
+            if ($this->items()->exists()) {
+                return $this->items()->with('asset')->get()->map(function (LoanItem $item) {
+                    return [
+                        'asset' => $item->asset,
+                        'quantity' => $item->quantity,
+                    ];
+                });
+            }
+        } catch (\Throwable $e) {
+            // Fallback gracefully if loan_items query fails
         }
 
         return collect([
