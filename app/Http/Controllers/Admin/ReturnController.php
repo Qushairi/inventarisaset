@@ -157,6 +157,7 @@ class ReturnController extends Controller
             ]);
 
             $this->assetStateService->syncLoanById($return->loan_id);
+            $this->pegawaiNotificationService->sendReturnRejectedNotification($return);
 
             $message = 'Pengembalian aset telah ditolak.';
         }

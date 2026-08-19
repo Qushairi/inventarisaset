@@ -119,6 +119,39 @@ class PegawaiNotificationService
         ]);
     }
 
+    public function sendReturnRejectedNotification(AssetReturn $return): bool
+    {
+        $return->loadMissing(['asset', 'user', 'loan']);
+
+        if (! $return->user instanceof User || $return->user->role !== 'pegawai') {
+            return false;
+        }
+
+        $assetLabel = $this->assetLabel($return->asset?->name, $return->asset?->code);
+
+        return $this->notifyIfMissing($return->user, [
+            'dedupe_key' => 'return-rejected-'.$return->id,
+            'type_key' => 'return_rejected',
+            'title' => 'Pengembalian ditolak admin',
+            'message' => 'Pengajuan pengembalian aset '.$assetLabel.' ditolak admin.',
+            'action_label' => 'Lihat pengembalian',
+            'action_url' => route('pegawai.returns.index', absolute: false),
+            'icon' => 'x-circle',
+            'variant' => 'danger',
+            'reference_type' => 'asset_return',
+            'reference_id' => $return->id,
+            'occurred_at' => now()->toIso8601String(),
+            'meta' => [
+                'return_id' => $return->id,
+                'loan_id' => $return->loan_id,
+                'asset_name' => $return->asset?->name,
+                'asset_code' => $return->asset?->code,
+                'status' => $return->status,
+                'verified_note' => $return->verified_note,
+            ],
+        ]);
+    }
+
     public function sendLoanDueSoonReminder(Loan $loan, CarbonInterface $today): bool
     {
         $loan->loadMissing(['asset', 'user']);
